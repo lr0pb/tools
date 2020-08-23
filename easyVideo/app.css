@@ -9,14 +9,29 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+}
+
+body, p {
   margin: 0;
+  font-family: sans-serif;
+}
+
+#viewBox, #log {
+  width: 99vw;
+  background-color: darkgrey;
+  margin: 2rem 0.5vw;
 }
 
 #viewBox {
-  width: 99vw; height: 132vw;
-  background-color: darkgrey;
+  height: 132vw;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  margin: 2rem 0.5vw;
+}
+
+#log {
+  height: 33vw;
+  font-size: 1.8em;
+  color: white;
+  overflow: scroll;
 }
