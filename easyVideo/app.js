@@ -17,7 +17,7 @@ function getFiles(e) {
 
 async function playFiles() {
   for (frame of frames) {
-    $('#viewBox').href = frame
+    $('#viewBox').src = frame
     await new Promise( (res) => {
       setTimeout(res, config.timeForFrame)
     })
