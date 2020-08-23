@@ -1,0 +1,21 @@
+html {
+  font-size: 1.035vmin;
+}
+
+body {
+  width: 100vw; min-height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+#viewBox {
+  width: 99vw; height: 132vw;
+  background-color: darkgrey;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  margin: 2rem 0.5vw;
+}
