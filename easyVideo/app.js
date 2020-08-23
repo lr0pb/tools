@@ -8,9 +8,8 @@ function $(selector) {
 }
 
 function log(content) {
-   let log = $('#log').textContent
-   $('#log').textContent = 'log'
-   $('#log').textContent = `${log}\n ${content}`
+   let log = $('#log').innerHTML
+   $('#log'). innerHTML = `${log} <br> ${content}`
 }
 
 function getFiles() {
@@ -24,9 +23,10 @@ function getFiles() {
 
 async function playFiles() {
   for (frame of frames) {
+    log(frame)
     $('#viewBox').setAttribute('src', frame)
     await new Promise( (res) => {
-      log('frame')
+      log('waiting')
       setTimeout( () => res(), config.timeForFrame)
     })
   }
