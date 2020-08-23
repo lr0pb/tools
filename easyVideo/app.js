@@ -7,19 +7,26 @@ function $(selector) {
   return document.querySelector(selector);
 }
 
+function log(content) {
+   let log = $('#log').textContent
+   log = `${log}\n ${content}`
+}
+
 function getFiles(e) {
   frames = []
   for (let file of e.files) {
     let frame = URL.createObjectURL(file)
     frames.push(frame)
   }
+  log(frames)
 }
 
 async function playFiles() {
   for (frame of frames) {
-    $('#viewBox').src = frame
+    $('#viewBox').setAttribute('src', frame)
     await new Promise( (res) => {
-      setTimeout(res, config.timeForFrame)
+      log('waiting')
+      setTimeout( () => res(), config.timeForFrame)
     })
   }
 }
