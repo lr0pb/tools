@@ -1,5 +1,5 @@
 const config = {
-  timeForFrame: 80
+  timeForFrame: 800
 }
 let frames = []
 
@@ -25,12 +25,20 @@ function getFiles() {
 async function playFiles() {
   log('playing')
   log(frames)
-  for (frame of frames) {
+  /*for (frame of frames) {
     $('#viewBox').setAttribute('src', frame)
     await new Promise( (res) => {
       log('waiting')
       setTimeout(res, config.timeForFrame)
     })
+  }*/
+  for (let i = 0, i < frames.length, i++) {
+    log(i)
+    log(frames[i])
+    setTimeout ( () => {
+      log(config.timeForFrame * i)
+      $('#viewBox').setAttribute('src', frames[i])
+    }, config.timeForFrame * i)
   }
 }
 
