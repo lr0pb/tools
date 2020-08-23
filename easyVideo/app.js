@@ -13,24 +13,23 @@ function log(content) {
    $('#log').textContent = `${log}\n ${content}`
 }
 
-function getFiles(e) {
+function getFiles() {
   frames = []
-  for (let file of e.files) {
-    log(file.name)
+  for (let file of this.files) {
     let frame = URL.createObjectURL(file)
     frames.push(frame)
   }
-  log(frames.lenght)
+  log(frames.length)
 }
 
 async function playFiles() {
   for (frame of frames) {
     $('#viewBox').setAttribute('src', frame)
     await new Promise( (res) => {
-      log('waiting')
       setTimeout( () => res(), config.timeForFrame)
     })
   }
+  log('end')
 }
 
 $('input').addEventListener('change', getFiles)
