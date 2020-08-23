@@ -1,5 +1,5 @@
 const config = {
-  timeForFrame: 100
+  timeForFrame: 80
 }
 let frames = []
 
@@ -19,17 +19,17 @@ function getFiles() {
     let frame = URL.createObjectURL(file)
     frames.push(frame)
   }
-  log(frames.length)
+  log(`files: ${frames.length}`)
 }
 
 async function playFiles() {
   for (frame of frames) {
     $('#viewBox').setAttribute('src', frame)
     await new Promise( (res) => {
+      log('frame')
       setTimeout( () => res(), config.timeForFrame)
     })
   }
-  log('end')
 }
 
 $('input').addEventListener('change', getFiles)
