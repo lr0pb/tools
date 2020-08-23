@@ -17,7 +17,7 @@ function getFiles(e) {
 
 async function playFiles() {
   for (frame of frames) {
-    $('#viewBox').style.backgroundImage = `url(${frame})`
+    $('#viewBox').href = frame
     await new Promise( (res) => {
       setTimeout(res, config.timeForFrame)
     })
