@@ -35,7 +35,7 @@ async function playFiles() {
   for (let i = 0, i < frames.length, i++) {
     log(i)
     log(frames[i])
-    setTimeout ( () => {
+    setTimeout( () => {
       log(config.timeForFrame * i)
       $('#viewBox').setAttribute('src', frames[i])
     }, config.timeForFrame * i)
