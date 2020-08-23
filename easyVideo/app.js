@@ -1,5 +1,5 @@
 const config = {
-  timeForFrame: 800
+  timeForFrame: 600
 }
 let frames = []
 
@@ -32,7 +32,7 @@ async function playFiles() {
       setTimeout(res, config.timeForFrame)
     })
   }*/
-  for (let i = 0, i < frames.length, i++) {
+  for (let i = 0; i < frames.length; i++) {
     log(i)
     log(frames[i])
     setTimeout( () => {
