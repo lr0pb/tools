@@ -9,16 +9,18 @@ function $(selector) {
 
 function log(content) {
    let log = $('#log').textContent
-   log = `${log}\n ${content}`
+   $('#log').textContent = 'log'
+   $('#log').textContent = `${log}\n ${content}`
 }
 
 function getFiles(e) {
   frames = []
   for (let file of e.files) {
+    log(file.name)
     let frame = URL.createObjectURL(file)
     frames.push(frame)
   }
-  log(frames)
+  log(frames.lenght)
 }
 
 async function playFiles() {
