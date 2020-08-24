@@ -25,15 +25,7 @@ function getFiles() {
 async function playFiles() {
   log('playing')
   log(frames)
-  /*for (frame of frames) {
-    $('#viewBox').setAttribute('src', frame)
-    await new Promise( (res) => {
-      log('waiting')
-      setTimeout(res, config.timeForFrame)
-    })
-  }*/
-  for (let i = 0; i < frames.length; i++) {
-    log(i)
+  for (let i = frames.length; i > 0; i--) {
     log(frames[i])
     setTimeout( () => {
       log(config.timeForFrame * i)
