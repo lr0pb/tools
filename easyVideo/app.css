@@ -9,11 +9,16 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  background-color: black;
+  color: white;
 }
 
 body, p {
   margin: 0;
   font-family: sans-serif;
+}
+button {
+  color: white;
 }
 
 #viewBox, #log {
@@ -32,6 +37,5 @@ body, p {
 #log {
   height: 33vw;
   font-size: 1.8em;
-  color: white;
   overflow: scroll;
 }
