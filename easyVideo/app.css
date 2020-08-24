@@ -17,13 +17,10 @@ body, p {
   margin: 0;
   font-family: sans-serif;
 }
-button {
-  color: white;
-}
 
 #viewBox, #log {
   width: 99vw;
-  background-color: darkgrey;
+  background-color: #292626;
   margin: 2rem 0.5vw;
 }
 
