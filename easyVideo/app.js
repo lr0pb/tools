@@ -25,7 +25,7 @@ function getFiles() {
 async function playFiles() {
   log('playing')
   log(frames)
-  for (let i = frames.length; i > 0; i--) {
+  for (let i = 0; i < frames.length; i++) {
     log(frames[i])
     setTimeout( () => {
       log(config.timeForFrame * i)
