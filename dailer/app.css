@@ -1,5 +1,5 @@
 html {
-  font-size: 1.035vmin;
+  font-size: 2.75vmin;
 }
 
 body {
@@ -11,6 +11,10 @@ body {
   justify-content: center;
   background-color: black;
   color: white;
+}
+
+body, .fullscreen {
+  text-align: center;
 }
 
 body, .fullscreen, .thing {
@@ -47,7 +51,7 @@ button {
 }
 
 .fullscreen {
-  width: 100vw; height: auto;
+  width: 100vw; height: 80vh;
   overflow: hidden auto;
 }
 
