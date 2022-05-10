@@ -21,7 +21,7 @@ const planCreator = {
   script: onPlanCreator
 };
 
-const onPlanCreator = async (globals) => {
+async function onPlanCreator (globals) {
   qs('#addThing').addEventListener(
     'click', () => globals.paintPage('thingCreator')
   );
