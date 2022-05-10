@@ -1,18 +1,18 @@
 const qs = (elem) => document.querySelector(elem);
 
-export onboarding = {
+const onboarding = {
   page: `
     <h1>Create your everyday plan for control over time how you grow yourself</h1>
     <button id="create">Create now</button>
   `,
   script: (globals) => {
     qs('#create').addEventListener(
-      'click', () => globals.paintPage(planCreator)
+      'click', () => globals.paintPage('planCreator')
     );
   }
-}
+};
 
-export planCreator = {
+const planCreator = {
   page: `
     <h1>Add your daily things you will control</h1>
     <div id="things"></div>
@@ -20,7 +20,24 @@ export planCreator = {
   `,
   script: (globals) => {
     qs('#addThing').addEventListener(
-      'click', () => globals.paintPage(thingCreator)
+      'click', () => globals.paintPage('thingCreator')
     );
   }
+};
+
+const thingCreator = {
+  page: `
+    <h1>Add thing</h1>
+    
+    <button id="saveThing">Save thing</button>
+  `,
+  script: (globals) => {
+    qs('#saveThing').addEventListener(
+      'click', () => globals.paintPage('planCreator')
+    );
+  }
+};
+
+export pages = {
+  onboarding, planCreator, thingCreator
 }
