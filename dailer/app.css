@@ -39,14 +39,14 @@ h3 {
 }
 
 button, .thing {
-  border-radius: 2rem;
-  border: 1rem solid #aaaaaa;
+  border-radius: 1.2rem;
+  border: 0.4rem solid #aaaaaa;
 }
 
 button {
   font-size: 2.1em;
   font-weight: 700;
-  padding: 0.2rem 0.7rem;
+  padding: 0.1rem 0.8rem;
   color: #000000;
   background-color: #dddddd;
 }
@@ -59,4 +59,13 @@ button {
 .thing {
   width: 95vw; height: 7.8rem;
   background-color: #777777;
+  display: flex;
+  align-items: center;
+}
+.thing > h3 {
+  margin-right: auto;
+}
+
+.smolBtn {
+  font-size: 1.2em;
 }
