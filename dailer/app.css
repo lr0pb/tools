@@ -29,7 +29,7 @@ body, p {
 }
 
 h1 {
-  font-size: 3.2em;
+  font-size: 2.8em;
 }
 h2 {
   font-size: 2.4em;
@@ -39,15 +39,16 @@ h3 {
 }
 
 button, .thing {
-  border-radius: 0.5rem;
-  border: 0.2rem solid #dddddd;
+  border-radius: 2rem;
+  border: 1rem solid #aaaaaa;
 }
 
 button {
   font-size: 2.1em;
+  font-weight: 700;
   padding: 0.2rem 0.7rem;
   color: #000000;
-  background-color: #ffffff;
+  background-color: #dddddd;
 }
 
 .fullscreen {
