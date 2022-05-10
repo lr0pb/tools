@@ -1,0 +1,19 @@
+html {
+  font-size: 1.035vmin;
+}
+
+body {
+  width: 100vw; min-height: 100vh;
+  overflow: hidden auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: black;
+  color: white;
+}
+
+body, p {
+  margin: 0;
+  font-family: sans-serif;
+}
