@@ -38,6 +38,6 @@ const thingCreator = {
   }
 };
 
-export default const pages = {
+export const pages = {
   onboarding, planCreator, thingCreator
 };
