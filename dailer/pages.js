@@ -7,7 +7,7 @@ export onboarding = {
   `,
   script: (globals) => {
     qs('#create').addEventListener(
-      'click', () => globals.paintPage('planCreator')
+      'click', () => globals.paintPage(planCreator)
     );
   }
 }
@@ -20,7 +20,7 @@ export planCreator = {
   `,
   script: (globals) => {
     qs('#addThing').addEventListener(
-      'click', () => globals.paintPage('thingCreator')
+      'click', () => globals.paintPage(thingCreator)
     );
   }
 }
