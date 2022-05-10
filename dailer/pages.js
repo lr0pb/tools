@@ -18,12 +18,26 @@ const planCreator = {
     <div id="things"></div>
     <button id="addThing">Add thing</button>
   `,
-  script: (globals) => {
-    qs('#addThing').addEventListener(
-      'click', () => globals.paintPage('thingCreator')
-    );
-  }
+  script: onPlanCreator
 };
+
+const onPlanCreator = async (globals) => {
+  qs('#addThing').addEventListener(
+    'click', () => globals.paintPage('thingCreator')
+  );
+  const things = await globals.db.getAll('things');
+  const thingsContainer = qs('#things')
+  if (!things.lenght) {
+    thingsContainer.innerHTML = `<h3>There is nothing yet!</h3>`;
+  } else for (let td of things) { // td stands for thingsData
+    const thing = document.createElement('div');
+    thing.className = 'thing';
+    thing.innerHTML = `
+      <h4>${td.name}</h4>
+    `;
+    thingsContainer.append(thing);
+  }
+}
 
 const thingCreator = {
   page: `
