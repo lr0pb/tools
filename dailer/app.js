@@ -1,12 +1,10 @@
-import {
-  onboarding, planCreator
-} from './pages.js'
+import pages from './pages.js'
 
 const globals = {
   paintPage: (name) => {
-    document.body.innerHTML = name.page;
-    name.script(globals);
+    document.body.innerHTML = pages[name].page;
+    pages[name].script(globals);
   }
 }
 
-globals.paintPage(onboarding);
+globals.paintPage('onboarding');
