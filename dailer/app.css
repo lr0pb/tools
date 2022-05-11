@@ -8,7 +8,7 @@ body, #content {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  /*justify-content: center;*/
   background-color: black;
   color: white;
 }
@@ -45,6 +45,7 @@ h2 {
 }
 h3, #message {
   font-size: 3.8em;
+  margin: 0;
 }
 
 button, .task, #message {
@@ -58,7 +59,7 @@ button {
   font-weight: 700;
   padding: 1.5rem 3rem;
   color: #ffffff;
-  background-color: #0c6aa0;
+  background-color: #3877cd;
 }
 
 .fullscreen {
@@ -67,14 +68,15 @@ button {
 }
 
 .task {
-  width: 93vw; height: 11rem;
+  width: 93vw; min-height: 11rem;
   background-color: #777777;
   display: flex;
   flex-direction: row;
   margin-top: 0;
 }
 .task > h3 {
-  margin: 0 auto 0 3rem;
+  margin: 2rem auto 2rem 3rem;
+  text-align: left;
 }
 
 .smolBtn {
@@ -86,10 +88,13 @@ button {
 }
 
 input, select {
-  width: 70vw;
+  width: 85vw;
   padding: 1.5rem;
   border: 0.8rem solid #474747;
   margin: 1rem;
   box-sizing: content-box;
   border-radius: 1.5rem;
+}
+#dateTitle, #date {
+  display: none;
 }
