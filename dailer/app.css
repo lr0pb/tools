@@ -1,5 +1,5 @@
 html {
-  font-size: 2.75vmin;
+  font-size: 1.25vmin;
 }
 
 body, #content {
@@ -25,9 +25,10 @@ body, #content {
 
 #message {
   display: none; position: fixed;
-  bottom: 0.3rem;
-  width: calc(100vw - 1rem); height: 7rem;
-  background-color: #888888;
+  bottom: 2rem;
+  width: calc(100vw - 14rem); height: 4rem;
+  background-color: #008000;
+  padding: 2rem;
 }
 
 body, #content, p {
@@ -36,27 +37,28 @@ body, #content, p {
 }
 
 h1 {
-  font-size: 2.8em;
+  font-size: 6em;
+  margin: 3rem;
 }
 h2 {
-  font-size: 2.4em;
+  font-size: 4.4em;
 }
 h3, #message {
-  font-size: 1.8em;
+  font-size: 3.8em;
 }
 
 button, .task, #message {
-  border-radius: 1rem;
-  border: 0.3rem solid #aaaaaa;
-  margin: 0.2rem 0.5rem;
+  border-radius: 2.5rem;
+  border: 0.9rem solid rgb(51 51 51 / 50%);
+  margin: 2rem 4rem;
 }
 
 button {
-  font-size: 2.1em;
+  font-size: 4.3em;
   font-weight: 700;
-  padding: 0.1rem 0.8rem;
-  color: #000000;
-  background-color: #dddddd;
+  padding: 1.5rem 3rem;
+  color: #ffffff;
+  background-color: #1276af;
 }
 
 .fullscreen {
@@ -81,4 +83,9 @@ button {
 
 input, select {
   width: 70vw;
+  padding: 1.5rem;
+  border: 0.8rem solid #474747;
+  margin: 1rem;
+  box-sizing: content-box;
+  border-radius: 1.5rem;
 }
