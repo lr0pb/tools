@@ -58,27 +58,31 @@ button {
   font-weight: 700;
   padding: 1.5rem 3rem;
   color: #ffffff;
-  background-color: #1276af;
+  background-color: #0c6aa0;
 }
 
 .fullscreen {
-  width: 100vw; height: 70vh;
+  width: 100vw; height: 75vh;
   overflow: hidden auto;
 }
 
 .task {
-  width: 95vw; height: 5rem;
+  width: 93vw; height: 11rem;
   background-color: #777777;
   display: flex;
-  align-items: center;
+  flex-direction: row;
+  margin-top: 0;
 }
 .task > h3 {
-  margin-right: auto;
+  margin: 0 auto 0 3rem;
 }
 
 .smolBtn {
-  font-size: 1.2em;
-  margin: 0 0.2rem 0;
+  font-size: 3.2em;
+  margin: 0 2rem 0 0;
+  padding: 1rem 2rem;
+  border-radius: 1.6rem;
+  background-color: #5c5e60;
 }
 
 input, select {
