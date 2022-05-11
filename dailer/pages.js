@@ -39,21 +39,21 @@ async function onPlanCreator(globals) {
       <button data-action="edit" class="smolBtn">Edit</button>
       <button data-action="delete" class="smolBtn">Delete</button>
     `;
-    task.addEventListener('click', (e) => { onTaskManageClick(e, globals) })
+    task.addEventListener('click', (e) => { onTaskManageClick({e, globals, task}) })
     tasksContainer.append(task);
   }
 }
 
-async function onTaskManageClick(e, globals) {
+async function onTaskManageClick({e, globals, task}) {
   if (e.target.dataset.action == 'edit') {
     globals.paintPage('taskCreator');
     
   } else if (e.target.dataset.action == 'delete') {
     //await globals.db.deleteItem('tasks', this.dataset.id);
-    const td = JSON.parse(this.dataset.td);
+    const td = JSON.parse(task.dataset.td);
     td.disabled = true;
     await globals.db.setItem('tasks', td);
-    this.remove();
+    task.remove();
     globals.message({
       state: 'success', text: 'Task deleted'
     });
@@ -65,44 +65,63 @@ const taskCreator = {
     <h1>Add task</h1>
     <input type="text" id="name" placeHolder="Enter task you will control"></input>
     <select id="period">
-      <option>One time only</option>
-      <option>Everyday</option>
-      <option>Every second day</option>
-      <option>Two over two</option>
-      <option>Only weekdays</option>
-      <option>On weekends</option>
-      <option>Custom period</option>
+      <option value="oneTime">One time only</option>
+      <option value="1">Everyday</option>
+      <option value="10">Every second day</option>
+      <option value="1100">Two over two</option>
+      <option value="1111100">Only weekdays</option>
+      <option value="0000011">On weekends</option>
+      <!--<option value="custom">Custom period</option>-->
     </select>
+    <h3 id="dateTitle"></h3>
+    <input type="date" id="date"></input>
     <button id="saveTask">Save task</button>
   `,
   script: onSaveTask
 };
 
 function onSaveTask(globals) {
-  qs('#saveTask').addEventListener(
-    'click', () => {
-      try {
-        const task = {
-          id: createId(),
-          name: qs('#name').value,
-          disabled: false
-        };
-        globals.db.setItem('tasks', task);
-        globals.message({
-          state: 'success', text: 'Task added'
-        });
-        globals.paintPage('planCreator');
-      } catch (err) {
-        globals.message({
-          state: 'fail', text: 'Fill all fields'
-        });
-      };
+  qs('#period').addEventListener('change', (e) => {
+    const value = e.target.value;
+    const show = (text) => {
+      qs('#dateTitle').textContent = text;
+      qs('#dateTitle').style.display = 'block';
+      qs('#date').style.display = 'block';
+    };
+    if (value == 'oneTime') show('Select the date')
+    else if (value == '10') show('Select start date')
+    else if (value == '1100') show('Select first date')
+    else {
+      qs('#dateTitle').style.display = 'none';
+      qs('#date').style.display = 'none';
     }
-  );
+  });
+  qs('#saveTask').addEventListener('click', () => {
+    const task = createTask();
+    if (task == 'error') return globals.message({
+      state: 'fail', text: 'Fill all fields'
+    });
+    globals.db.setItem('tasks', task);
+    globals.message({
+      state: 'success', text: 'Task added'
+    });
+    globals.paintPage('planCreator');
+  });
 }
 
-function createId() {
-  return Date.now().toString();
+function createTask(id) {
+  let period = qs('#period').value;
+  if (parseInt(period) !== NaN) period = parseInt(period);
+  const task = {
+    id: id ? id : Date.now().toString(),
+    name: qs('#name').value,
+    oneTime: period == 'oneTime',
+    period,
+    periodStart: qs('#date').value,
+    periodDay: 0,
+    disabled: false;
+  };
+  if (task.name == '') return 'error';
 }
 
 export const pages = {
