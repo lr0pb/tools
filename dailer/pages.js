@@ -1,12 +1,11 @@
 const qs = (elem) => document.querySelector(elem);
 
 const onboarding = {
+  header: '',
   page: `
-    <div class="fullscreen" style="justify-content: center;">
-      <h1 style="text-aling: center;">Create your everyday plan for manage how you grow yourself over time</h1>
-      <button id="create">Create now</button>
-    </div>
+    <h2>Create your everyday plan for manage how you grow yourself over time</h2>
   `,
+  footer: '<button id="create">Create now</button>',
   script: (globals) => {
     qs('#create').addEventListener(
       'click', () => globals.paintPage('planCreator')
@@ -15,11 +14,11 @@ const onboarding = {
 };
 
 const planCreator = {
+  header: 'Manage your tasks',
   page: `
-    <h1>Manage your tasks</h1>
-    <div id="tasks" class="fullscreen"></div>
-    <button id="addTask">Add task</button>
+    <div id="tasks"></div>
   `,
+  footer: '<button id="addTask">Add task</button>',
   script: onPlanCreator
 };
 
@@ -67,8 +66,8 @@ async function onTaskManageClick({e, globals, task}) {
 }
 
 const taskCreator = {
+  header: 'Add task',
   page: `
-    <h1>Add task</h1>
     <h3>Enter task you will control</h3>
     <input type="text" id="name" placeHolder="Task name"></input>
     <h3>How often you will do this task?</h3>
@@ -83,8 +82,8 @@ const taskCreator = {
     </select>
     <h3 id="dateTitle"></h3>
     <input type="date" id="date"></input>
-    <button id="saveTask">Save task</button>
   `,
+  footer: '<button id="saveTask">Save task</button>',
   script: onSaveTask
 };
 
