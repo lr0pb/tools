@@ -3,7 +3,7 @@ const qs = (elem) => document.querySelector(elem);
 const onboarding = {
   page: `
     <div class="fullscreen" style="justify-content: center;">
-      <h1>Create your everyday plan for control over time how you grow yourself</h1>
+      <h1 style="text-aling: center;">Create your everyday plan for manage how you grow yourself over time</h1>
       <button id="create">Create now</button>
     </div>
   `,
@@ -16,7 +16,7 @@ const onboarding = {
 
 const planCreator = {
   page: `
-    <h1>Add your daily tasks you will control</h1>
+    <h1>Manage your tasks</h1>
     <div id="tasks" class="fullscreen"></div>
     <button id="addTask">Add task</button>
   `,
@@ -38,7 +38,10 @@ async function onPlanCreator(globals) {
     task.className = 'task';
     task.dataset.td = JSON.stringify(td);
     task.innerHTML = `
-      <h3>${td.name}</h3>
+      <div>
+        <h3>${td.name}</h3>
+        <p>${td.periodTitle}</p>
+      </div>
       <button data-action="edit" class="smolBtn">Edit</button>
       <button data-action="delete" class="smolBtn">Delete</button>
     `;
@@ -66,7 +69,9 @@ async function onTaskManageClick({e, globals, task}) {
 const taskCreator = {
   page: `
     <h1>Add task</h1>
-    <input type="text" id="name" placeHolder="Enter task you will control"></input>
+    <h3>Enter task you will control</h3>
+    <input type="text" id="name" placeHolder="Task name"></input>
+    <h3>How often you will do this task?</h3>
     <select id="period">
       <option value="1">Everyday</option>
       <option value="10">Every second day</option>
@@ -114,12 +119,13 @@ function onSaveTask(globals) {
 
 function createTask(id) {
   let period = qs('#period').value;
-  if (parseInt(period) !== NaN) period = parseInt(period);
+  if (parseInt(period)) period = parseInt(period);
   const task = {
     id: id ? id : Date.now().toString(),
     name: qs('#name').value,
     oneTime: period == 'oneTime',
     period,
+    periodTitle: period,
     periodStart: qs('#date').value,
     periodDay: 0,
     disabled: false
