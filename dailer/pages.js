@@ -28,9 +28,9 @@ async function onPlanCreator(globals) {
     'click', () => globals.paintPage('taskCreator')
   );
   const tasks = await globals.db.getAll('tasks');
-  const tasksContainer = qs('#tasks');
-  console.log(tasks);
-  if (tasks.lenght == 0) {
+  const tasksContainer = qs('#tasks')
+  if (!tasks.length) {
+    tasksContainer.style.justifyContent = 'center';
     tasksContainer.innerHTML = `<h3>There is nothing yet!</h3>`;
   } else for (let td of tasks) { // td stands for task's data
     if (td.disabled) continue;
