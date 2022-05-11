@@ -14,7 +14,9 @@ const db = new IDB('dailer', 1, [
 const globals = {
   db,
   paintPage: (name) => {
+    qs('h1').textContent = pages[name].header;
     qs('#content').innerHTML = pages[name].page;
+    qs('#footer').innerHTML = pages[name].footer;
     pages[name].script(globals);
   },
   message: ({state, text}) => {
