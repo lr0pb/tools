@@ -1,9 +1,11 @@
 import { pages } from './pages.js'
 import IDB from './IDB.js'
 
+const qs = (elem) => document.querySelector(elem);
+
 const db = new IDB('dailer', 1, [
   {
-    name: 'things', index: {keyPath: 'id'}
+    name: 'tasks', index: {keyPath: 'id'}
   }, {
     name: 'days', index: {keyPath: 'date'}
   }
@@ -12,8 +14,18 @@ const db = new IDB('dailer', 1, [
 const globals = {
   db,
   paintPage: (name) => {
-    document.body.innerHTML = pages[name].page;
+    qs('#content').innerHTML = pages[name].page;
     pages[name].script(globals);
+  },
+  message: ({state, text}) => {
+    const msg = qs('#message');
+    msg.style.display = 'block';
+    msg.style.borderColor = state == 'fail'
+    ? 'red' : 'green';
+    msg.textContent = text;
+    setTimeout( () => {
+      msg.style.display = 'none';
+    }, 2000);
   }
 }
 
