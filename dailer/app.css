@@ -38,26 +38,31 @@ body, #content, p {
 
 h1 {
   font-size: 6em;
-  margin: 3rem;
+  text-align: left;
+  margin: 4rem auto 4rem 3rem;
 }
 h2 {
   font-size: 4.4em;
 }
 h3, #message {
   font-size: 3.8em;
-  margin: 0;
+  margin: 1rem;
+}
+p {
+  font-size: 2.5em;
+  padding: 0.5rem 0 0;
 }
 
 button, .task, #message {
   border-radius: 2.5rem;
   border: 0.9rem solid rgb(51 51 51 / 50%);
-  margin: 2rem 4rem;
+  margin: 2.5rem;
 }
 
 button {
   font-size: 4.3em;
   font-weight: 700;
-  padding: 1.5rem 3rem;
+  padding: 2rem 5rem;
   color: #ffffff;
   background-color: #3877cd;
 }
@@ -74,7 +79,7 @@ button {
   flex-direction: row;
   margin-top: 0;
 }
-.task > h3 {
+.task > div {
   margin: 2rem auto 2rem 3rem;
   text-align: left;
 }
@@ -94,6 +99,7 @@ input, select {
   margin: 1rem;
   box-sizing: content-box;
   border-radius: 1.5rem;
+  outline: none;
 }
 #dateTitle, #date {
   display: none;
