@@ -79,7 +79,7 @@ const taskCreator = {
 };
 
 function onSaveTask(globals) {
-  qs('#saveThing').addEventListener(
+  qs('#saveTask').addEventListener(
     'click', () => {
       try {
         const task = {
