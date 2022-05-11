@@ -27,6 +27,7 @@ async function onPlanCreator(globals) {
   );
   const tasks = await globals.db.getAll('tasks');
   const tasksContainer = qs('#tasks');
+  console.log(tasks);
   if (tasks.lenght == 0) {
     tasksContainer.innerHTML = `<h3>There is nothing yet!</h3>`;
   } else for (let td of tasks) { // td stands for task's data
@@ -119,8 +120,9 @@ function createTask(id) {
     period,
     periodStart: qs('#date').value,
     periodDay: 0,
-    disabled: false;
+    disabled: false
   };
+  console.log(task);
   if (task.name == '') return 'error';
 }
 
