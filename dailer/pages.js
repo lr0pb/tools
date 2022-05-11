@@ -2,8 +2,10 @@ const qs = (elem) => document.querySelector(elem);
 
 const onboarding = {
   page: `
-    <h1>Create your everyday plan for control over time how you grow yourself</h1>
-    <button id="create">Create now</button>
+    <div class="fullscreen" style="justify-content: center;">
+      <h1>Create your everyday plan for control over time how you grow yourself</h1>
+      <button id="create">Create now</button>
+    </div>
   `,
   script: (globals) => {
     qs('#create').addEventListener(
@@ -34,7 +36,7 @@ async function onPlanCreator(globals) {
     if (td.disabled) continue;
     const task = document.createElement('div');
     task.className = 'task';
-    task.dataset.data = JSON.stringify(td);
+    task.dataset.td = JSON.stringify(td);
     task.innerHTML = `
       <h3>${td.name}</h3>
       <button data-action="edit" class="smolBtn">Edit</button>
@@ -66,12 +68,12 @@ const taskCreator = {
     <h1>Add task</h1>
     <input type="text" id="name" placeHolder="Enter task you will control"></input>
     <select id="period">
-      <option value="oneTime">One time only</option>
       <option value="1">Everyday</option>
       <option value="10">Every second day</option>
       <option value="1100">Two over two</option>
       <option value="1111100">Only weekdays</option>
       <option value="0000011">On weekends</option>
+      <option value="oneTime">One time only</option>
       <!--<option value="custom">Custom period</option>-->
     </select>
     <h3 id="dateTitle"></h3>
@@ -124,6 +126,7 @@ function createTask(id) {
   };
   console.log(task);
   if (task.name == '') return 'error';
+  return task;
 }
 
 export const pages = {
