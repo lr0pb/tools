@@ -27,7 +27,7 @@ async function onPlanCreator(globals) {
   );
   const tasks = await globals.db.getAll('tasks');
   const tasksContainer = qs('#tasks');
-  if (!tasks.lenght) {
+  if (tasks.lenght == 0) {
     tasksContainer.innerHTML = `<h3>There is nothing yet!</h3>`;
   } else for (let td of tasks) { // td stands for task's data
     if (td.disabled) continue;
@@ -39,12 +39,12 @@ async function onPlanCreator(globals) {
       <button data-action="edit" class="smolBtn">Edit</button>
       <button data-action="delete" class="smolBtn">Delete</button>
     `;
-    task.addEventListener('click', onTaskManageClick)
-    thingsContainer.append(task);
+    task.addEventListener('click', (e) => { onTaskManageClick(e, globals) })
+    tasksContainer.append(task);
   }
 }
 
-async function onTaskManageClick(e) {
+async function onTaskManageClick(e, globals) {
   if (e.target.dataset.action == 'edit') {
     globals.paintPage('taskCreator');
     
