@@ -102,8 +102,7 @@ function onSaveTask(globals) {
 }
 
 function createId() {
-  const date = new Date();
-  return date.now().toString();
+  return Date.now().toString();
 }
 
 export const pages = {
