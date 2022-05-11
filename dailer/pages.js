@@ -44,7 +44,7 @@ async function onPlanCreator(globals) {
   }
 }
 
-aaync function onTaskManageClick(e) {
+async function onTaskManageClick(e) {
   if (e.target.dataset.action == 'edit') {
     globals.paintPage('taskCreator');
     
