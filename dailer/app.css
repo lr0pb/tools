@@ -2,7 +2,7 @@ html {
   font-size: 2.75vmin;
 }
 
-body {
+body, #content {
   width: 100vw; min-height: 100vh;
   overflow: hidden auto;
   display: flex;
@@ -13,17 +13,24 @@ body {
   color: white;
 }
 
-body, .fullscreen {
+#content, .fullscreen {
   text-align: center;
 }
 
-body, .fullscreen, .thing {
+#content, .fullscreen, .task {
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-body, p {
+#message {
+  display: none; position: fixed;
+  bottom: 0.3rem;
+  width: calc(100vw - 1rem); height: 7rem;
+  background-color: #888888;
+}
+
+body, #content, p {
   margin: 0;
   font-family: sans-serif;
 }
@@ -34,13 +41,14 @@ h1 {
 h2 {
   font-size: 2.4em;
 }
-h3 {
+h3, #message {
   font-size: 1.8em;
 }
 
-button, .thing {
-  border-radius: 1.2rem;
-  border: 0.4rem solid #aaaaaa;
+button, .task, #message {
+  border-radius: 1rem;
+  border: 0.3rem solid #aaaaaa;
+  margin: 0.2rem 0.5rem;
 }
 
 button {
@@ -52,20 +60,25 @@ button {
 }
 
 .fullscreen {
-  width: 100vw; height: 80vh;
+  width: 100vw; height: 70vh;
   overflow: hidden auto;
 }
 
-.thing {
-  width: 95vw; height: 7.8rem;
+.task {
+  width: 95vw; height: 5rem;
   background-color: #777777;
   display: flex;
   align-items: center;
 }
-.thing > h3 {
+.task > h3 {
   margin-right: auto;
 }
 
 .smolBtn {
   font-size: 1.2em;
+  margin: 0 0.2rem 0;
+}
+
+input, select {
+  width: 70vw;
 }
