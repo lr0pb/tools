@@ -21,7 +21,7 @@ const planCreator = {
   page: ``,
   footer: `
     <button id="addTask">&#128221; Add task</button>
-    <button id="toMain" class="sec">Save</button>
+    <button id="toMain" class="success">&#128190; Save</button>
   `,
   script: onPlanCreator
 };
@@ -36,10 +36,7 @@ async function onPlanCreator(globals) {
   const tasks = await globals.db.getAll('tasks');
   const tasksContainer = qs('#content');
   if (!tasks.length) {
-    tasksContainer.classList.add('center');
-    tasksContainer.innerHTML = `
-      <h2 class="emoji">&#128495;</h2><h3>There is nothing yet!</h3>
-    `;
+    showNoTasks(tasksContainer);
   } else for (let td of tasks) { // td stands for task's data
     if (td.disabled) continue;
     const task = document.createElement('div');
@@ -53,12 +50,26 @@ async function onPlanCreator(globals) {
       <button data-action="edit" class="emojiBtn">&#128394;</button>
       <button data-action="delete" class="emojiBtn">&#128465;</button>
     `;
-    task.addEventListener('click', (e) => { onTaskManageClick({e, globals, task}) })
+    task.addEventListener('click', (e) => {
+      onTaskManageClick({e, globals, task, tasksContainer})
+    })
     tasksContainer.append(task);
+  }
+  if (!tasksContainer.children.length) {
+    showNoTasks(tasksContainer);
   }
 }
 
-async function onTaskManageClick({e, globals, task}) {
+function showNoTasks(elem) {
+  elem.classList.add('center');
+  elem.innerHTML = `
+    <h2 class="emoji">&#128495;</h2><h3>There is nothing yet!</h3>
+  `;
+}
+
+async function onTaskManageClick({
+  e, globals, task, tasksContainer
+}) {
   if (e.target.dataset.action == 'edit') {
     globals.paintPage('taskCreator');
     
@@ -71,6 +82,9 @@ async function onTaskManageClick({e, globals, task}) {
     globals.message({
       state: 'success', text: 'Task deleted'
     });
+    if (!tasksContainer.children.length) {
+      showNoTasks(tasksContainer);
+    }
   } else return;
 }
 
@@ -150,7 +164,7 @@ const main = {
     <h2 class="emoji">&#128302;</h2>
     <h2>Task's page is coming</h2>
   `,
-  footer: '<button id="toPlan" class="sec">&#128230; Edit tasks</button>',
+  footer: '<button id="toPlan" class="secondary">&#128230; Edit tasks</button>',
   script: mainScript
 };
 
