@@ -38,4 +38,4 @@ const globals = {
   }
 }
 
-globals.paintPage('onboarding');
+globals.paintPage(localStorage.onboarded == 'true' ? 'main' : 'onboarding');
