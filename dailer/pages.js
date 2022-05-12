@@ -5,7 +5,7 @@ const onboarding = {
   page: `
     <h2>Create your everyday plan for manage how you grow yourself over time</h2>
   `,
-  footer: '<button id="create">Create now</button>',
+  footer: '<button id="create">&#128203; Create now</button>',
   script: (globals) => {
     qs('#create').addEventListener(
       'click', () => globals.paintPage('planCreator')
@@ -14,7 +14,7 @@ const onboarding = {
 };
 
 const planCreator = {
-  header: 'Manage your tasks',
+  header: '&#128209; Manage your tasks',
   page: `
     <div id="tasks"></div>
   `,
@@ -30,7 +30,7 @@ async function onPlanCreator(globals) {
   const tasksContainer = qs('#tasks')
   if (!tasks.length) {
     tasksContainer.style.justifyContent = 'center';
-    tasksContainer.innerHTML = `<h3>There is nothing yet!</h3>`;
+    tasksContainer.innerHTML = `<h2>&#128495;</h2><h3>There is nothing yet!</h3>`;
   } else for (let td of tasks) { // td stands for task's data
     if (td.disabled) continue;
     const task = document.createElement('div');
@@ -41,8 +41,8 @@ async function onPlanCreator(globals) {
         <h3>${td.name}</h3>
         <p>${td.periodTitle}</p>
       </div>
-      <button data-action="edit" class="smolBtn">Edit</button>
-      <button data-action="delete" class="smolBtn">Delete</button>
+      <button data-action="edit" class="emojiBtn">&#128394;</button>
+      <button data-action="delete" class="emojiBtn">&#128465;</button>
     `;
     task.addEventListener('click', (e) => { onTaskManageClick({e, globals, task}) })
     tasksContainer.append(task);
@@ -66,7 +66,7 @@ async function onTaskManageClick({e, globals, task}) {
 }
 
 const taskCreator = {
-  header: 'Add task',
+  header: '&#128221; Add task',
   page: `
     <h3>Enter task you will control</h3>
     <input type="text" id="name" placeHolder="Task name"></input>
@@ -75,8 +75,8 @@ const taskCreator = {
       <option value="1">Everyday</option>
       <option value="10">Every second day</option>
       <option value="1100">Two over two</option>
-      <option value="1111100">Only weekdays</option>
-      <option value="0000011">On weekends</option>
+      <option value="1111100">On weekdays</option>
+      <option value="0000011">Only weekends</option>
       <option value="oneTime">One time only</option>
       <!--<option value="custom">Custom period</option>-->
     </select>
