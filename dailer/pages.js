@@ -3,8 +3,10 @@ const qs = (elem) => document.querySelector(elem);
 const onboarding = {
   header: '',
   page: `
+    <h2 class="emoji">&#128171;</h2>
     <h2>Create your everyday plan for manage how you grow yourself over time</h2>
   `,
+  centerContent: true,
   footer: '<button id="create">&#128203; Create now</button>',
   script: (globals) => {
     qs('#create').addEventListener(
@@ -15,9 +17,7 @@ const onboarding = {
 
 const planCreator = {
   header: '&#128209; Manage your tasks',
-  page: `
-    <div id="tasks"></div>
-  `,
+  page: ``,
   footer: '<button id="addTask">Add task</button>',
   script: onPlanCreator
 };
@@ -27,10 +27,12 @@ async function onPlanCreator(globals) {
     'click', () => globals.paintPage('taskCreator')
   );
   const tasks = await globals.db.getAll('tasks');
-  const tasksContainer = qs('#tasks')
+  const tasksContainer = qs('#content');
   if (!tasks.length) {
-    tasksContainer.style.justifyContent = 'center';
-    tasksContainer.innerHTML = `<h2>&#128495;</h2><h3>There is nothing yet!</h3>`;
+    tasksContainer.classList.add('center');
+    tasksContainer.innerHTML = `
+      <h2 class="emoji">&#128495;</h2><h3>There is nothing yet!</h3>
+    `;
   } else for (let td of tasks) { // td stands for task's data
     if (td.disabled) continue;
     const task = document.createElement('div');
