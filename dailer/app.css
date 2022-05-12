@@ -1,48 +1,58 @@
+:root {
+  --fullWidth: min(85vw, 600px);
+}
+
 html {
   font-size: 1.25vmin;
 }
 
-body, #content {
-  width: 100vw; min-height: 100vh;
-  overflow: hidden auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  /*justify-content: center;*/
+body {
+  width: 100vw; height: 100vh;
+  overflow: hidden;
   background-color: black;
   color: white;
+  display: grid;
+  grid-template-areas:
+    "... header ..."
+    "... content ..."
+    "... footer ..."
+  ;
+  grid-template-rows: 16rem 1fr 18rem;
+  grid-template-columns: minmax(3rem, 1fr) min(100vw, 600px) minmax(3rem, 1fr);
 }
 
-#content, .fullscreen {
+#header { grid-area: header; }
+#content { grid-area: content; }
+#footer { grid-area: footer; }
+
+#header, #content, #footer {
+  display: flex;
+}
+#content {
+  flex-direction: column;
+  align-items: start;
+}
+#header, #content, #footer, .center {
+  align-items: center;
+}
+#footer, .center {
+  justify-content: center;
+}
+.center {
   text-align: center;
 }
 
-#content, .fullscreen, .task {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-#message {
-  display: none; position: fixed;
-  bottom: 2rem;
-  width: calc(100vw - 14rem); height: 4rem;
-  background-color: #008000;
-  padding: 2rem;
-}
-
-body, #content, p {
+body, #content, h1, h2, h3, p {
   margin: 0;
   font-family: sans-serif;
 }
 
 h1 {
   font-size: 6em;
-  text-align: left;
-  margin: 4rem auto 4rem 3rem;
 }
 h2 {
-  font-size: 4.4em;
+  font-size: 4.8em;
+  margin: 1rem 6rem;
 }
 h3, #message {
   font-size: 3.8em;
@@ -50,7 +60,10 @@ h3, #message {
 }
 p {
   font-size: 2.5em;
-  padding: 0.5rem 0 0;
+  margin: 0 1rem;
+}
+.emoji {
+  font-size: 7em;
 }
 
 button, .task, #message {
@@ -66,37 +79,38 @@ button {
   color: #ffffff;
   background-color: #3877cd;
 }
+button.emojiBtn {
+  font-size: 5em;
+  background-color: transparent;
+  border-color: transparent;
+  margin: 0 3rem 0 0;
+  padding: 1rem 1rem;
+}
 
-.fullscreen {
-  width: 100vw; height: 75vh;
-  overflow: hidden auto;
+#message {
+  display: none; position: fixed;
+  width: var(--fullWidth); height: 4rem;
+  padding: 2rem; margin: 0;
+  left: 50%; bottom: 4rem;
+  transform: translateX(-50%);
 }
 
 .task {
-  width: 93vw; min-height: 11rem;
   background-color: #777777;
   display: flex;
   flex-direction: row;
-  margin-top: 0;
+  margin: 0 0 2.5rem;
 }
 .task > div {
-  margin: 2rem auto 2rem 3rem;
+  margin: 1rem auto 2rem 2rem;
   text-align: left;
 }
 
-.smolBtn {
-  font-size: 3.2em;
-  margin: 0 2rem 0 0;
-  padding: 1rem 2rem;
-  border-radius: 1.6rem;
-  background-color: #5c5e60;
-}
-
 input, select {
-  width: 85vw;
+  width: var(--fullWidth);
   padding: 1.5rem;
   border: 0.8rem solid #474747;
-  margin: 1rem;
+  margin: 1rem 0;
   box-sizing: content-box;
   border-radius: 1.5rem;
   outline: none;
