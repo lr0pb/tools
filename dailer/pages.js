@@ -9,22 +9,29 @@ const onboarding = {
   centerContent: true,
   footer: '<button id="create">&#128203; Create now</button>',
   script: (globals) => {
-    qs('#create').addEventListener(
-      'click', () => globals.paintPage('planCreator')
-    );
+    qs('#create').addEventListener('click', () => {
+      localStorage.onboarded = 'true';
+      globals.paintPage('taskCreator');
+    });
   }
 };
 
 const planCreator = {
   header: '&#128209; Manage your tasks',
   page: ``,
-  footer: '<button id="addTask">Add task</button>',
+  footer: `
+    <button id="addTask">&#128221; Add task</button>
+    <button id="toMain" class="sec">Save</button>
+  `,
   script: onPlanCreator
 };
 
 async function onPlanCreator(globals) {
   qs('#addTask').addEventListener(
     'click', () => globals.paintPage('taskCreator')
+  );
+  qs('#toMain').addEventListener(
+    'click', () => globals.paintPage('main')
   );
   const tasks = await globals.db.getAll('tasks');
   const tasksContainer = qs('#content');
@@ -136,6 +143,23 @@ function createTask(id) {
   return task;
 }
 
+const main = {
+  header: `&#128481; Today's tasks`,
+  centerContent: true,
+  page: `
+    <h2 class="emoji">&#128302;</h2>
+    <h2>Task's page is coming</h2>
+  `,
+  footer: '<button id="toPlan" class="sec">&#128230; Edit tasks</button>',
+  script: mainScript
+};
+
+async function mainScript(globals) {
+  qs('#toPlan').addEventListener(
+    'click', () => globals.paintPage('planCreator')
+  );
+}
+
 export const pages = {
-  onboarding, planCreator, taskCreator
+  onboarding, main, planCreator, taskCreator
 };
