@@ -14,10 +14,17 @@ const db = new IDB('dailer', 1, [
 const globals = {
   db,
   paintPage: (name) => {
-    qs('h1').textContent = pages[name].header;
-    qs('#content').innerHTML = pages[name].page;
-    qs('#footer').innerHTML = pages[name].footer;
-    pages[name].script(globals);
+    const page = pages[name];
+    const content = qs('#content');
+    qs('h1').innerHTML = page.header;
+    if (page.centerContent) {
+      content.classList.add('center');
+    } else {
+      content.classList.remove('center');
+    }
+    content.innerHTML = page.page;
+    qs('#footer').innerHTML = page.footer;
+    page.script(globals);
   },
   message: ({state, text}) => {
     const msg = qs('#message');
