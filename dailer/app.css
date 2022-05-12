@@ -1,5 +1,5 @@
 :root {
-  --fullWidth: min(85vw, 600px);
+  --fullWidth: min(90vw, 600px);
 }
 
 html {
@@ -18,7 +18,7 @@ body {
     "... footer ..."
   ;
   grid-template-rows: 16rem 1fr 18rem;
-  grid-template-columns: minmax(3rem, 1fr) min(100vw, 600px) minmax(3rem, 1fr);
+  grid-template-columns: minmax(3rem, 1fr) min(calc(100vw - 6rem), 600px) minmax(3rem, 1fr);
 }
 
 #header { grid-area: header; }
@@ -31,8 +31,9 @@ body {
 #content {
   flex-direction: column;
   align-items: start;
+  overflow: hidden auto;
 }
-#header, #content, #footer, .center {
+#header, #footer, .center {
   align-items: center;
 }
 #footer, .center {
@@ -86,6 +87,9 @@ button.emojiBtn {
   margin: 0 3rem 0 0;
   padding: 1rem 1rem;
 }
+button.sec {
+  background-color: #5c5e60;
+}
 
 #message {
   display: none; position: fixed;
@@ -96,6 +100,7 @@ button.emojiBtn {
 }
 
 .task {
+  width: var(--fullWidth);
   background-color: #777777;
   display: flex;
   flex-direction: row;
@@ -108,7 +113,7 @@ button.emojiBtn {
 
 input, select {
   width: var(--fullWidth);
-  padding: 1.5rem;
+  padding: 1.5rem 0;
   border: 0.8rem solid #474747;
   margin: 1rem 0;
   box-sizing: content-box;
