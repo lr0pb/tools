@@ -81,10 +81,10 @@ button {
   background-color: #3877cd;
 }
 button.emojiBtn {
-  font-size: 6em;
+  font-size: 5em;
   background-color: transparent;
   border-color: transparent;
-  margin: 0 0.5rem;
+  margin: 0;
   padding: 1rem 1rem;
 }
 button.secondary {
@@ -114,7 +114,7 @@ button.success {
   text-align: left;
 }
 .task > :last-child {
-  margin-right: 3rem;
+  margin-right: 2.5rem;
 }
 
 input, select {
