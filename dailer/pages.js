@@ -235,8 +235,8 @@ async function createDay(globals) {
   if (!day) {
     day = { date: today, tasks: [], completed: false };
   } else return day;
-  const tasks = await globals.db.getAll('tasks')
-    .filter( (elem) => !elem.disabled );
+  let tasks = await globals.db.getAll('tasks');
+  tasks = tasks.filter( (elem) => !elem.disabled );
   for (task of tasks) {
     
   }
