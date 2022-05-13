@@ -139,7 +139,7 @@ function getWeekStart() {
 
 function onSaveTask(globals) {
   const periodElem = qs('#period');
-  for (let i = 0, i < periods.length, i++) {
+  for (let i = 0; i < periods.length; i++) {
     const per = document.createElement('option');
     per.value = i;
     per.textContent = periods[i].title;
