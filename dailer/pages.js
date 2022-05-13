@@ -63,7 +63,7 @@ async function onPlanCreator(globals) {
 function showNoTasks(elem) {
   elem.classList.add('center');
   elem.innerHTML = `
-    <h2 class="emoji">&#128495;</h2><h3>There is nothing yet!</h3>
+    <h2 class="emoji">&#128495;</h2><h2>There is nothing yet!</h2>
   `;
 }
 
@@ -94,34 +94,64 @@ const taskCreator = {
     <h3>Enter task you will control</h3>
     <input type="text" id="name" placeHolder="Task name"></input>
     <h3>How often you will do this task?</h3>
-    <select id="period">
-      <option value="1">Everyday</option>
-      <option value="10">Every second day</option>
-      <option value="1100">Two over two</option>
-      <option value="1111100">On weekdays</option>
-      <option value="0000011">Only weekends</option>
-      <option value="oneTime">One time only</option>
-      <!--<option value="custom">Custom period</option>-->
-    </select>
+    <select id="period"></select>
     <h3 id="dateTitle"></h3>
     <input type="date" id="date"></input>
   `,
-  footer: '<button id="saveTask">Save task</button>',
+  footer: '<button id="saveTask">&#128190; Save task</button>',
   script: onSaveTask
 };
 
+const periods = [{
+  title: 'Everyday',
+  days: [1],
+  get startDate() { return new Date(); }
+}, {
+  title: 'Every second day',
+  days: [1, 0],
+  selectTitle: 'Select start date'
+}, {
+  title: 'Two over two',
+  days: [1, 1, 0, 0],
+  selectTitle: 'Select start date'
+}, {
+  title: 'On weekdays',
+  days: [0, 1, 1, 1, 1, 1, 0],
+  get startDate() { return getWeekStart(); }
+}, {
+  title: 'Only weekends',
+  days: [1, 0, 0, 0, 0, 0, 1],
+  get startDate() { return getWeekStart(); }
+}, {
+  title: 'One time only',
+  selectTitle: 'Select the day',
+  special: 'oneTime'
+}];
+
+function getWeekStart() {
+  const day = new Date();
+  return new Date(
+    day.getFullYear(),
+    day.getMonth(),
+    day.getDate() - day.getDay()
+  );
+}
+
 function onSaveTask(globals) {
-  qs('#period').addEventListener('change', (e) => {
-    const value = e.target.value;
-    const show = (text) => {
-      qs('#dateTitle').textContent = text;
+  const periodElem = qs('#period');
+  for (let i = 0, i < periods.length, i++) {
+    const per = document.createElement('option');
+    per.value = i;
+    per.textContent = periods[i].title;
+    periodElem.append(per);
+  }
+  periodElem.addEventListener('change', (e) => {
+    const value = Number(e.target.value);
+    if (periods[value].selectTitle) {
+      qs('#dateTitle').textContent = periods[value].selectTitle;
       qs('#dateTitle').style.display = 'block';
       qs('#date').style.display = 'block';
-    };
-    if (value == 'oneTime') show('Select the date')
-    else if (value == '10') show('Select start date')
-    else if (value == '1100') show('Select first date')
-    else {
+    } else {
       qs('#dateTitle').style.display = 'none';
       qs('#date').style.display = 'none';
     }
@@ -140,20 +170,23 @@ function onSaveTask(globals) {
 }
 
 function createTask(id) {
-  let period = qs('#period').value;
-  if (parseInt(period)) period = parseInt(period);
+  const value = Number(qs('#period').value);
   const task = {
     id: id ? id : Date.now().toString(),
     name: qs('#name').value,
-    oneTime: period == 'oneTime',
-    period,
-    periodTitle: period,
-    periodStart: qs('#date').value,
+    period: periods[value].days,
+    periodTitle: periods[value].title,
+    periodStart: periods[value].selectTitle
+    ? new Date(qs('#date').value)
+    : periods[value].startDate,
     periodDay: 0,
     disabled: false
   };
+  if (periods[value].special) {
+    task[periods[value].special] = true;
+  }
   console.log(task);
-  if (task.name == '') return 'error';
+  if (task.name == '' || !task.periodStart) return 'error';
   return task;
 }
 
