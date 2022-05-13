@@ -1,5 +1,11 @@
 const qs = (elem) => document.querySelector(elem);
 
+const getToday = () => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return today;
+}
+
 const onboarding = {
   header: '',
   page: `
@@ -39,21 +45,7 @@ async function onPlanCreator(globals) {
     showNoTasks(tasksContainer);
   } else for (let td of tasks) { // td stands for task's data
     if (td.disabled) continue;
-    const task = document.createElement('div');
-    task.className = 'task';
-    task.dataset.td = JSON.stringify(td);
-    task.innerHTML = `
-      <div>
-        <h3>${td.name}</h3>
-        <p>${td.periodTitle}</p>
-      </div>
-      <button data-action="edit" class="emojiBtn">&#128394;</button>
-      <button data-action="delete" class="emojiBtn">&#128465;</button>
-    `;
-    task.addEventListener('click', (e) => {
-      onTaskManageClick({e, globals, task, tasksContainer})
-    })
-    tasksContainer.append(task);
+    renderTask(td, tasksContainer);
   }
   if (!tasksContainer.children.length) {
     showNoTasks(tasksContainer);
@@ -67,6 +59,24 @@ function showNoTasks(elem) {
   `;
 }
 
+function renderTask(td, tasksContainer) {
+  const task = document.createElement('div');
+  task.className = 'task';
+  task.dataset.id = td.id;
+  task.innerHTML = `
+    <div>
+      <h3>${td.name}</h3>
+      <p>${td.periodTitle}</p>
+    </div>
+    <button data-action="edit" class="emojiBtn">&#128394;</button>
+    <button data-action="delete" class="emojiBtn">&#128465;</button>
+  `;
+  task.addEventListener('click', (e) => {
+    onTaskManageClick({e, globals, task, tasksContainer})
+  })
+  tasksContainer.append(task);
+}
+
 async function onTaskManageClick({
   e, globals, task, tasksContainer
 }) {
@@ -75,7 +85,7 @@ async function onTaskManageClick({
     
   } else if (e.target.dataset.action == 'delete') {
     //await globals.db.deleteItem('tasks', this.dataset.id);
-    const td = JSON.parse(task.dataset.td);
+    const td = await globals.db.getItem('tasks', task.dataset.id);
     td.disabled = true;
     await globals.db.setItem('tasks', td);
     task.remove();
@@ -108,8 +118,9 @@ const taskCreator = {
 const periods = [{
   title: 'Everyday',
   days: [1],
-  get startDate() { return new Date(); }
-}, {
+  get startDate() { return getToday(); },
+  periodDay: 0
+},/* {
   title: 'Every second day',
   days: [1, 0],
   selectTitle: 'Select start date'
@@ -117,31 +128,31 @@ const periods = [{
   title: 'Two over two',
   days: [1, 1, 0, 0],
   selectTitle: 'Select start date'
-}, {
+},*/ {
   title: 'On weekdays',
   days: [0, 1, 1, 1, 1, 1, 0],
-  get startDate() { return getWeekStart(); }
+  get startDate() { return getWeekStart(); },
+  get periodDay() { return new Date().getDay(); }
 }, {
   title: 'Only weekends',
   days: [1, 0, 0, 0, 0, 0, 1],
-  get startDate() { return getWeekStart(); }
+  get startDate() { return getWeekStart(); },
+  get periodDay() { return new Date().getDay(); }
 }, {
   title: 'One time only',
   selectTitle: 'Select the day',
-  special: 'oneTime'
+  special: 'oneTime',
+  periodDay: -1
 }];
 
 function getWeekStart() {
-  const day = new Date();
-  return new Date(
-    day.getFullYear(),
-    day.getMonth(),
-    day.getDate() - day.getDay()
-  );
+  const day = getToday();
+  day.setDate(day.getDate() - day.getDay());
+  return day;
 }
 
 function onSaveTask(globals) {
-  qs('#toMain').addEventListener(
+  qs('#toPlan').addEventListener(
     'click', () => globals.paintPage('planCreator')
   );
   const periodElem = qs('#period');
@@ -183,9 +194,9 @@ function createTask(id) {
     period: periods[value].days,
     periodTitle: periods[value].title,
     periodStart: periods[value].selectTitle
-    ? new Date(qs('#date').value)
-    : periods[value].startDate,
-    periodDay: 0,
+    ? new Date(qs('#date').value).toString()
+    : periods[value].startDate.toString(),
+    periodDay: periods[value].periodDay,
     disabled: false
   };
   if (periods[value].special) {
@@ -194,7 +205,7 @@ function createTask(id) {
   console.log(task);
   if (
     task.name == '' ||
-    task.periodStart.toString() == 'Invalid Date'
+    task.periodStart == 'Invalid Date'
   ) return 'error';
   return task;
 }
@@ -204,7 +215,7 @@ const main = {
   centerContent: true,
   page: `
     <h2 class="emoji">&#128302;</h2>
-    <h2>Task's page is coming</h2>
+    <h2>You have no tasks today!</h2>
   `,
   footer: '<button id="toPlan" class="secondary">&#128230; Edit tasks</button>',
   script: mainScript
@@ -214,6 +225,24 @@ async function mainScript(globals) {
   qs('#toPlan').addEventListener(
     'click', () => globals.paintPage('planCreator')
   );
+  const day = await createDay(globals);
+  if (day == 'error') return;
+}
+
+async function createDay(globals) {
+  const today = getToday().toString();
+  let day = await globals.db.getItem('days', today);
+  if (!day) {
+    day = { date: today, tasks: [], completed: false };
+  } else return day;
+  const tasks = await globals.db.getAll('tasks')
+    .filter( (elem) => !elem.disabled );
+  for (task of tasks) {
+    
+  }
+  if (!day.tasks.length) return 'error';
+  await globals.db.setItem('days', day);
+  return day;
 }
 
 export const pages = {
