@@ -98,7 +98,10 @@ const taskCreator = {
     <h3 id="dateTitle"></h3>
     <input type="date" id="date"></input>
   `,
-  footer: '<button id="saveTask">&#128190; Save task</button>',
+  footer: `
+    <button id="toPlan" class="secondary">Back</button>
+    <button id="saveTask">&#128190; Save task</button>
+  `,
   script: onSaveTask
 };
 
@@ -138,6 +141,9 @@ function getWeekStart() {
 }
 
 function onSaveTask(globals) {
+  qs('#toMain').addEventListener(
+    'click', () => globals.paintPage('planCreator')
+  );
   const periodElem = qs('#period');
   for (let i = 0; i < periods.length; i++) {
     const per = document.createElement('option');
@@ -186,7 +192,10 @@ function createTask(id) {
     task[periods[value].special] = true;
   }
   console.log(task);
-  if (task.name == '' || !task.periodStart) return 'error';
+  if (
+    task.name == '' ||
+    task.periodStart.toString() == 'Invalid Date'
+  ) return 'error';
   return task;
 }
 
