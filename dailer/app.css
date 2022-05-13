@@ -33,7 +33,7 @@ body {
   align-items: start;
   overflow: hidden auto;
 }
-#header, #footer, .center {
+#header, #footer, #content.center {
   align-items: center;
 }
 #footer, .center {
@@ -64,7 +64,7 @@ p {
   margin: 0 1rem;
 }
 .emoji {
-  font-size: 7em;
+  font-size: 9em;
 }
 
 button, .task, #message {
@@ -81,14 +81,17 @@ button {
   background-color: #3877cd;
 }
 button.emojiBtn {
-  font-size: 5em;
+  font-size: 6em;
   background-color: transparent;
   border-color: transparent;
-  margin: 0 3rem 0 0;
+  margin: 0 0.5rem;
   padding: 1rem 1rem;
 }
-button.sec {
+button.secondary {
   background-color: #5c5e60;
+}
+button.success {
+  background-color: #379b00;
 }
 
 #message {
@@ -109,6 +112,9 @@ button.sec {
 .task > div {
   margin: 1rem auto 2rem 2rem;
   text-align: left;
+}
+.task > :last-child {
+  margin-right: 3rem;
 }
 
 input, select {
