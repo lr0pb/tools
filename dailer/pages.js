@@ -238,6 +238,7 @@ function createTask(id) {
     disabled: false,
     deleted: false
   };
+  task.periodStart.setHours(0, 0, 0, 0);
   if (periods[value].special) {
     task[periods[value].special] = true;
   }
@@ -268,6 +269,7 @@ async function mainScript(globals) {
   if (day == 'error') return;
   const tasksContainer = qs('#content');
   tasksContainer.innerHTML = '';
+  tasksContainer.classList.remove('center');
   for (let i = day.tasks.length - 1; i > -1; i--) {
     for (let id in day.tasks[i]) {
       const td = await globals.db.getItem('tasks', id);
@@ -305,7 +307,7 @@ async function createDay(globals) {
     };
   } else return day;
   let tasks = await globals.db.getAll('tasks');
-  tasks = tasks.filter( (elem) => !elem.disabled || !elem.deleted );
+  tasks = tasks.filter( (elem) => !elem.disabled && !elem.deleted );
   for (let task of tasks) {
     const resp = dates.compare(today, task.periodStart);
     if (resp != 1) {
@@ -317,6 +319,8 @@ async function createDay(globals) {
       if (day.firstCreation) {
         task.history.push(0);
         day.tasks[task.priority][task.id] = 0;
+      } else {
+        day.tasks[task.priority][task.id] = getLast(task.history);
       }
       await globals.db.setItem('tasks', task);
     }
