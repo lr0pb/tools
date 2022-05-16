@@ -139,9 +139,8 @@ const taskCreator = {
 const periods = [{
   title: 'Everyday',
   days: [1],
-  selectTitle: 'Select day to start',
-  periodDay: -1,
-  get maxDate() { return getToday() + oneDay * 6; },
+  get startDate() { return getToday(); },
+  periodDay: 0,
   selected: true
 }, {
   title: 'Every second day',
@@ -249,7 +248,9 @@ function createTask(id) {
   if (periods[value].special) {
     task.special = periods[value].special;
   }
-  const startTitle = new Date(task.periodStart).toLocaleDateString(navigator.language);
+  const date = new Date(task.periodStart);
+  task.periodStart = date.setHours(0, 0, 0, 0);
+  const startTitle = date.toLocaleDateString(navigator.language);
   if (task.special == 'oneTime') {
     task.periodTitle = startTitle;
   } else if (task.periodStart > getToday()) {
@@ -328,7 +329,7 @@ async function createDay(globals, today = getToday()) {
   let tasks = await globals.db.getAll('tasks');
   tasks = tasks.filter( (elem) => !elem.disabled && !elem.deleted );
   for (let task of tasks) {
-    if (task.periodStart >= today) {
+    if (task.periodStart <= today) {
       if (day.firstCreation || !task.history.length) {
         updateTask(task);
         if (task.period[task.periodDay]) {
