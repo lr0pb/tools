@@ -96,10 +96,13 @@ button.success {
 
 #message {
   display: none; position: fixed;
-  width: var(--fullWidth); height: 4rem;
+  box-sizing: border-box;
+  width: var(--fullWidth); min-height: 5rem;
   padding: 2rem; margin: 0;
   left: 50%; bottom: 4rem;
   transform: translateX(-50%);
+  background: linear-gradient(90deg, var(--color) 0%, #191a1a 75%);
+  border-color: var(--color);
 }
 
 .task {
@@ -117,7 +120,7 @@ button.success {
   margin: 1.5rem auto 0 1rem;
 }
 .task > :last-child {
-  margin-right: 2.5rem;
+  margin-right: 2rem;
 }
 
 input, select {
