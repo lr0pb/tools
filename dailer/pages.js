@@ -156,12 +156,12 @@ const periods = [{
   title: 'On weekdays',
   days: [0, 1, 1, 1, 1, 1, 0],
   get startDate() { return getWeekStart(); },
-  get periodDay() { return new Date().getDay(); }
+  get periodDay() { return new Date().getDay()--; }
 }, {
   title: 'Only weekends',
   days: [1, 0, 0, 0, 0, 0, 1],
   get startDate() { return getWeekStart(); },
-  get periodDay() { return new Date().getDay(); }
+  get periodDay() { return new Date().getDay()--; }
 }, {
   title: 'One time only',
   days: [1],
@@ -253,10 +253,7 @@ function createTask(id) {
 const main = {
   header: `&#128481; Today's tasks`,
   centerContent: true,
-  page: `
-    <h2 class="emoji">&#128302;</h2>
-    <h2>You have no tasks today!</h2>
-  `,
+  page: ``,
   footer: '<button id="toPlan" class="secondary">&#128230; Edit tasks</button>',
   script: mainScript
 };
@@ -266,9 +263,11 @@ async function mainScript(globals) {
     'click', () => globals.paintPage('planCreator')
   );
   const day = await createDay(globals);
-  if (day == 'error') return;
   const tasksContainer = qs('#content');
-  tasksContainer.innerHTML = '';
+  if (day == 'error') return tasksContainer.innerHTML = `
+    <h2 class="emoji">&#128302;</h2>
+    <h2>You have no tasks today!</h2>
+  `;
   tasksContainer.classList.remove('center');
   for (let i = day.tasks.length - 1; i > -1; i--) {
     for (let id in day.tasks[i]) {
@@ -282,7 +281,7 @@ async function onTaskCompleteClick({ e, globals, task, tasksContainer }) {
   if (e.target.dataset.action == 'complete') {
     const td = await globals.db.getItem('tasks', task.dataset.id);
     const day = await globals.db.getItem('days', getToday().toString());
-    const value = !getLast(td.history);
+    const value = getLast(td.history) == 1 ? 0 : 1;
     td.history.pop();
     td.history.push(value);
     day.tasks[td.priority][td.id] = value;
@@ -296,8 +295,11 @@ function getTaskComplete(td) {
   return getLast(td.history) ? '&#9989;' : '&#11036;';
 }
 
-async function createDay(globals) {
-  const today = getToday();
+async function createDay(globals, today = getToday()) {
+  const check = checkLastDay(globals, today);
+  if (!check.check) {
+    await createDay(globals, check.dayBefore);
+  }
   let day = await globals.db.getItem('days', today.toString());
   if (!day || day.lastTasksChange != localStorage.lastTasksChange) {
     day = {
@@ -309,25 +311,30 @@ async function createDay(globals) {
   let tasks = await globals.db.getAll('tasks');
   tasks = tasks.filter( (elem) => !elem.disabled && !elem.deleted );
   for (let task of tasks) {
-    const resp = dates.compare(today, task.periodStart);
-    if (resp != 1) {
-      updateTask(task);
-      if (!task.period[task.periodDay]) {
+    const resp = dates.compare(task.periodStart, today);
+    if (resp != 1) { // if task.periodStart > today
+      if (day.firstCreation || !task.history.length) {
+        updateTask(task);
+        if (task.period[task.periodDay]) {
+          task.history.push(0);
+          day.tasks[task.priority][task.id] = 0;
+        }
         await globals.db.setItem('tasks', task);
-        continue;
-      }
-      if (day.firstCreation) {
-        task.history.push(0);
-        day.tasks[task.priority][task.id] = 0;
       } else {
         day.tasks[task.priority][task.id] = getLast(task.history);
       }
-      await globals.db.setItem('tasks', task);
     }
   }
   if (isEmpty(day)) return 'error';
   await globals.db.setItem('days', day);
   return day;
+}
+
+function checkLastDay(globals, day) {
+  const dayBefore = new Date(day);
+  dayBefore.setDate(dayBefore.getDate() - 1);
+  const check = await globals.db.getItem('days', dayBefore.toString());
+  return { check, dayBefore };
 }
 
 function updateTask(task) {
