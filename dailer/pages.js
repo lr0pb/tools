@@ -1,14 +1,12 @@
-import { dates } from './dates.js'
-
 const qs = (elem) => document.querySelector(elem);
 
 const getLast = (arr) => arr[arr.length - 1];
 
-const getToday = () => {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return today;
+const getToday = () => { // date in milliseconds
+  return new Date().setHours(0, 0, 0, 0);
 };
+
+const oneDay = 86 400 000; // 86 400 000 milliseconds in one day
 
 const onboarding = {
   header: '',
@@ -21,7 +19,6 @@ const onboarding = {
   script: (globals) => {
     qs('#create').addEventListener('click', () => {
       localStorage.onboarded = 'true';
-      localStorage.firstDayEver = 'true';
       globals.paintPage('taskCreator');
     });
   }
@@ -119,9 +116,9 @@ const taskCreator = {
     <select id="priority"></select>
     <h3>How often you will do this task?</h3>
     <select id="period"></select>
-    <h3>Choose custom period will be available later</h3>
     <h3 id="dateTitle"></h3>
     <input type="date" id="date"></input>
+    <h3>Choose custom period will be available later</h3>
   `,
   footer: `
     <button id="toPlan" class="secondary">Back</button>
@@ -145,15 +142,19 @@ const periods = [{
   get startDate() { return getToday(); },
   periodDay: 0,
   selected: true
-},/* {
+}, {
   title: 'Every second day',
   days: [1, 0],
-  selectTitle: 'Select start date'
+  selectTitle: 'Select day to start',
+  periodDay: -1,
+  get maxDate() { return getToday() + oneDay * 7; }
 }, {
   title: 'Two over two',
   days: [1, 1, 0, 0],
-  selectTitle: 'Select start date'
-},*/ {
+  selectTitle: 'Select day to start',
+  periodDay: -1,
+  get maxDate() { return getToday() + oneDay * 7; }
+}, {
   title: 'On weekdays',
   days: [0, 1, 1, 1, 1, 1, 0],
   get startDate() { return getWeekStart(); },
@@ -167,14 +168,13 @@ const periods = [{
   title: 'One time only',
   days: [1],
   selectTitle: 'Select the day',
-  special: 'oneTime',
-  periodDay: -1
+  periodDay: -1,
+  special: 'oneTime'
 }];
 
-function getWeekStart() {
-  const day = getToday();
-  day.setDate(day.getDate() - day.getDay());
-  return day;
+function getWeekStart() {  // date in milliseconds
+  const day = new Date(getToday());
+  return day.setDate(day.getDate() - day.getDay());
 }
 
 function onSaveTask(globals) {
@@ -215,9 +215,14 @@ function onPeriodChange(e) {
     qs('#dateTitle').innerHTML = periods[value].selectTitle;
     qs('#dateTitle').style.display = 'block';
     qs('#date').style.display = 'block';
+    if (periods[value].maxDate) {
+      qs('#date').max = new Date(periods[value].maxDate)
+        .toLocaleDateString('en-ca');
+    }
   } else {
     qs('#dateTitle').style.display = 'none';
     qs('#date').style.display = 'none';
+    qs('#date').removeAttribute('max');
   }
 }
 
@@ -232,21 +237,22 @@ function createTask(id) {
     period: periods[value].days,
     periodTitle: periods[value].title,
     periodStart: periods[value].selectTitle
-    ? new Date(qs('#date').value)
+    ? new Date(qs('#date').value).getTime()
     : periods[value].startDate,
     periodDay: periods[value].periodDay,
     history: [],
     disabled: false,
     deleted: false
   };
-  task.periodStart.setHours(0, 0, 0, 0);
   if (periods[value].special) {
-    task[periods[value].special] = true;
+    task.special = periods[value].special;
+  }
+  if (task.special == 'oneTime') {
+    task.periodStart = new Date(task.periodStart).toLocaleDateString(navigator.language);
   }
   console.log(task);
   if (
-    task.name == '' ||
-    task.periodStart.toString() == 'Invalid Date'
+    task.name == '' || isNaN(task.periodStart)
   ) return 'error';
   return task;
 }
@@ -297,8 +303,11 @@ function getTaskComplete(td) {
 }
 
 async function createDay(globals, today = getToday()) {
+  if (!localStorage.firstDayEver) {
+    localStorage.firstDayEver = today.toString();
+  }
   const check = await checkLastDay(globals, today);
-  if (!check.check && localStorage.firstDayEver == 'false') {
+  if (!check.check) {
     await createDay(globals, check.dayBefore);
   }
   let day = await globals.db.getItem('days', today.toString());
@@ -312,8 +321,7 @@ async function createDay(globals, today = getToday()) {
   let tasks = await globals.db.getAll('tasks');
   tasks = tasks.filter( (elem) => !elem.disabled && !elem.deleted );
   for (let task of tasks) {
-    const resp = dates.compare(task.periodStart, today);
-    if (resp != 1) { // if task.periodStart > today
+    if (task.periodStart > today) {
       if (day.firstCreation || !task.history.length) {
         updateTask(task);
         if (task.period[task.periodDay]) {
@@ -328,25 +336,24 @@ async function createDay(globals, today = getToday()) {
   }
   if (isEmpty(day)) return 'error';
   await globals.db.setItem('days', day);
-  localStorage.firstDayEver = 'false';
   return day;
 }
 
 async function checkLastDay(globals, day) {
-  const dayBefore = new Date(day);
-  dayBefore.setDate(dayBefore.getDate() - 1);
-  const check = await globals.db.getItem('days', dayBefore.toString());
+  const dayBefore = day - oneDay;
+  const check = localStorage.firstDayEver == day.toString()
+  ? true
+  : await globals.db.getItem('days', dayBefore.toString());
   return { check, dayBefore };
 }
 
 function updateTask(task) {
-  if (task.oneTime) {
+  if (task.special == 'oneTime') {
     if (task.history.length) {
       task.periodDay = -1;
       task.disabled = true;
-    } else {
-      const isSame = dates.compare(getToday(), task.periodStart);
-      if (isSame == 0) task.periodDay = 0;
+    } else if (getToday() == task.periodStart) {
+      task.periodDay = 0;
     }
     return;
   }
