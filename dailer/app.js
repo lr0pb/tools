@@ -29,9 +29,12 @@ const globals = {
   message: ({state, text}) => {
     const msg = qs('#message');
     msg.style.display = 'block';
-    msg.style.backgroundColor = state == 'fail'
-    ? '#a30000' : '#008000';
-    msg.textContent = text;
+    msg.style.setProperty(
+      '--color', state == 'fail' ? '#a30000' : '#008000'
+    );
+    msg.innerHTML = `
+      ${state == 'fail' ? '&#10060;' : '&#9989;'} ${text}
+    `;
     setTimeout( () => {
       msg.style.display = 'none';
     }, 2000);
