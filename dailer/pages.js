@@ -61,12 +61,21 @@ function showNoTasks(elem) {
   `;
 }
 
+const priorities = [{
+  title: 'Can miss sometimes'
+}, {
+  title: 'Normal',
+  selected: true
+}, {
+  title: 'Extra important'
+}];
+
 function renderTask({type, globals, td, tasksContainer}) {
   const task = document.createElement('div');
   const getTaskInner = () => {
     return type == 'edit' ? `
       <h3>${td.name}</h3>
-      <p>${td.periodTitle} | ${td.priorityTitle}</p>
+      <p>${td.periodTitle} | ${priorities[td.priority].title}</p>
     ` : `<h2>${td.name}</h2>`;
   };
   const getTaskButtons = () => {
@@ -127,33 +136,25 @@ const taskCreator = {
   script: onSaveTask
 };
 
-const priorities = [{
-  title: 'Can miss sometimes'
-}, {
-  title: 'Normal',
-  selected: true
-}, {
-  title: 'Extra important'
-}];
-
 const periods = [{
   title: 'Everyday',
   days: [1],
-  get startDate() { return getToday(); },
-  periodDay: 0,
+  selectTitle: 'Select day to start',
+  periodDay: -1,
+  get maxDate() { return getToday() + oneDay * 6; },
   selected: true
 }, {
   title: 'Every second day',
   days: [1, 0],
   selectTitle: 'Select day to start',
   periodDay: -1,
-  get maxDate() { return getToday() + oneDay * 7; }
+  get maxDate() { return getToday() + oneDay * 13; }
 }, {
   title: 'Two over two',
   days: [1, 1, 0, 0],
   selectTitle: 'Select day to start',
   periodDay: -1,
-  get maxDate() { return getToday() + oneDay * 7; }
+  get maxDate() { return getToday() + oneDay * 13; }
 }, {
   title: 'On weekdays',
   days: [0, 1, 1, 1, 1, 1, 0],
@@ -211,18 +212,19 @@ function createOptionsList(elem, options) {
 
 function onPeriodChange(e) {
   const value = Number(e.target.value);
+  const date = qs('#date');
+  date.value = '';
+  date.removeAttribute('max');
   if (periods[value].selectTitle) {
     qs('#dateTitle').innerHTML = periods[value].selectTitle;
     qs('#dateTitle').style.display = 'block';
-    qs('#date').style.display = 'block';
+    date.style.display = 'block';
     if (periods[value].maxDate) {
-      qs('#date').max = new Date(periods[value].maxDate)
-        .toLocaleDateString('en-ca');
+      date.max = new Date(periods[value].maxDate).toLocaleDateString('en-ca');
     }
   } else {
     qs('#dateTitle').style.display = 'none';
-    qs('#date').style.display = 'none';
-    qs('#date').removeAttribute('max');
+    date.style.display = 'none';
   }
 }
 
@@ -233,8 +235,8 @@ function createTask(id) {
     id: id ? id : Date.now().toString(),
     name: qs('#name').value,
     priority,
-    priorityTitle: priorities[priority].title,
     period: periods[value].days,
+    ogTitle: periods[value].title,
     periodTitle: periods[value].title,
     periodStart: periods[value].selectTitle
     ? new Date(qs('#date').value).getTime()
@@ -247,8 +249,13 @@ function createTask(id) {
   if (periods[value].special) {
     task.special = periods[value].special;
   }
+  const startTitle = new Date(task.periodStart).toLocaleDateString(navigator.language);
   if (task.special == 'oneTime') {
-    task.periodStart = new Date(task.periodStart).toLocaleDateString(navigator.language);
+    task.periodTitle = startTitle;
+  } else if (task.periodStart > getToday()) {
+    task.periodTitle += ` from ${
+      task.periodStart + oneDay == getToday() ? 'tomorrow' : startTitle
+    }`;
   }
   console.log(task);
   if (
@@ -321,7 +328,7 @@ async function createDay(globals, today = getToday()) {
   let tasks = await globals.db.getAll('tasks');
   tasks = tasks.filter( (elem) => !elem.disabled && !elem.deleted );
   for (let task of tasks) {
-    if (task.periodStart > today) {
+    if (task.periodStart >= today) {
       if (day.firstCreation || !task.history.length) {
         updateTask(task);
         if (task.period[task.periodDay]) {
@@ -356,6 +363,10 @@ function updateTask(task) {
       task.periodDay = 0;
     }
     return;
+  }
+  if (task.ogTitle) {
+    task.periodTitle = task.ogTitle;
+    delete task.ogTitle;
   }
   task.periodDay++;
   if (task.periodDay == task.period.length) {
