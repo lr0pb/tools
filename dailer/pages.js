@@ -21,6 +21,7 @@ const onboarding = {
   script: (globals) => {
     qs('#create').addEventListener('click', () => {
       localStorage.onboarded = 'true';
+      localStorage.firstDayEver = 'true';
       globals.paintPage('taskCreator');
     });
   }
@@ -156,12 +157,12 @@ const periods = [{
   title: 'On weekdays',
   days: [0, 1, 1, 1, 1, 1, 0],
   get startDate() { return getWeekStart(); },
-  get periodDay() { return new Date().getDay()--; }
+  get periodDay() { return new Date().getDay() - 1; }
 }, {
   title: 'Only weekends',
   days: [1, 0, 0, 0, 0, 0, 1],
   get startDate() { return getWeekStart(); },
-  get periodDay() { return new Date().getDay()--; }
+  get periodDay() { return new Date().getDay() - 1; }
 }, {
   title: 'One time only',
   days: [1],
@@ -297,7 +298,7 @@ function getTaskComplete(td) {
 
 async function createDay(globals, today = getToday()) {
   const check = await checkLastDay(globals, today);
-  if (!check.check) {
+  if (!check.check && localStorage.firstDayEver == 'false') {
     await createDay(globals, check.dayBefore);
   }
   let day = await globals.db.getItem('days', today.toString());
@@ -327,6 +328,7 @@ async function createDay(globals, today = getToday()) {
   }
   if (isEmpty(day)) return 'error';
   await globals.db.setItem('days', day);
+  localStorage.firstDayEver = 'false';
   return day;
 }
 
