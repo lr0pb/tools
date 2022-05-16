@@ -6,7 +6,7 @@ const getToday = () => { // date in milliseconds
   return new Date().setHours(0, 0, 0, 0);
 };
 
-const oneDay = 86 400 000; // 86 400 000 milliseconds in one day
+const oneDay = 86400000; // 86 400 000 milliseconds in one day
 
 const onboarding = {
   header: '',
