@@ -296,7 +296,7 @@ function getTaskComplete(td) {
 }
 
 async function createDay(globals, today = getToday()) {
-  const check = checkLastDay(globals, today);
+  const check = await checkLastDay(globals, today);
   if (!check.check) {
     await createDay(globals, check.dayBefore);
   }
@@ -330,7 +330,7 @@ async function createDay(globals, today = getToday()) {
   return day;
 }
 
-function checkLastDay(globals, day) {
+async function checkLastDay(globals, day) {
   const dayBefore = new Date(day);
   dayBefore.setDate(dayBefore.getDate() - 1);
   const check = await globals.db.getItem('days', dayBefore.toString());
