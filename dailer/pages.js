@@ -7,7 +7,7 @@ const getToday = () => { // date in milliseconds
 };
 
 const convertDate = (date) => {
-  return new Date(date).toLocalDateString('en-ca');
+  return new Date(date).toLocaleDateString('en-ca');
 };
 
 const oneDay = 86400000; // 86 400 000 milliseconds in one day
