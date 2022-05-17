@@ -131,10 +131,10 @@ const taskCreator = {
     <select id="period"></select>
     <h3 id="dateTitle"></h3>
     <input type="date" id="date"></input>
-    <h3>Choose custom period will be available later</h3>
+    <h3 id="description"></h3>
   `,
   footer: `
-    <button id="toPlan" class="secondary">Back</button>
+    <button id="toPlan" class="secondary">&#11013; Back</button>
     <button id="saveTask">&#128190; Save task</button>
   `,
   script: onSaveTask
@@ -192,10 +192,11 @@ const periods = [{
   title: 'One time until complete',
   days: [1],
   get startDate() { return getToday(); },
-  selectTitle: 'Task will be active unlimited time until you complete them',
+  description: 'Task will be active unlimited time until you complete them',
   periodDay: -1,
-  get maxDate() { return getToday(); },
   special: 'untilComplete'
+}, {
+  title: 'Other period'
 }];
 
 function getWeekStart() {  // date in milliseconds
@@ -240,6 +241,9 @@ function onPeriodChange(e) {
   const date = qs('#date');
   date.value = '';
   date.removeAttribute('max');
+  date.style.display = 'none';
+  qs('#dateTitle').style.display = 'none';
+  qs('#description').style.display = 'none';
   if (periods[value].selectTitle) {
     qs('#dateTitle').innerHTML = periods[value].selectTitle;
     qs('#dateTitle').style.display = 'block';
@@ -250,9 +254,8 @@ function onPeriodChange(e) {
     if (periods[value].maxDate) {
       date.max = convertDate(periods[value].maxDate);
     }
-  } else {
-    qs('#dateTitle').style.display = 'none';
-    date.style.display = 'none';
+  } else if (periods[value].description) {
+    qs('#description').innerHTML = periods[value].description;
   }
 }
 
@@ -285,7 +288,7 @@ function createTask(id) {
   
   if (task.special == 'oneTime') {
     task.periodTitle = `Only ${startTitle}`;
-  } else if (task.periodStart > getToday() && task.ogTitle != periods[1].title) {
+  } else if (task.periodStart > getToday()) {
     task.periodTitle += ` from ${startTitle}`;
   }
   console.log(task);
@@ -299,7 +302,10 @@ const main = {
   header: `&#128481; Today's tasks`,
   centerContent: true,
   page: ``,
-  footer: '<button id="toPlan" class="secondary">&#128230; Edit tasks</button>',
+  footer: `
+    <!--<button id="toHistory" class="secondary">&#128198; History</button>-->
+    <button id="toPlan" class="secondary">&#128230; Edit tasks</button>
+  `,
   script: mainScript
 };
 
@@ -421,6 +427,14 @@ function isEmpty(day) {
   return true;
 }
 
+const settings = {
+  header: `&#128481; Settings`,
+  centerContent: true,
+  page: `<h2>Soon</h2>`,
+  footer: ``,
+  script: () => {}
+};
+
 export const pages = {
-  onboarding, main, planCreator, taskCreator
+  onboarding, main, settings, planCreator, taskCreator
 };
