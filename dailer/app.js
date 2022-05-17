@@ -8,6 +8,8 @@ const db = new IDB('dailer', 1, [
     name: 'tasks', index: {keyPath: 'id'}
   }, {
     name: 'days', index: {keyPath: 'date'}
+  }, {
+    name: 'periods', index: {keyPath: 'id'}
   }
 ]);
 
@@ -17,6 +19,8 @@ const globals = {
     const page = pages[name];
     const content = qs('#content');
     qs('h1').innerHTML = page.header;
+    qs('#pageBtn').onclick = null;
+    qs('#pageBtn').style.display = 'none';
     if (page.centerContent) {
       content.classList.add('center');
     } else {
@@ -38,7 +42,13 @@ const globals = {
     setTimeout( () => {
       msg.style.display = 'none';
     }, 2000);
+  },
+  pageButton: (func) => {
+    qs('#pageBtn').onclick = func;
+    qs('#pageBtn').style.display = 'block';
   }
 }
+
+qs('#settings').addEventListener('click', () => globals.paintPage('settings') );
 
 globals.paintPage(localStorage.onboarded == 'true' ? 'main' : 'onboarding');
