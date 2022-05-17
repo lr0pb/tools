@@ -6,6 +6,10 @@ const getToday = () => { // date in milliseconds
   return new Date().setHours(0, 0, 0, 0);
 };
 
+const convertDate = (date) => {
+  return new Date(date).toLocalDateString('en-ca');
+};
+
 const oneDay = 86400000; // 86 400 000 milliseconds in one day
 
 const onboarding = {
@@ -137,11 +141,25 @@ const taskCreator = {
 };
 
 const periods = [{
+  title: 'Today only',
+  days: [1],
+  get startDate() { return getToday(); },
+  periodDay: -1,
+  special: 'oneTime',
+  selected: true
+}, {
+  title: 'Tomorrow',
+  days: [1],
+  get startDate() { return getToday() + oneDay; },
+  periodDay: -1,
+  special: 'oneTime'
+}, {
   title: 'Everyday',
   days: [1],
   get startDate() { return getToday(); },
-  periodDay: 0,
-  selected: true
+  selectTitle: 'Select day to start',
+  periodDay: -1,
+  get maxDate() { return getToday() + oneDay * 6; }
 }, {
   title: 'Every second day',
   days: [1, 0],
@@ -170,6 +188,14 @@ const periods = [{
   selectTitle: 'Select the day',
   periodDay: -1,
   special: 'oneTime'
+}, {
+  title: 'One time until complete',
+  days: [1],
+  get startDate() { return getToday(); },
+  selectTitle: 'Task will be active unlimited time until you complete them',
+  periodDay: -1,
+  get maxDate() { return getToday(); },
+  special: 'untilComplete'
 }];
 
 function getWeekStart() {  // date in milliseconds
@@ -184,7 +210,7 @@ function onSaveTask(globals) {
   createOptionsList(qs('#priority'), priorities);
   createOptionsList(qs('#period'), periods);
   qs('#period').addEventListener('change', onPeriodChange);
-  qs('#date').min = new Date().toLocaleDateString('en-ca');
+  qs('#date').min = convertDate(Date.now());
   qs('#saveTask').addEventListener('click', () => {
     const task = createTask();
     if (task == 'error') return globals.message({
@@ -218,8 +244,11 @@ function onPeriodChange(e) {
     qs('#dateTitle').innerHTML = periods[value].selectTitle;
     qs('#dateTitle').style.display = 'block';
     date.style.display = 'block';
+    if (periods[value].startDate) {
+      date.value = convertDate(periods[value].startDate);
+    }
     if (periods[value].maxDate) {
-      date.max = new Date(periods[value].maxDate).toLocaleDateString('en-ca');
+      date.max = convertDate(periods[value].maxDate);
     }
   } else {
     qs('#dateTitle').style.display = 'none';
@@ -250,13 +279,14 @@ function createTask(id) {
   }
   const date = new Date(task.periodStart);
   task.periodStart = date.setHours(0, 0, 0, 0);
-  const startTitle = date.toLocaleDateString(navigator.language);
+  let startTitle = date.toLocaleDateString(navigator.language);
+  if (task.periodStart == getToday()) startTitle = 'today';
+  if (task.periodStart - oneDay == getToday()) startTitle = 'tomorrow';
+  
   if (task.special == 'oneTime') {
-    task.periodTitle = startTitle;
-  } else if (task.periodStart > getToday()) {
-    task.periodTitle += ` from ${
-      task.periodStart + oneDay == getToday() ? 'tomorrow' : startTitle
-    }`;
+    task.periodTitle = `Only ${startTitle}`;
+  } else if (task.periodStart > getToday() && task.ogTitle != periods[1].title) {
+    task.periodTitle += ` from ${startTitle}`;
   }
   console.log(task);
   if (
@@ -362,6 +392,15 @@ function updateTask(task) {
       task.disabled = true;
     } else if (getToday() == task.periodStart) {
       task.periodDay = 0;
+    }
+    return;
+  } else if (task.special == 'untilComplete') {
+    if (task.history[0] == 1) {
+      task.periodDay = -1;
+      task.disabled = true;
+    } else {
+      task.periodDay = 0;
+      task.history.length = 0;
     }
     return;
   }
