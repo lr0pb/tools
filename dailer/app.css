@@ -1,9 +1,13 @@
 :root {
-  --fullWidth: min(90vw, 600px);
+  --fullWidth: min(90vw, 440px);
 }
 
 html {
   font-size: 1.25vmin;
+}
+
+@media (min-width: 450px) {
+  html { font-size: 0.65vmin; }
 }
 
 body {
@@ -18,7 +22,7 @@ body {
     "... footer ..."
   ;
   grid-template-rows: 16rem 1fr 18rem;
-  grid-template-columns: minmax(3rem, 1fr) min(calc(100vw - 6rem), 600px) minmax(3rem, 1fr);
+  grid-template-columns: minmax(3rem, 1fr) min(calc(100vw - 6rem), 450px) minmax(3rem, 1fr);
 }
 
 #header { grid-area: header; }
@@ -28,10 +32,20 @@ body {
 #header, #content, #footer {
   display: flex;
 }
+#header > h1 {
+  margin-right: auto;
+}
+#pageBtn {
+  display: none;
+}
 #content {
   flex-direction: column;
   align-items: start;
   overflow: hidden auto;
+  scrollbar-width: none;
+}
+#content::-webkit-scrollbar {
+  width: 0; height: 0;
 }
 #header, #footer, #content.center {
   align-items: center;
@@ -70,13 +84,13 @@ p {
 button, .task, #message {
   border-radius: 2.5rem;
   border: 0.9rem solid rgb(51 51 51 / 50%);
-  margin: 2.5rem;
+  margin: 2.5rem 1.5rem;
 }
 
 button {
   font-size: 4.3em;
   font-weight: 700;
-  padding: 2rem 5rem;
+  padding: 2rem 4rem;
   color: #ffffff;
   background-color: #3877cd;
 }
@@ -85,7 +99,7 @@ button.emojiBtn {
   background-color: transparent;
   border-color: transparent;
   margin: 0;
-  padding: 1rem 1rem;
+  padding: 1rem;
 }
 button.secondary {
   background-color: #5c5e60;
@@ -132,6 +146,6 @@ input, select {
   border-radius: 1.5rem;
   outline: none;
 }
-#dateTitle, #date {
+#dateTitle, #date, #description {
   display: none;
 }
