@@ -144,7 +144,7 @@ const taskCreator = {
 };
 
 async function getPeriods(globals) {
-  const customs = await globals.getAll('periods');
+  const customs = await globals.db.getAll('periods');
   for (let per of customs) {
     periods[per.id] = per;
   }
