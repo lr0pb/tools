@@ -1,7 +1,5 @@
-import { pages } from './pages.js'
+import { qs, pages } from './pages.js'
 import IDB from './IDB.js'
-
-const qs = (elem) => document.querySelector(elem);
 
 const db = new IDB('dailer', 2, [
   {
@@ -31,7 +29,7 @@ const globals = {
     }
     content.innerHTML = page.page;
     qs('#footer').innerHTML = page.footer;
-    await page.script(globals);
+    await page.script({globals, page: content});
   },
   message: ({state, text}) => {
     const msg = qs('#message');
@@ -64,6 +62,6 @@ qs('#closeSettings').addEventListener('click', async () => {
   await pages[globals.pageName].onSettingsUpdate(globals);
 });
 
-pages.settings.paint(globals, qs('#settings > .content'));
+pages.settings.paint({globals, page: qs('#settings > .content')});
 
 globals.paintPage(localStorage.onboarded == 'true' ? 'main' : 'onboarding');
