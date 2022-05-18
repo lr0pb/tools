@@ -1,5 +1,6 @@
 :root {
-  --fullWidth: min(90vw, 440px);
+  --fullWidth: min(92vw, 450px);
+  --darkShadow: #474747;
 }
 
 html {
@@ -39,7 +40,7 @@ body, #settings {
 .header, .content, #footer {
   display: flex;
 }
-.header > h1, h4 {
+.header > h1, .header > h4 {
   margin-right: auto;
 }
 #pageBtn {
@@ -146,12 +147,16 @@ button.success {
 
 input, select {
   width: var(--fullWidth);
-  padding: 1.5rem 0;
-  border: 0.8rem solid #474747;
+  padding: 1.5rem 2rem;
+  border: 0.8rem solid var(--darkShadow);
   margin: 1rem 0;
-  box-sizing: content-box;
+  box-sizing: border-box;
   border-radius: 1.5rem;
   outline: none;
+}
+input:disabled, select:disabled {
+  background-color: var(--darkShadow);
+  color: white;
 }
 #dateTitle, #date, #description {
   display: none;
