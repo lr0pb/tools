@@ -253,23 +253,23 @@ function onPeriodChange(e, globals) {
   }
 }
 
-function createTask(task = {}) {
+function createTask(td = {}) {
   const value = Number(qs('#period').value);
   const priority = Number(qs('#priority').value);
   const task = {
-    id: task.id || Date.now().toString(),
+    id: td.id || Date.now().toString(),
     name: qs('#name').value,
     priority,
-    period: task.period || periods[value].days,
-    periodId: task.periodId || task.ogTitle || periods[value].id,
-    periodTitle: task.periodTitle || periods[value].title,
-    periodStart: task.periodStart && task.periodStart <= getToday()
-    ? task.periodStart
-    : periods[task.periodId].selectTitle || periods[value].selectTitle
+    period: td.period || periods[value].days,
+    periodId: td.periodId || td.ogTitle || periods[value].id,
+    periodTitle: td.periodTitle || periods[value].title,
+    periodStart: td.periodStart && td.periodStart <= getToday()
+    ? td.periodStart
+    : periods[td.periodId].selectTitle || periods[value].selectTitle
     ? new Date(qs('#date').value).getTime()
-    : task.periodStart || periods[value].startDate,
-    periodDay: periods[value].periodDay,
-    history: task.history || [],
+    : td.periodStart || periods[value].startDate,
+    periodDay: td.periodDay || periods[value].periodDay,
+    history: td.history || [],
     disabled: false,
     deleted: false
   };
