@@ -3,7 +3,7 @@ import IDB from './IDB.js'
 
 const qs = (elem) => document.querySelector(elem);
 
-const db = new IDB('dailer', 1, [
+const db = new IDB('dailer', 2, [
   {
     name: 'tasks', index: {keyPath: 'id'}
   }, {
@@ -15,9 +15,12 @@ const db = new IDB('dailer', 1, [
 
 const globals = {
   db,
-  paintPage: (name) => {
+  pageName: null,
+  pageInfo: null,
+  paintPage: async (name) => {
+    globals.pageName = name;
     const page = pages[name];
-    const content = qs('#content');
+    const content = qs('body > .content');
     qs('h1').innerHTML = page.header;
     qs('#pageBtn').onclick = null;
     qs('#pageBtn').style.display = 'none';
@@ -28,7 +31,7 @@ const globals = {
     }
     content.innerHTML = page.page;
     qs('#footer').innerHTML = page.footer;
-    page.script(globals);
+    await page.script(globals);
   },
   message: ({state, text}) => {
     const msg = qs('#message');
@@ -43,12 +46,24 @@ const globals = {
       msg.style.display = 'none';
     }, 2000);
   },
-  pageButton: (func) => {
-    qs('#pageBtn').onclick = func;
-    qs('#pageBtn').style.display = 'block';
+  pageButton: ({emoji, onClick}) => {
+    const pageBtn = qs('#pageBtn');
+    pageBtn.innerHTML = emoji;
+    pageBtn.onclick = onClick;
+    pageBtn.style.display = 'block';
+  },
+  openSettings: () => {
+    qs('#settings').style.display = 'grid';
   }
 }
 
-qs('#settings').addEventListener('click', () => globals.paintPage('settings') );
+qs('#openSettings').addEventListener('click', globals.openSettings);
+qs('#closeSettings').addEventListener('click', async () => {
+  qs('#settings').style.display = 'none';
+  if (!pages[globals.pageName].onSettingsUpdate) return;
+  await pages[globals.pageName].onSettingsUpdate(globals);
+});
+
+pages.settings.paint(globals, qs('#settings > .content'));
 
 globals.paintPage(localStorage.onboarded == 'true' ? 'main' : 'onboarding');
