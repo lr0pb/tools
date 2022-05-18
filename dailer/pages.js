@@ -107,7 +107,7 @@ async function onTaskManageClick({ e, globals, task, tasksContainer }) {
   if (e.target.dataset.action == 'edit') {
     globals.pageInfo = {
       taskAction: 'edit',
-      taskId: task.dataset.id;
+      taskId: task.dataset.id
     };
     globals.paintPage('taskCreator');
   } else if (e.target.dataset.action == 'delete') {
