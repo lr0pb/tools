@@ -10,44 +10,51 @@ html {
   html { font-size: 0.65vmin; }
 }
 
-body {
+body, #settings {
   width: 100vw; height: 100vh;
   overflow: hidden;
   background-color: black;
   color: white;
   display: grid;
+  --footerHeight: 18rem;
   grid-template-areas:
     "... header ..."
     "... content ..."
     "... footer ..."
   ;
-  grid-template-rows: 16rem 1fr 18rem;
+  grid-template-rows: 16rem 1fr var(--footerHeight);
   grid-template-columns: minmax(3rem, 1fr) min(calc(100vw - 6rem), 450px) minmax(3rem, 1fr);
 }
+#settings {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  --footerHeight: 0;
+}
 
-#header { grid-area: header; }
-#content { grid-area: content; }
+.header { grid-area: header; }
+.content { grid-area: content; }
 #footer { grid-area: footer; }
 
-#header, #content, #footer {
+.header, .content, #footer {
   display: flex;
 }
-#header > h1 {
+.header > h1, h4 {
   margin-right: auto;
 }
 #pageBtn {
   display: none;
 }
-#content {
+.content {
   flex-direction: column;
   align-items: start;
   overflow: hidden auto;
   scrollbar-width: none;
 }
-#content::-webkit-scrollbar {
+.content::-webkit-scrollbar {
   width: 0; height: 0;
 }
-#header, #footer, #content.center {
+.header, #footer, .content.center {
   align-items: center;
 }
 #footer, .center {
@@ -57,12 +64,12 @@ body {
   text-align: center;
 }
 
-body, #content, h1, h2, h3, p {
+body, .content, h1, h2, h3, h4, p {
   margin: 0;
   font-family: sans-serif;
 }
 
-h1 {
+h1, h4 {
   font-size: 6em;
 }
 h2 {
@@ -109,7 +116,7 @@ button.success {
 }
 
 #message {
-  display: none; position: fixed;
+  display: none; position: fixed; z-index: 999;
   box-sizing: border-box;
   width: var(--fullWidth); min-height: 5rem;
   padding: 2rem; margin: 0;
