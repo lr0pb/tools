@@ -21,8 +21,11 @@ const onboarding = {
   centerContent: true,
   footer: '<button id="create">&#128203; Create now</button>',
   script: (globals) => {
+    qs('#openSettings').style.display = 'none';
     qs('#create').addEventListener('click', () => {
       localStorage.onboarded = 'true';
+      localStorage.periodsList = JSON.stringify(['01', '03', '07', '09']);
+      qs('#openSettings').style.display = 'block';
       globals.paintPage('taskCreator');
     });
   }
@@ -102,8 +105,11 @@ function renderTask({type, globals, td, tasksContainer}) {
 
 async function onTaskManageClick({ e, globals, task, tasksContainer }) {
   if (e.target.dataset.action == 'edit') {
+    globals.pageInfo = {
+      taskAction: 'edit',
+      taskId: task.dataset.id;
+    };
     globals.paintPage('taskCreator');
-    
   } else if (e.target.dataset.action == 'delete') {
     //await globals.db.deleteItem('tasks', this.dataset.id);
     const td = await globals.db.getItem('tasks', task.dataset.id);
@@ -121,7 +127,7 @@ async function onTaskManageClick({ e, globals, task, tasksContainer }) {
 }
 
 const taskCreator = {
-  header: '&#128221; Add task',
+  header: '&#128221; <span id="taskAction">Add</span> task',
   page: `
     <h3>Enter task you will control</h3>
     <input type="text" id="name" placeHolder="Task name"></input>
@@ -134,83 +140,114 @@ const taskCreator = {
     <h3 id="description"></h3>
   `,
   footer: `
-    <button id="toPlan" class="secondary">&#11013; Back</button>
+    <button id="toPlan" class="secondary">&#9194; Back</button>
     <button id="saveTask">&#128190; Save task</button>
   `,
-  script: onSaveTask
+  script: onSaveTask,
+  onSettingsUpdate: async (globals) => {
+    const periodsList = await getPeriods(globals);
+    createOptionsList(qs('#period'), periodsList);
+  }
 };
 
-const periods = [{
-  title: 'Today only',
-  days: [1],
-  get startDate() { return getToday(); },
-  periodDay: -1,
-  special: 'oneTime',
-  selected: true
-}, {
-  title: 'Tomorrow',
-  days: [1],
-  get startDate() { return getToday() + oneDay; },
-  periodDay: -1,
-  special: 'oneTime'
-}, {
-  title: 'Everyday',
-  days: [1],
-  get startDate() { return getToday(); },
-  selectTitle: 'Select day to start',
-  periodDay: -1,
-  get maxDate() { return getToday() + oneDay * 6; }
-}, {
-  title: 'Every second day',
-  days: [1, 0],
-  selectTitle: 'Select day to start',
-  periodDay: -1,
-  get maxDate() { return getToday() + oneDay * 13; }
-}, {
-  title: 'Two over two',
-  days: [1, 1, 0, 0],
-  selectTitle: 'Select day to start',
-  periodDay: -1,
-  get maxDate() { return getToday() + oneDay * 13; }
-}, {
-  title: 'On weekdays',
-  days: [0, 1, 1, 1, 1, 1, 0],
-  get startDate() { return getWeekStart(); },
-  get periodDay() { return new Date().getDay() - 1; }
-}, {
-  title: 'Only weekends',
-  days: [1, 0, 0, 0, 0, 0, 1],
-  get startDate() { return getWeekStart(); },
-  get periodDay() { return new Date().getDay() - 1; }
-}, {
-  title: 'One time only',
-  days: [1],
-  selectTitle: 'Select the day',
-  periodDay: -1,
-  special: 'oneTime'
-}, {
-  title: 'One time until complete',
-  days: [1],
-  get startDate() { return getToday(); },
-  description: 'Task will be active unlimited time until you complete them',
-  periodDay: -1,
-  special: 'untilComplete'
-}, {
-  title: 'Other period'
-}];
+const periods = {
+  '01': {
+    title: 'Today only',
+    days: [1],
+    get startDate() { return getToday(); },
+    periodDay: -1,
+    special: 'oneTime',
+    selected: true
+  },
+  '02': {
+    title: 'Tomorrow',
+    days: [1],
+    get startDate() { return getToday() + oneDay; },
+    periodDay: -1,
+    special: 'oneTime'
+  },
+  '03': {
+    title: 'Everyday',
+    days: [1],
+    get startDate() { return getToday(); },
+    selectTitle: 'Select day to start',
+    periodDay: -1,
+    get maxDate() { return getToday() + oneDay * 6; }
+  },
+  '04': {
+    title: 'Every second day',
+    days: [1, 0],
+    selectTitle: 'Select day to start',
+    periodDay: -1,
+    get maxDate() { return getToday() + oneDay * 13; }
+  },
+  '05': {
+    title: 'Two over two',
+    days: [1, 1, 0, 0],
+    selectTitle: 'Select day to start',
+    periodDay: -1,
+    get maxDate() { return getToday() + oneDay * 13; }
+  },
+  '06': {
+    title: 'On weekdays',
+    days: [0, 1, 1, 1, 1, 1, 0],
+    get startDate() { return getWeekStart(); },
+    get periodDay() { return new Date().getDay() - 1; }
+  },
+  '07': {
+    title: 'Only weekends',
+    days: [1, 0, 0, 0, 0, 0, 1],
+    get startDate() { return getWeekStart(); },
+    get periodDay() { return new Date().getDay() - 1; }
+  },
+  '08': {
+    title: 'One time only',
+    days: [1],
+    selectTitle: 'Select the day',
+    periodDay: -1,
+    special: 'oneTime'
+  },
+  '09': {
+    title: 'One time until complete',
+    days: [1],
+    get startDate() { return getToday(); },
+    description: 'Task will be active unlimited time until you complete them',
+    periodDay: -1,
+    special: 'untilComplete'
+  }
+};
 
 function getWeekStart() {  // date in milliseconds
   const day = new Date(getToday());
   return day.setDate(day.getDate() - day.getDay());
 }
 
-function onSaveTask(globals) {
+async function getPeriods(globals) {
+  const list = JSON.parse(localStorage.periodsList);
+  const periodsList = [];
+  for (let per of list) {
+    const period = Number(per) <= 50
+    ? periods[per]
+    : await globals.db.getItem('periods', per);
+    periodsList.push(period);
+  }
+  periodsList.push({
+    id: '00',
+    title: 'Other period'
+  });
+  return periodsList;
+}
+
+async function onSaveTask(globals) {
+  if (globals.pageInfo && globals.pageInfo.taskAction == 'edit') {
+    qs('#taskAction').textContent = 'Edit';
+  }
   qs('#toPlan').addEventListener(
     'click', () => globals.paintPage('planCreator')
   );
   createOptionsList(qs('#priority'), priorities);
-  createOptionsList(qs('#period'), periods);
-  qs('#period').addEventListener('change', onPeriodChange);
+  await taskCreator.onSettingsUpdate(globals);
+  qs('#period').addEventListener('change', (e) => onPeriodChange(e, globals));
   qs('#date').min = convertDate(Date.now());
   qs('#saveTask').addEventListener('click', () => {
     const task = createTask();
@@ -227,17 +264,21 @@ function onSaveTask(globals) {
 }
 
 function createOptionsList(elem, options) {
+  elem.innerHTML = '';
   for (let i = 0; i < options.length; i++) {
     const opt = document.createElement('option');
-    opt.value = i;
+    opt.value = options[i].id || i;
     opt.textContent = options[i].title;
     if (options[i].selected) opt.selected = 'selected';
     elem.append(opt);
   }
 }
 
-function onPeriodChange(e) {
+function onPeriodChange(e, globals) {
   const value = Number(e.target.value);
+  if (value == '00') {
+    return globals.openSettings();
+  }
   const date = qs('#date');
   date.value = '';
   date.removeAttribute('max');
@@ -256,6 +297,7 @@ function onPeriodChange(e) {
     }
   } else if (periods[value].description) {
     qs('#description').innerHTML = periods[value].description;
+    qs('#description').style.display = 'block';
   }
 }
 
@@ -395,9 +437,11 @@ function updateTask(task) {
   if (task.special == 'oneTime') {
     if (task.history.length) {
       task.periodDay = -1;
+      task.periodTitle = `Only ${convertDate(task.periodStart)}`;
       task.disabled = true;
     } else if (getToday() == task.periodStart) {
       task.periodDay = 0;
+      task.periodTitle = 'Only today';
     }
     return;
   } else if (task.special == 'untilComplete') {
@@ -428,11 +472,9 @@ function isEmpty(day) {
 }
 
 const settings = {
-  header: `&#128481; Settings`,
-  centerContent: true,
-  page: `<h2>Soon</h2>`,
-  footer: ``,
-  script: () => {}
+  paint: (globals, page) => {
+    page.innerHTML = '<h2>Settings will be available soon</h2>';
+  }
 };
 
 export const pages = {
