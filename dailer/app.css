@@ -89,6 +89,10 @@ p {
   font-size: 9em;
 }
 
+button, .task, #message, input, select {
+  box-sizing: border-box;
+}
+
 button, .task, #message {
   border-radius: 2.5rem;
   border: 0.9rem solid rgb(51 51 51 / 50%);
@@ -118,7 +122,6 @@ button.success {
 
 #message {
   display: none; position: fixed; z-index: 999;
-  box-sizing: border-box;
   width: var(--fullWidth); min-height: 5rem;
   padding: 2rem; margin: 0;
   left: 50%; bottom: 4rem;
@@ -150,7 +153,6 @@ input, select {
   padding: 1.5rem 2rem;
   border: 0.8rem solid var(--darkShadow);
   margin: 1rem 0;
-  box-sizing: border-box;
   border-radius: 1.5rem;
   outline: none;
 }
