@@ -460,7 +460,7 @@ const settings = {
   }
 };
 
-function updatePeriodList({e, globals, periodsCount, elem }) {
+function updatePeriodsList({e, globals, periodsCount, elem }) {
   const list = JSON.parse(localStorage.periodsList);
   const id = elem.dataset.id;
   if (list.includes(id)) {
