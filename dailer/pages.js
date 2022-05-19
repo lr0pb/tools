@@ -18,7 +18,6 @@ const onboarding = {
     qs('#openSettings').style.display = 'none';
     qs('#create').addEventListener('click', () => {
       localStorage.onboarded = 'true';
-      localStorage.periodsList = JSON.stringify(['01', '03', '07', '09']);
       qs('#openSettings').style.display = 'block';
       globals.paintPage('taskCreator');
     });
@@ -168,9 +167,10 @@ async function onTaskCreator({globals}) {
   await taskCreator.onSettingsUpdate(globals);
   qs('#period').addEventListener('change', (e) => onPeriodChange(e, globals));
   qs('#date').min = convertDate(Date.now());
-  let td = null;
+  let td;
   if (globals.pageInfo && globals.pageInfo.taskAction == 'edit') {
     td = await enterEditTaskMode(globals);
+    globals.pageInfo = null;
   }
   qs('#saveTask').addEventListener('click', () => {
     const task = createTask(td);
@@ -195,20 +195,21 @@ async function enterEditTaskMode(globals) {
   qs('#period').value = td.ogTitle || td.periodTitle;
   qs('#period').disabled = 'disabled';
   qs('#date').value = convertDate(td.periodStart);
-  if (td.startDate > getToday() && periods[td.periodId].selectTitle) {
+  if (!td.periodId) setPeriodId(td);
+  if (td.periodStart > getToday() && periods[td.periodId].selectTitle) {
     qs('#dateTitle').innerHTML = periods[td.periodId].selectTitle;
     qs('#dateTitle').style.display = 'block';
     qs('#date').max = periods[td.periodId].maxDate;
     qs('#date').style.display = 'block';
   }
-  if (!td.periodId) setPeriodId(td);
   return td;
 }
 
 function setPeriodId(task) {
   for (let per in periods) {
-    if (per.title == task.periodTitle || per.title == task.ogTitle) {
-      task.periodId = per.id;
+    const title = periods[per].title;
+    if (title == task.periodTitle || title == task.ogTitle) {
+      task.periodId = per;
       delete task.ogTitle;
       break;
     }
@@ -273,8 +274,8 @@ function createTask(td = {}) {
     disabled: false,
     deleted: false
   };
-  if (periods[value].special) {
-    task.special = periods[value].special;
+  if (td.special || periods[value].special) {
+    task.special = td.special || periods[value].special;
   }
   setPeriodTitle(task);
   console.log(task);
@@ -411,7 +412,7 @@ function updateTask(task) {
     }
     return;
   }
-  task.periodTitle = task.ogTitle || periods[task.periodId].title;
+  task.periodTitle = task.ogTitle || (task.periodId && periods[task.periodId].title) || task.periodTitle;
   task.periodDay++;
   if (task.periodDay == task.period.length) {
     task.periodDay = 0;
