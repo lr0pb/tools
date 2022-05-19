@@ -62,6 +62,10 @@ qs('#closeSettings').addEventListener('click', async () => {
   await pages[globals.pageName].onSettingsUpdate(globals);
 });
 
+if (!localStorage.periodsList) {
+  localStorage.periodsList = JSON.stringify(['01', '03', '07', '09']);
+}
+
 pages.settings.paint({globals, page: qs('#settings > .content')});
 
 globals.paintPage(localStorage.onboarded == 'true' ? 'main' : 'onboarding');
