@@ -84,6 +84,7 @@ function renderToggler({name, id, emoji, func, args, page}) {
     }
   })
   page.append(elem);
+  return elem;
 }
 
 function renderTask({type, globals, td, page}) {
@@ -152,6 +153,7 @@ const taskCreator = {
   `,
   script: onTaskCreator,
   onSettingsUpdate: async (globals) => {
+    if (globals.pageInfo && globals.pageInfo.taskAction == 'edit') return;
     const periodsList = await getPeriods(globals);
     createOptionsList(qs('#period'), periodsList);
   }
@@ -175,9 +177,10 @@ async function getPeriods(globals) {
 }
 
 async function onTaskCreator({globals}) {
-  qs('#toPlan').addEventListener(
-    'click', () => globals.paintPage('planCreator')
-  );
+  qs('#toPlan').addEventListener('click', () => {
+    globals.pageInfo = null;
+    globals.paintPage('planCreator');
+  });
   createOptionsList(qs('#priority'), priorities);
   await taskCreator.onSettingsUpdate(globals);
   qs('#period').addEventListener('change', (e) => onPeriodChange(e, globals));
@@ -185,7 +188,6 @@ async function onTaskCreator({globals}) {
   let td;
   if (globals.pageInfo && globals.pageInfo.taskAction == 'edit') {
     td = await enterEditTaskMode(globals);
-    globals.pageInfo = null;
   }
   qs('#saveTask').addEventListener('click', () => {
     const task = createTask(td);
@@ -197,6 +199,7 @@ async function onTaskCreator({globals}) {
     globals.message({
       state: 'success', text: 'Task added'
     });
+    globals.pageInfo = null;
     globals.paintPage('planCreator');
   });
 }
@@ -208,10 +211,13 @@ async function enterEditTaskMode(globals) {
   qs('#name').value = td.name;
   if (td.nameEdited) qs('#name').disabled = 'disabled';
   qs('#priority').value = td.priority;
-  qs('#period').value = td.ogTitle || td.periodTitle;
+  if (!td.periodId) setPeriodId(td);
+  const opt = document.createElement('option');
+  opt.selected = 'selected';
+  opt.innerHTML = td.ogTitle || periods[td.periodId].title || td.periodTitle;
+  qs('#period').append(opt);
   qs('#period').disabled = 'disabled';
   qs('#date').value = convertDate(td.periodStart);
-  if (!td.periodId) setPeriodId(td);
   if (td.periodStart > getToday() && periods[td.periodId].selectTitle) {
     qs('#dateTitle').innerHTML = periods[td.periodId].selectTitle;
     qs('#dateTitle').style.display = 'block';
@@ -244,7 +250,7 @@ function createOptionsList(elem, options) {
 }
 
 function onPeriodChange(e, globals) {
-  const value = Number(e.target.value);
+  const value = e.target.value;
   if (value == '00') {
     return globals.openSettings();
   }
@@ -271,7 +277,7 @@ function onPeriodChange(e, globals) {
 }
 
 function createTask(td = {}) {
-  const value = Number(qs('#period').value);
+  const value = qs('#period').value;
   const priority = Number(qs('#priority').value);
   const task = {
     id: td.id || Date.now().toString(),
@@ -282,7 +288,7 @@ function createTask(td = {}) {
     periodTitle: td.periodTitle || periods[value].title,
     periodStart: td.periodStart && td.periodStart <= getToday()
     ? td.periodStart
-    : periods[td.periodId].selectTitle || periods[value].selectTitle
+    : (td.periodId && periods[td.periodId].selectTitle) || periods[value].selectTitle
     ? new Date(qs('#date').value).getTime()
     : td.periodStart || periods[value].startDate,
     periodDay: td.periodDay || periods[value].periodDay,
@@ -445,17 +451,18 @@ const settings = {
   paint: ({globals, page}) => {
     const periodsCount = 5;
     page.innerHTML = `
-      <h3>You can set which periods will be shown in Period choise drop down list of task</h3>
-      <h3>Choose up to ${periodsCount} periods</h3>
+      <h2>Periods</h2>
+      <h3>Set up to ${periodsCount} periods that will be shown in Period choise drop down list of task</h3>
     `;
     for (let per in periods) {
       const period = periods[per];
-      renderToggler({
+      const elem = renderToggler({
         name: period.title, id: period.id,
         emoji: getPeriodUsed(per),
         func: updatePeriodsList,
         args: { globals, periodsCount }, page
       });
+      elem.classList.add('first');
     }
   }
 };
@@ -464,6 +471,11 @@ function updatePeriodsList({e, globals, periodsCount, elem }) {
   const list = JSON.parse(localStorage.periodsList);
   const id = elem.dataset.id;
   if (list.includes(id)) {
+    if (list.length == 1) {
+      return globals.message({
+        state: 'fail', text: `You need to have at least 1 period`
+      });
+    }
     const idx = list.indexOf(id);
     list.splice(idx, 1);
   } else {
