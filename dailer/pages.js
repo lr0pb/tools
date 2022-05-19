@@ -185,10 +185,9 @@ async function onTaskCreator({globals}) {
   await taskCreator.onSettingsUpdate(globals);
   qs('#period').addEventListener('change', (e) => onPeriodChange(e, globals));
   qs('#date').min = convertDate(Date.now());
+  const isEdit = globals.pageInfo && globals.pageInfo.taskAction == 'edit';
   let td;
-  if (globals.pageInfo && globals.pageInfo.taskAction == 'edit') {
-    td = await enterEditTaskMode(globals);
-  }
+  if (isEdit) td = await enterEditTaskMode(globals);
   qs('#saveTask').addEventListener('click', () => {
     const task = createTask(td);
     if (task == 'error') return globals.message({
@@ -197,7 +196,7 @@ async function onTaskCreator({globals}) {
     localStorage.lastTasksChange = Date.now().toString();
     globals.db.setItem('tasks', task);
     globals.message({
-      state: 'success', text: 'Task added'
+      state: 'success', text: isEdit ? 'Task saved' : 'Task added'
     });
     globals.pageInfo = null;
     globals.paintPage('planCreator');
@@ -285,20 +284,20 @@ function createTask(td = {}) {
     priority,
     period: td.period || periods[value].days,
     periodId: td.periodId || td.ogTitle || periods[value].id,
-    periodTitle: td.periodTitle || periods[value].title,
+    periodTitle: td.periodId ? periods[td.periodId].title : periods[value].title,
     periodStart: td.periodStart && td.periodStart <= getToday()
     ? td.periodStart
     : (td.periodId && periods[td.periodId].selectTitle) || periods[value].selectTitle
     ? new Date(qs('#date').value).getTime()
     : td.periodStart || periods[value].startDate,
-    periodDay: td.periodDay || periods[value].periodDay,
+    periodDay: td.periodId ? td.periodDay : periods[value].periodDay,
     history: td.history || [],
+    special: td.periodId ? td.special : periods[value].special,
+    nameEdited: td.periodId ? td.nameEdited : false,
     disabled: false,
     deleted: false
   };
-  if (td.special || periods[value].special) {
-    task.special = td.special || periods[value].special;
-  }
+  if (!task.special) delete task.special;
   if (td.name && task.name != td.name) task.nameEdited = true;
   setPeriodTitle(task);
   console.log(task);
@@ -454,6 +453,7 @@ const settings = {
       <h2>Periods</h2>
       <h3>Set up to ${periodsCount} periods that will be shown in Period choise drop down list of task</h3>
     `;
+    let first = true;
     for (let per in periods) {
       const period = periods[per];
       const elem = renderToggler({
@@ -462,7 +462,10 @@ const settings = {
         func: updatePeriodsList,
         args: { globals, periodsCount }, page
       });
-      elem.classList.add('first');
+      if (first) {
+        elem.classList.add('first');
+        first = false;
+      }
     }
   }
 };
