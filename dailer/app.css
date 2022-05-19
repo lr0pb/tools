@@ -64,6 +64,9 @@ body, #settings {
 .center {
   text-align: center;
 }
+.center h2 {
+  margin: 1rem 6rem;
+}
 
 body, .content, h1, h2, h3, h4, p {
   margin: 0;
@@ -75,7 +78,7 @@ h1, h4 {
 }
 h2 {
   font-size: 4.9em;
-  margin: 1rem 6rem;
+  margin: 1rem;
 }
 h3, #message {
   font-size: 3.8em;
@@ -136,6 +139,9 @@ button.success {
   display: flex;
   flex-direction: row;
   margin: 0 0 2.5rem;
+}
+.task.first {
+  margin-top: 2.5rem;
 }
 .task > div {
   margin: 1rem auto 2rem 2rem;
