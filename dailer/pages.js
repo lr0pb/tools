@@ -69,28 +69,43 @@ const priorities = [{
   title: 'Extra important'
 }];
 
+function renderToggler({name, id, emoji, func, args, page}) {
+  const elem = document.createElement('div');
+  elem.className = 'task';
+  elem.dataset.id = id;
+  elem.innerHTML = `
+    <div><h2>${name}</h2></div>
+    <button data-action="complete" class="emojiBtn">${emoji}</button>
+  `;
+  elem.addEventListener('click', async (e) => {
+    args.e = e; args.elem = elem;
+    if (e.target.dataset.action == 'complete') {
+      await func(args);
+    }
+  })
+  page.append(elem);
+}
+
 function renderTask({type, globals, td, page}) {
+  if (type == 'day') return renderToggler({
+    name: td.name, id: td.id,
+    emoji: getTaskComplete(td),
+    func: onTaskCompleteClick,
+    args: { globals }, page
+  });
   const task = document.createElement('div');
-  const getTaskInner = () => {
-    return type == 'edit' ? `
-      <h3>${td.name}</h3>
-      <p>${td.periodTitle} | ${priorities[td.priority].title}</p>
-    ` : `<h2>${td.name}</h2>`;
-  };
-  const getTaskButtons = () => {
-    return type == 'edit' ? `
-      ${td.disabled ? '' : '<button data-action="edit" class="emojiBtn">&#128394;</button>'}
-      <button data-action="delete" class="emojiBtn">&#128465;</button>
-    ` : `
-      <button data-action="complete" class="emojiBtn">${getTaskComplete(td)}</button>
-     `;
-  };
   task.className = 'task';
   task.dataset.id = td.id;
-  task.innerHTML = `<div>${getTaskInner()}</div> ${getTaskButtons()}`;
-  task.addEventListener('click', (e) => {
-    const args = {e, globals, task, page};
-    type == 'edit' ? onTaskManageClick(args) : onTaskCompleteClick(args);
+  task.innerHTML = `
+    <div>
+      <h3>${td.name}</h3>
+      <p>${td.periodTitle} | ${priorities[td.priority].title}</p>
+    </div>
+    ${td.disabled ? '' : '<button data-action="edit" class="emojiBtn">&#128394;</button>'}
+    <button data-action="delete" class="emojiBtn">&#128465;</button>
+   `;
+  task.addEventListener('click', async (e) => {
+    await onTaskManageClick({e, globals, task, page});
   })
   page.append(task);
 }
@@ -121,7 +136,7 @@ async function onTaskManageClick({ e, globals, task, page }) {
 const taskCreator = {
   header: '&#128221; <span id="taskAction">Add</span> task',
   page: `
-    <h3>Enter task you will control</h3>
+    <h3 id="nameTitle">Enter task you will control</h3>
     <input type="text" id="name" placeHolder="Task name"></input>
     <h3>How important this task?</h3>
     <select id="priority"></select>
@@ -189,8 +204,9 @@ async function onTaskCreator({globals}) {
 async function enterEditTaskMode(globals) {
   const td = await globals.db.getItem('tasks', globals.pageInfo.taskId);
   qs('#taskAction').innerHTML = 'Edit';
+  qs('#nameTitle').innerHTML = 'You can change task name only once';
   qs('#name').value = td.name;
-  qs('#name').disabled = 'disabled';
+  if (td.nameEdited) qs('#name').disabled = 'disabled';
   qs('#priority').value = td.priority;
   qs('#period').value = td.ogTitle || td.periodTitle;
   qs('#period').disabled = 'disabled';
@@ -199,7 +215,7 @@ async function enterEditTaskMode(globals) {
   if (td.periodStart > getToday() && periods[td.periodId].selectTitle) {
     qs('#dateTitle').innerHTML = periods[td.periodId].selectTitle;
     qs('#dateTitle').style.display = 'block';
-    qs('#date').max = periods[td.periodId].maxDate;
+    qs('#date').max = convertDate(periods[td.periodId].maxDate);
     qs('#date').style.display = 'block';
   }
   return td;
@@ -277,6 +293,7 @@ function createTask(td = {}) {
   if (td.special || periods[value].special) {
     task.special = td.special || periods[value].special;
   }
+  if (td.name && task.name != td.name) task.nameEdited = true;
   setPeriodTitle(task);
   console.log(task);
   if (
@@ -305,7 +322,7 @@ const main = {
   page: ``,
   footer: `
     <!--<button id="toHistory" class="secondary">&#128198; History</button>-->
-    <button id="toPlan" class="secondary">&#128230; Edit tasks</button>
+    <button id="toPlan" class="secondary">&#128209; Edit tasks</button>
   `,
   script: mainScript
 };
@@ -328,18 +345,16 @@ async function mainScript({globals, page}) {
   }
 }
 
-async function onTaskCompleteClick({ e, globals, task, page }) {
-  if (e.target.dataset.action == 'complete') {
-    const td = await globals.db.getItem('tasks', task.dataset.id);
-    const day = await globals.db.getItem('days', getToday().toString());
-    const value = getLast(td.history) == 1 ? 0 : 1;
-    td.history.pop();
-    td.history.push(value);
-    day.tasks[td.priority][td.id] = value;
-    await globals.db.setItem('tasks', td);
-    await globals.db.setItem('days', day);
-    e.target.innerHTML = getTaskComplete(td);
-  } else return;
+async function onTaskCompleteClick({ e, globals, elem: task }) {
+  const td = await globals.db.getItem('tasks', task.dataset.id);
+  const day = await globals.db.getItem('days', getToday().toString());
+  const value = getLast(td.history) == 1 ? 0 : 1;
+  td.history.pop();
+  td.history.push(value);
+  day.tasks[td.priority][td.id] = value;
+  await globals.db.setItem('tasks', td);
+  await globals.db.setItem('days', day);
+  e.target.innerHTML = getTaskComplete(td);
 }
 
 function getTaskComplete(td) {
@@ -395,8 +410,8 @@ function updateTask(task) {
   if (task.special == 'oneTime') {
     if (task.history.length) {
       task.periodDay = -1;
-      task.periodTitle = `Only ${convertDate(task.periodStart)}`;
       task.disabled = true;
+      setPeriodTitle(task);
     } else if (getToday() == task.periodStart) {
       task.periodDay = 0;
       task.periodTitle = 'Only today';
@@ -428,9 +443,44 @@ function isEmpty(day) {
 
 const settings = {
   paint: ({globals, page}) => {
-    page.innerHTML = '<h2>Settings will be available soon</h2>';
+    const periodsCount = 5;
+    page.innerHTML = `
+      <h3>You can set which periods will be shown in Period choise drop down list of task</h3>
+      <h3>Choose up to ${periodsCount} periods</h3>
+    `;
+    for (let per in periods) {
+      const period = periods[per];
+      renderToggler({
+        name: period.title, id: period.id,
+        emoji: getPeriodUsed(per),
+        func: updatePeriodsList,
+        args: { globals, periodsCount }, page
+      });
+    }
   }
 };
+
+function updatePeriodList({e, globals, periodsCount, elem }) {
+  const list = JSON.parse(localStorage.periodsList);
+  const id = elem.dataset.id;
+  if (list.includes(id)) {
+    const idx = list.indexOf(id);
+    list.splice(idx, 1);
+  } else {
+    list.length == periodsCount
+    ? globals.message({
+        state: 'fail', text: `You already choose ${periodsCount} periods`
+      })
+    : list.push(id);
+  }
+  localStorage.periodsList = JSON.stringify(list);
+  e.target.innerHTML = getPeriodUsed(id);
+}
+
+function getPeriodUsed(id) {
+  return JSON.parse(localStorage.periodsList).includes(id)
+  ? '&#9989;' : '&#11036;';
+}
 
 export const pages = {
   onboarding, main, settings, planCreator, taskCreator
