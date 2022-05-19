@@ -287,7 +287,7 @@ function createTask(td = {}) {
     periodTitle: td.periodId ? periods[td.periodId].title : periods[value].title,
     periodStart: td.periodStart && td.periodStart <= getToday()
     ? td.periodStart
-    : (td.periodId && periods[td.periodId].selectTitle) || periods[value].selectTitle
+    : (td.periodId ? periods[td.periodId].selectTitle : periods[value].selectTitle)
     ? new Date(qs('#date').value).getTime()
     : td.periodStart || periods[value].startDate,
     periodDay: td.periodId ? td.periodDay : periods[value].periodDay,
