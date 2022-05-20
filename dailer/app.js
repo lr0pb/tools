@@ -68,7 +68,11 @@ window.addEventListener('pagehide', () => {
   }
 });
 
-window.addEventListener('pageshow', createDb);
+window.addEventListener('pageshow', (e) => {
+  createDb();
+  if (e.persisted) return;
+  globals.paintPage(localStorage.onboarded == 'true' ? 'main' : 'onboarding');
+});
 
 qs('#openSettings').addEventListener('click', globals.openSettings);
 qs('#closeSettings').addEventListener('click', async () => {
@@ -82,5 +86,3 @@ if (!localStorage.periodsList) {
 }
 
 pages.settings.paint({globals, page: qs('#settings > .content')});
-
-globals.paintPage(localStorage.onboarded == 'true' ? 'main' : 'onboarding');
