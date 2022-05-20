@@ -393,7 +393,7 @@ async function createDay(globals, today = getToday()) {
           day.tasks[task.priority][task.id] = 0;
         }
         await globals.db.setItem('tasks', task);
-      } else {
+      } else if (task.period[task.periodDay]) {
         day.tasks[task.priority][task.id] = getLast(task.history);
       }
     }
