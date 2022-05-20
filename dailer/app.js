@@ -1,18 +1,12 @@
 import { qs, pages } from './pages.js'
 import IDB from './IDB.js'
 
-const db = new IDB('dailer', 2, [
-  {
-    name: 'tasks', index: {keyPath: 'id'}
-  }, {
-    name: 'days', index: {keyPath: 'date'}
-  }, {
-    name: 'periods', index: {keyPath: 'id'}
-  }
-]);
+if ('serviceWorker' in navigator && caches) {
+  navigator.serviceWorker.register('./sw.js')
+};
 
 const globals = {
-  db,
+  db: null,
   pageName: null,
   pageInfo: null,
   paintPage: async (name) => {
@@ -54,6 +48,27 @@ const globals = {
     qs('#settings').style.display = 'grid';
   }
 }
+
+function createDb() {
+  if (!globals.db) globals.db = new IDB('dailer', 2, [
+    {
+      name: 'tasks', index: {keyPath: 'id'}
+    }, {
+      name: 'days', index: {keyPath: 'date'}
+    }, {
+      name: 'periods', index: {keyPath: 'id'}
+    }
+  ]);
+}
+
+window.addEventListener('pagehide', () => {
+  if (globals.db) {
+    globals.db.db.close();
+    globals.db = null;
+  }
+});
+
+window.addEventListener('pageshow', createDb);
 
 qs('#openSettings').addEventListener('click', globals.openSettings);
 qs('#closeSettings').addEventListener('click', async () => {
