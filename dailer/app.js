@@ -85,7 +85,7 @@ function renderFirstPage() {
       const splitted = elem.split('=');
       params[splitted[0]] = splitted[1];
     });
-  const page = (params.page && pages[params.page]) || 'main';
+  const page = (params.page && pages[params.page]) ?params.page : 'main';
   globals.paintPage(localStorage.onboarded == 'true' ? page : 'onboarding');
 }
 
