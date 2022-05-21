@@ -154,6 +154,12 @@ button.success {
   margin-right: 2rem;
 }
 
+#infoBackground {
+  width: 100%; height: 35rem;
+  background: linear-gradient(135deg, #25347C, #030007);
+  margin-bottom: 2rem;
+}
+
 input, select {
   width: var(--fullWidth);
   padding: 1.5rem 2rem;
