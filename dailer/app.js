@@ -23,6 +23,7 @@ const globals = {
     }
     content.innerHTML = page.page;
     qs('#footer').innerHTML = page.footer;
+    history.pushState({}, '', `?page=${name}`);
     await page.script({globals, page: content});
   },
   message: ({state, text}) => {
@@ -70,9 +71,23 @@ window.addEventListener('pagehide', () => {
 
 window.addEventListener('pageshow', (e) => {
   createDb();
-  if (e.persisted) return;
-  globals.paintPage(localStorage.onboarded == 'true' ? 'main' : 'onboarding');
+  if (!e.persisted) renderFirstPage();
 });
+
+window.addEventListener('popstate', renderFirstPage)
+
+function renderFirstPage() {
+  const params = {};
+  location.search
+    .replace('?', '')
+    .split('&')
+    .forEach((elem) => {
+      const splitted = elem.split('=');
+      params[splitted[0]] = splitted[1];
+    });
+  const page = (params.page && pages[params.page]) || 'main';
+  globals.paintPage(localStorage.onboarded == 'true' ? page : 'onboarding');
+}
 
 qs('#openSettings').addEventListener('click', globals.openSettings);
 qs('#closeSettings').addEventListener('click', async () => {
