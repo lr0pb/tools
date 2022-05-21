@@ -25,27 +25,49 @@ const onboarding = {
 };
 
 const planCreator = {
-  header: '&#128209; Manage your tasks',
+  header: '&#128209; Your tasks',
   page: ``,
   footer: `
+    <button id="back" class="secondary">&#9194; Back</button>
     <button id="addTask">&#128221; Add task</button>
-    <button id="toMain" class="success">&#128190; Save</button>
   `,
   script: onPlanCreator
 };
 
 async function onPlanCreator({globals, page}) {
+  globals.pageButton({
+    emoji: '&#128218;',
+    onClick: () => globals.paintPage('tasksArchive')
+  });
+  qs('#back').addEventListener('click', history.back);
   qs('#addTask').addEventListener(
     'click', () => globals.paintPage('taskCreator')
   );
-  qs('#toMain').addEventListener(
-    'click', () => globals.paintPage('main')
-  );
+  await renderTasksList({
+    globals, page, isBadTask: (td) => td.deleted && td.disabled
+  });
+}
+
+const tasksArchive = {
+  header: '&#128218; Archived tasks',
+  page: ``,
+  footer: `<button id="back" class="secondary">&#9194; Back</button>`,
+  script: onTasksArchive
+};
+
+async function onTasksArchive({globals, page}) {
+  qs('#back').addEventListener('click', history.back);
+  await renderTasksList({
+    globals, page, isBadTask: (td) => td.deleted && !td.disabled
+  });
+}
+
+async function renderTasksList({globals, page, isBadTask}) {
   const tasks = await globals.db.getAll('tasks');
   if (!tasks.length) {
     showNoTasks(page);
   } else for (let td of tasks) { // td stands for task's data
-    if (td.deleted) continue;
+    if (isBadTask(td)) continue;
     renderTask({type: 'edit', globals, td, page});
   }
   if (!page.children.length) {
@@ -56,7 +78,7 @@ async function onPlanCreator({globals, page}) {
 function showNoTasks(page) {
   page.classList.add('center');
   page.innerHTML = `
-    <h2 class="emoji">&#128495;</h2><h2>There is nothing yet!</h2>
+    <h2 class="emoji">&#128173;</h2><h2>There is nothing yet!</h2>
   `;
 }
 
@@ -102,8 +124,10 @@ function renderTask({type, globals, td, page}) {
       <h3>${td.name}</h3>
       <p>${td.periodTitle} | ${priorities[td.priority].title}</p>
     </div>
-    ${td.disabled ? '' : '<button data-action="edit" class="emojiBtn">&#128394;</button>'}
-    <button data-action="delete" class="emojiBtn">&#128465;</button>
+    ${td.disabled ? '' : `
+      <button data-action="edit" class="emojiBtn">&#128394;</button>
+      <button data-action="delete" class="emojiBtn">&#128465;</button>
+    `}
    `;
   task.addEventListener('click', async (e) => {
     await onTaskManageClick({e, globals, task, page});
@@ -131,7 +155,50 @@ async function onTaskManageClick({ e, globals, task, page }) {
     if (!page.children.length) {
       showNoTasks(page);
     }
-  } else return;
+  } else {
+    globals.pageInfo = {
+      taskId: task.dataset.id
+    };
+    globals.paintPage('taskInfo');
+  };
+}
+
+
+const taskInfo = {
+  header: '&#128220; Task info',
+  page: ``,
+  footer: `
+    <button id="back" class="secondary">&#9194; Back</button>
+    <button id="edit">&#128394; Edit task</button>
+  `,
+  script: renderTaskInfo
+};
+
+async function renderTaskInfo({globals, page}) {
+  qs('#back').addEventListener('click', () => {
+    globals.pageInfo = null;
+    history.back();
+  });
+  const task = await globals.db.getItem('tasks', globals.pageInfo.taskId);
+  if (task.disabled) {
+    qs('#edit').style.display = 'none';
+  } else {
+    qs('#edit').addEventListener('click', () => {
+      globals.pageInfo.taskAction = 'edit';
+      globals.paintPage('taskCreator');
+    });
+  }
+  page.innerHTML = `
+    <div style="width: 100%; height: 50rem;"></div>
+    <h2>${task.name}</h2>
+    <h3>${!task.special && task.periodStart < getToday()
+        ? `Repeat it ${periods[task.periodId].title} from ${task.periodStart.toLocaleDateString(navigator.language)}`
+        : task.periodTitle
+    } | ${priorities[task.priority].title}</h3>
+    ${!task.history.length ? '' : `
+      <h2>History</h2><div id="history"></div>
+    `}
+  `;
 }
 
 const taskCreator = {
@@ -148,8 +215,8 @@ const taskCreator = {
     <h3 id="description"></h3>
   `,
   footer: `
-    <button id="toPlan" class="secondary">&#9194; Back</button>
-    <button id="saveTask">&#128190; Save task</button>
+    <button id="back" class="secondary">&#9194; Back</button>
+    <button id="saveTask" class="success">&#128190; Save task</button>
   `,
   script: onTaskCreator,
   onSettingsUpdate: async (globals) => {
@@ -177,9 +244,9 @@ async function getPeriods(globals) {
 }
 
 async function onTaskCreator({globals}) {
-  qs('#toPlan').addEventListener('click', () => {
+  qs('#back').addEventListener('click', () => {
     globals.pageInfo = null;
-    globals.paintPage('planCreator');
+    history.back();
   });
   createOptionsList(qs('#priority'), priorities);
   await taskCreator.onSettingsUpdate(globals);
@@ -498,5 +565,5 @@ function getPeriodUsed(id) {
 }
 
 export const pages = {
-  onboarding, main, settings, planCreator, taskCreator
+  onboarding, main, settings, planCreator, taskCreator, tasksArchive, taskInfo
 };
