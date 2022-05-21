@@ -39,12 +39,12 @@ async function onPlanCreator({globals, page}) {
     emoji: '&#128218;',
     onClick: () => globals.paintPage('tasksArchive')
   });
-  qs('#back').addEventListener('click', history.back);
+  qs('#back').addEventListener('click', () => history.back());
   qs('#addTask').addEventListener(
     'click', () => globals.paintPage('taskCreator')
   );
   await renderTasksList({
-    globals, page, isBadTask: (td) => td.deleted && td.disabled
+    globals, page, isBadTask: (td) => td.deleted || td.disabled
   });
 }
 
@@ -56,9 +56,9 @@ const tasksArchive = {
 };
 
 async function onTasksArchive({globals, page}) {
-  qs('#back').addEventListener('click', history.back);
+  qs('#back').addEventListener('click', () => history.back());
   await renderTasksList({
-    globals, page, isBadTask: (td) => td.deleted && !td.disabled
+    globals, page, isBadTask: (td) => td.deleted || !td.disabled
   });
 }
 
@@ -189,12 +189,17 @@ async function renderTaskInfo({globals, page}) {
     });
   }
   page.innerHTML = `
-    <div style="width: 100%; height: 50rem;"></div>
+    <div id="infoBackground"></div>
     <h2>${task.name}</h2>
     <h3>${!task.special && task.periodStart < getToday()
-        ? `Repeat it ${periods[task.periodId].title} from ${task.periodStart.toLocaleDateString(navigator.language)}`
+        ? `Repeat it ${periods[task.periodId].title} from ${new Date(task.periodStart).toLocaleDateString(navigator.language)}`
         : task.periodTitle
-    } | ${priorities[task.priority].title}</h3>
+    }</h3>
+    <h3>Today ${task.period[task.periodDay]
+      ? 'is the day you'
+      : "you don't"
+    } need to do this task</h3>
+    <h3>Importance of the task: ${priorities[task.priority].title}</h3>
     ${!task.history.length ? '' : `
       <h2>History</h2><div id="history"></div>
     `}
@@ -244,10 +249,7 @@ async function getPeriods(globals) {
 }
 
 async function onTaskCreator({globals}) {
-  qs('#back').addEventListener('click', () => {
-    globals.pageInfo = null;
-    history.back();
-  });
+  qs('#back').addEventListener('click', () => history.back());
   createOptionsList(qs('#priority'), priorities);
   await taskCreator.onSettingsUpdate(globals);
   qs('#period').addEventListener('change', (e) => onPeriodChange(e, globals));
