@@ -9,7 +9,7 @@ const globals = {
   db: null,
   pageName: null,
   pageInfo: null,
-  paintPage: async (name) => {
+  paintPage: async (name, back) => {
     globals.pageName = name;
     const page = pages[name];
     const content = qs('body > .content');
@@ -23,7 +23,7 @@ const globals = {
     }
     content.innerHTML = page.page;
     qs('#footer').innerHTML = page.footer;
-    history.pushState({}, '', `?page=${name}`);
+    if (!back) history.pushState({}, '', `?page=${name}`);
     await page.script({globals, page: content});
   },
   message: ({state, text}) => {
@@ -71,12 +71,12 @@ window.addEventListener('pagehide', () => {
 
 window.addEventListener('pageshow', (e) => {
   createDb();
-  if (!e.persisted) renderFirstPage();
+  if (!e.persisted) renderFirstPage(false);
 });
 
-window.addEventListener('popstate', renderFirstPage)
+window.addEventListener('popstate', () => renderFirstPage(true));
 
-function renderFirstPage() {
+function renderFirstPage(back) {
   const params = {};
   location.search
     .replace('?', '')
@@ -86,7 +86,8 @@ function renderFirstPage() {
       params[splitted[0]] = splitted[1];
     });
   const page = (params.page && pages[params.page]) ?params.page : 'main';
-  globals.paintPage(localStorage.onboarded == 'true' ? page : 'onboarding');
+  const rndr = localStorage.onboarded == 'true' ? page : 'onboarding';
+  globals.paintPage(rndr, back);
 }
 
 qs('#openSettings').addEventListener('click', globals.openSettings);
