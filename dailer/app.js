@@ -25,7 +25,7 @@ const globals = {
     }
     content.innerHTML = page.page;
     qs('#footer').innerHTML = page.footer;
-    if (!back) history.pushState({}, '', getUrl().replace(/(?<=page=)\w+/, name));
+    if (!back) history.pushState(globals.pageInfo || {}, '', getUrl().replace(/(?<=page=)\w+/, name));
     await page.script({globals, page: content});
   },
   message: ({state, text}) => {
@@ -41,15 +41,30 @@ const globals = {
       msg.style.display = 'none';
     }, 2000);
   },
+  openPopup: ({text, action}) => {
+    qs('#popup').style.display = 'flex';
+    qs('#popup > h2').innerHTML = text;
+    qs('[data-action="confirm"]').onclick = action;
+  },
+  closePopup: () => {
+    qs('#popup').style.display = 'none';
+    qs('[data-action="confirm"]').onclick = null;
+  },
   pageButton: ({emoji, onClick}) => {
     const pageBtn = qs('#pageBtn');
     pageBtn.innerHTML = emoji;
     pageBtn.onclick = onClick;
     pageBtn.style.display = 'block';
   },
-  openSettings: () => {
+  openSettings: (back) => {
     qs('#settings').style.display = 'grid';
-    history.pushState({settings: true}, '', getUrl() + '&settings=open');
+    if (back !== true) history.pushState({settings: true}, '', getUrl() + '&settings=open');
+  },
+  closeSettings: async (back) => {
+    qs('#settings').style.display = 'none';
+    if (back !== true) history.back();
+    if (!pages[globals.pageName].onSettingsUpdate) return;
+    await pages[globals.pageName].onSettingsUpdate(globals);
   }
 }
 
@@ -88,21 +103,20 @@ function renderPage(e, back) {
       const splitted = elem.split('=');
       params[splitted[0]] = splitted[1];
     });
-  if (params.settings == 'open') return;
-  if (e.type == 'popstate' && e.state.settings) return;
+  if (params.settings == 'open') return globals.openSettings(true);
+  if (e.type == 'popstate' && e.state.settings) return globals.closeSettings(true);
   const page = (params.page && pages[params.page]) ? params.page : 'main';
   const rndr = localStorage.onboarded == 'true' ? page : 'onboarding';
-  const link = getUrl() + getUrl().includes('?') ? '' : '?' + 'page=' + rndr;
+  const link = getUrl() + (getUrl().includes('?') ? '' : '?') + 'page=' + rndr;
   if (!back) history.replaceState({}, '', link);
   globals.paintPage(rndr, back);
 }
 
 qs('#openSettings').addEventListener('click', globals.openSettings);
-qs('#closeSettings').addEventListener('click', async () => {
-  qs('#settings').style.display = 'none';
-  history.back();
-  if (!pages[globals.pageName].onSettingsUpdate) return;
-  await pages[globals.pageName].onSettingsUpdate(globals);
+qs('#closeSettings').addEventListener('click', globals.closeSettings);
+
+qs('#popup').addEventListener('click', (e) => {
+  if (e.target.dataset.action == 'cancel') globals.closePopup();
 });
 
 if (!localStorage.periodsList) {
