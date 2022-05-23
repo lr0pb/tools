@@ -92,14 +92,17 @@ p {
   font-size: 9em;
 }
 
-button, .task, #message, input, select {
+button, .task, #message, input, select, #infoBackground, .infoRect {
   box-sizing: border-box;
 }
 
-button, .task, #message {
+button, .task, #message, #infoBackground, .infoRect {
   border-radius: 2.5rem;
   border: 0.9rem solid rgb(51 51 51 / 50%);
   margin: 2.5rem 1.5rem;
+}
+.content > button {
+  margin: 2rem 0;
 }
 
 button {
@@ -121,6 +124,9 @@ button.secondary {
 }
 button.success {
   background-color: #379b00;
+}
+button.danger {
+  background-color: #cb3a3a;
 }
 
 #message {
@@ -155,9 +161,29 @@ button.success {
 }
 
 #infoBackground {
-  width: 100%; height: 35rem;
-  background: linear-gradient(135deg, #25347C, #030007);
-  margin-bottom: 2rem;
+  width: var(--fullWidth); min-height: 35rem;
+  background: linear-gradient(135deg, #5570f6, #0f0b30 50%);
+  background-attachment: fixed;
+  display: flex;
+  flex-direction: column-reverse;
+  margin: 0 0 1rem;
+}
+#infoBackground > h4 {
+  margin: 2rem 3rem;
+}
+
+.itemsHolder {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 1rem 0;
+}
+.infoRect {
+  width: calc(var(--fullWidth) / 2 - 3rem);
+  min-height: 27rem;
+  margin: 1.5rem;
+}
+.infoRect > * {
+  margin: 1.5rem 2.5rem;
 }
 
 input, select {
@@ -172,6 +198,6 @@ input:disabled, select:disabled {
   background-color: var(--darkShadow);
   color: white;
 }
-#dateTitle, #date, #description {
+#dateTitle, #date, #description, #editButtons {
   display: none;
 }
