@@ -148,16 +148,19 @@ async function onTaskManageClick({ e, globals, task, page }) {
     };
     globals.paintPage('taskCreator');
   } else if (e.target.dataset.action == 'delete') {
-    await editTask({globals, id: task.dataset.id, field: 'deleted'});
-    task.remove();
-    if (!page.children.length) showNoTasks(page);
+    await editTask({
+      globals, id: task.dataset.id, field: 'deleted', onConfirm: () => {
+        task.remove();
+        if (!page.children.length) showNoTasks(page);
+      }
+    });
   } else {
     globals.pageInfo = { taskId: task.dataset.id };
     globals.paintPage('taskInfo');
   };
 }
 
-async function editTask({globals, id, field}) {
+async function editTask({globals, id, field, onConfirm}) {
   const td = await globals.db.getItem('tasks', id);
   globals.openPopup({
     text: `Are you sure to ${field.replace(/\w$/, '')} task?`,
@@ -169,6 +172,7 @@ async function editTask({globals, id, field}) {
       globals.message({
         state: 'success', text: `Task ${field}`
       });
+      onConfirm();
     }
   });
 }
@@ -226,7 +230,7 @@ async function renderTaskInfo({globals, page}) {
 function createInfoRect(emoji, text, color) {
   const elem = document.createElement('div');
   elem.className = 'infoRect';
-  elem.style.setProperty('--color', `--${color}`);
+  elem.style.setProperty('--color', `var(--${color})`);
   elem.innerHTML = `
     <h4>${emoji}</h4>
     <h3>${text}</h3>
@@ -296,7 +300,7 @@ async function onTaskCreator({globals}) {
   let td;
   if (isEdit) {
     td = await enterEditTaskMode(globals);
-    enableEditButtons(globals, td);
+    enableEditButtons(globals, td, safeBack);
   }
   qs('#saveTask').addEventListener('click', () => {
     const task = createTask(td);
@@ -339,15 +343,17 @@ async function enterEditTaskMode(globals) {
   return td;
 }
 
-function enableEditButtons(globals, td) {
+function enableEditButtons(globals, td, safeBack) {
   qs('#editButtons').style.display = 'block';
   qs('#disable').addEventListener('click', async () => {
-    await editTask({globals, id: td.id, field: 'disabled'});
-    safeBack();
+    await editTask({
+      globals, id: td.id, field: 'disabled', onConfirm: safeBack
+    });
   });
   qs('#delete').addEventListener('click', async () => {
-    await editTask({globals, id: td.id, field: 'deleted'});
-    safeBack();
+    await editTask({
+      globals, id: td.id, field: 'deleted', onConfirm: safeBack
+    });
   });
 }
 
