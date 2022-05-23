@@ -21,7 +21,7 @@ const onboarding = {
     qs('#create').addEventListener('click', () => {
       localStorage.onboarded = 'true';
       qs('#openSettings').style.display = 'block';
-      globals.paintPage('taskCreator');
+      globals.paintPage('taskCreator', true);
     });
   }
 };
@@ -161,7 +161,7 @@ async function editTask({globals, id, field}) {
   const td = await globals.db.getItem('tasks', id);
   globals.openPopup({
     text: `Are you sure to ${field.replace(/\w$/, '')} task?`,
-    action: () => {
+    action: async () => {
       td[field] = true;
       await globals.db.setItem('tasks', td);
       localStorage.lastTasksChange = Date.now().toString();
@@ -286,6 +286,7 @@ async function onTaskCreator({globals}) {
     history.back();
   };
   qs('#back').addEventListener('click', safeBack);
+  if (!localStorage.firstDayEver) qs('#back').style.display = 'none';
   createOptionsList(qs('#priority'), priorities);
   await taskCreator.onSettingsUpdate(globals);
   qs('#period').addEventListener('change', (e) => onPeriodChange(e, globals));
@@ -307,6 +308,10 @@ async function onTaskCreator({globals}) {
     globals.message({
       state: 'success', text: isEdit ? 'Task saved' : 'Task added'
     });
+    if (!localStorage.firstDayEver) {
+      globals.paintPage('main', true, true);
+      return;
+    }
     safeBack();
   });
 }
