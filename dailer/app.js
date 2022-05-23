@@ -23,7 +23,7 @@ const globals = {
     }
     content.innerHTML = page.page;
     qs('#footer').innerHTML = page.footer;
-    if (!back) history.pushState({}, '', `?page=${name}`);
+    if (!back) history.pushState({}, '', location.href.replace(/(?<=page=)\w+/, name));
     await page.script({globals, page: content});
   },
   message: ({state, text}) => {
@@ -47,6 +47,7 @@ const globals = {
   },
   openSettings: () => {
     qs('#settings').style.display = 'grid';
+    history.pushState({settings: true}, '', location.href + '&settings=open');
   }
 }
 
@@ -71,12 +72,12 @@ window.addEventListener('pagehide', () => {
 
 window.addEventListener('pageshow', (e) => {
   createDb();
-  if (!e.persisted) renderFirstPage(false);
+  if (!e.persisted) renderPage(e, false);
 });
 
-window.addEventListener('popstate', () => renderFirstPage(true));
+window.addEventListener('popstate', (e) => renderPage(e, true));
 
-function renderFirstPage(back) {
+function renderPage(e, back) {
   const params = {};
   location.search
     .replace('?', '')
@@ -85,7 +86,9 @@ function renderFirstPage(back) {
       const splitted = elem.split('=');
       params[splitted[0]] = splitted[1];
     });
-  const page = (params.page && pages[params.page]) ?params.page : 'main';
+  if (params.settings == 'open') return;
+  if (e.type == 'popstate' && e.state.settings) return;
+  const page = (params.page && pages[params.page]) ? params.page : 'main';
   const rndr = localStorage.onboarded == 'true' ? page : 'onboarding';
   globals.paintPage(rndr, back);
 }
@@ -93,6 +96,7 @@ function renderFirstPage(back) {
 qs('#openSettings').addEventListener('click', globals.openSettings);
 qs('#closeSettings').addEventListener('click', async () => {
   qs('#settings').style.display = 'none';
+  history.back();
   if (!pages[globals.pageName].onSettingsUpdate) return;
   await pages[globals.pageName].onSettingsUpdate(globals);
 });
