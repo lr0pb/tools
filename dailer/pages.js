@@ -143,26 +143,24 @@ async function onTaskManageClick({ e, globals, task, page }) {
     };
     globals.paintPage('taskCreator');
   } else if (e.target.dataset.action == 'delete') {
-    //await globals.db.deleteItem('tasks', this.dataset.id);
-    const td = await globals.db.getItem('tasks', task.dataset.id);
-    td.deleted = true;
-    await globals.db.setItem('tasks', td);
-    localStorage.lastTasksChange = Date.now().toString();
+    await editTask({globals, id: task.dataset.id, field: 'deleted'});
     task.remove();
     globals.message({
       state: 'success', text: 'Task deleted'
     });
-    if (!page.children.length) {
-      showNoTasks(page);
-    }
+    if (!page.children.length) showNoTasks(page);
   } else {
-    globals.pageInfo = {
-      taskId: task.dataset.id
-    };
+    globals.pageInfo = { taskId: task.dataset.id };
     globals.paintPage('taskInfo');
   };
 }
 
+async function editTask({globals, id, field}) {
+  const td = await globals.db.getItem('tasks', id);
+  td[field] = true;
+  await globals.db.setItem('tasks', td);
+  localStorage.lastTasksChange = Date.now().toString();
+}
 
 const taskInfo = {
   header: '&#128220; Task info',
@@ -189,21 +187,34 @@ async function renderTaskInfo({globals, page}) {
     });
   }
   page.innerHTML = `
-    <div id="infoBackground"></div>
-    <h2>${task.name}</h2>
-    <h3>${!task.special && task.periodStart < getToday()
-        ? `Repeat it ${periods[task.periodId].title} from ${new Date(task.periodStart).toLocaleDateString(navigator.language)}`
-        : task.periodTitle
-    }</h3>
-    <h3>Today ${task.period[task.periodDay]
-      ? 'is the day you'
-      : "you don't"
-    } need to do this task</h3>
-    <h3>Importance of the task: ${priorities[task.priority].title}</h3>
+    <div id="infoBackground">
+      <h4>${task.name}</h4>
+    </div>
+    <div class="itemsHolder"></div>
     ${!task.history.length ? '' : `
       <h2>History</h2><div id="history"></div>
     `}
   `;
+  const periodText = !task.special && task.periodStart < getToday()
+    ? `${periods[task.periodId].title} from ${new Date(task.periodStart).toLocaleDateString(navigator.language)}`
+    : task.periodTitle;
+  createInfoRect('&#128467;', periodText, 'brown');
+  createInfoRect('&#128337;', `Today ${task.period[task.periodDay]
+      ? 'you should do'
+      : "you haven't"
+    } this task`, 'brown');
+  createInfoRect('&#128293;', `Importance: ${priorities[task.priority].title}`, 'brown');
+}
+
+function createInfoRect(emoji, text, color) {
+  const elem = document.createElement('div');
+  elem.className = 'infoRect';
+  elem.style.backgroundColor = color;
+  elem.innerHTML = `
+    <h2 class="emoji">${emoji}</h2>
+    <h3>${text}</h3>
+  `;
+  qs('.itemsHolder').append(elem);
 }
 
 const taskCreator = {
@@ -218,6 +229,10 @@ const taskCreator = {
     <h3 id="dateTitle"></h3>
     <input type="date" id="date"></input>
     <h3 id="description"></h3>
+    <div id="editButtons">
+      <button id="disable" class="secondary">Disable task</button>
+      <button id="delete" class="danger">Delete task</button>
+    </div>
   `,
   footer: `
     <button id="back" class="secondary">&#9194; Back</button>
@@ -249,14 +264,29 @@ async function getPeriods(globals) {
 }
 
 async function onTaskCreator({globals}) {
-  qs('#back').addEventListener('click', () => history.back());
+  const safeBack = () => {
+    globals.pageInfo = null;
+    history.back();
+  };
+  qs('#back').addEventListener('click', safeBack);
   createOptionsList(qs('#priority'), priorities);
   await taskCreator.onSettingsUpdate(globals);
   qs('#period').addEventListener('change', (e) => onPeriodChange(e, globals));
   qs('#date').min = convertDate(Date.now());
   const isEdit = globals.pageInfo && globals.pageInfo.taskAction == 'edit';
   let td;
-  if (isEdit) td = await enterEditTaskMode(globals);
+  if (isEdit) {
+    td = await enterEditTaskMode(globals);
+    qs('#editButtons').style.display = 'block';
+    qs('#disable').addEventListener('click', async () => {
+      await editTask({globals, id: td.id, field: 'disabled'});
+      safeBack();
+    });
+    qs('#delete').addEventListener('click', async () => {
+      await editTask({globals, id: td.id, field: 'deleted'});
+      safeBack();
+    });
+  }
   qs('#saveTask').addEventListener('click', () => {
     const task = createTask(td);
     if (task == 'error') return globals.message({
@@ -267,8 +297,7 @@ async function onTaskCreator({globals}) {
     globals.message({
       state: 'success', text: isEdit ? 'Task saved' : 'Task added'
     });
-    globals.pageInfo = null;
-    globals.paintPage('planCreator');
+    safeBack();
   });
 }
 
