@@ -23,7 +23,7 @@ const globals = {
     }
     content.innerHTML = page.page;
     qs('#footer').innerHTML = page.footer;
-    if (!back) history.pushState({}, '', location.href.replace(/(?<=page=)\w+/, name));
+    if (!back) history.pushState({}, '', location.href.toString().replace(/(?<=page=)\w+/, name));
     await page.script({globals, page: content});
   },
   message: ({state, text}) => {
@@ -47,7 +47,7 @@ const globals = {
   },
   openSettings: () => {
     qs('#settings').style.display = 'grid';
-    history.pushState({settings: true}, '', location.href + '&settings=open');
+    history.pushState({settings: true}, '', location.href.toString() + '&settings=open');
   }
 }
 
