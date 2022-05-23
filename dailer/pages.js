@@ -6,6 +6,8 @@ export const qs = (elem) => document.querySelector(elem);
 
 const getLast = (arr) => arr[arr.length - 1];
 
+const intlDate = (date) => new Date(date).toLocaleDateString(navigator.language);
+
 const onboarding = {
   header: '',
   page: `
@@ -83,12 +85,15 @@ function showNoTasks(page) {
 }
 
 const priorities = [{
-  title: 'Can miss sometimes'
+  title: 'Can miss sometimes',
+  color: 'green'
 }, {
   title: 'Normal',
+  color: 'green',
   selected: true
 }, {
-  title: 'Extra important'
+  title: 'Extra important',
+  color: 'yellow'
 }];
 
 function renderToggler({name, id, emoji, func, args, page}) {
@@ -145,9 +150,6 @@ async function onTaskManageClick({ e, globals, task, page }) {
   } else if (e.target.dataset.action == 'delete') {
     await editTask({globals, id: task.dataset.id, field: 'deleted'});
     task.remove();
-    globals.message({
-      state: 'success', text: 'Task deleted'
-    });
     if (!page.children.length) showNoTasks(page);
   } else {
     globals.pageInfo = { taskId: task.dataset.id };
@@ -157,9 +159,18 @@ async function onTaskManageClick({ e, globals, task, page }) {
 
 async function editTask({globals, id, field}) {
   const td = await globals.db.getItem('tasks', id);
-  td[field] = true;
-  await globals.db.setItem('tasks', td);
-  localStorage.lastTasksChange = Date.now().toString();
+  globals.openPopup({
+    text: `Are you sure to ${field.replace(/\w$/, '')} task?`,
+    action: () => {
+      td[field] = true;
+      await globals.db.setItem('tasks', td);
+      localStorage.lastTasksChange = Date.now().toString();
+      globals.closePopup();
+      globals.message({
+        state: 'success', text: `Task ${field}`
+      });
+    }
+  });
 }
 
 const taskInfo = {
@@ -177,8 +188,9 @@ async function renderTaskInfo({globals, page}) {
     globals.pageInfo = null;
     history.back();
   });
+  if (!globals.pageInfo) globals.pageInfo = history.state;
   const task = await globals.db.getItem('tasks', globals.pageInfo.taskId);
-  if (task.disabled) {
+  if (task.disabled || task.deleted) {
     qs('#edit').style.display = 'none';
   } else {
     qs('#edit').addEventListener('click', () => {
@@ -191,27 +203,32 @@ async function renderTaskInfo({globals, page}) {
       <h4>${task.name}</h4>
     </div>
     <div class="itemsHolder"></div>
-    ${!task.history.length ? '' : `
+    ${!task.history.length || task.special ? '' : `
       <h2>History</h2><div id="history"></div>
     `}
   `;
   const periodText = !task.special && task.periodStart < getToday()
-    ? `${periods[task.periodId].title} from ${new Date(task.periodStart).toLocaleDateString(navigator.language)}`
+    ? `${periods[task.periodId].title} from ${intlDate(task.periodStart)}`
     : task.periodTitle;
-  createInfoRect('&#128467;', periodText, 'brown');
-  createInfoRect('&#128337;', `Today ${task.period[task.periodDay]
-      ? 'you should do'
-      : "you haven't"
-    } this task`, 'brown');
-  createInfoRect('&#128293;', `Importance: ${priorities[task.priority].title}`, 'brown');
+  createInfoRect('&#128467;', periodText, 'blue');
+  const isActiveText = `Today ${task.period[task.periodDay] ? 'you should do' : "you haven't"} this task`;
+  if (!task.disabled) createInfoRect('&#128337;', isActiveText, task.period[task.periodDay] ? 'green' : 'red');
+  createInfoRect('&#128293;', `Importance: ${priorities[task.priority].title}`, priorities[task.priority].color);
+  if (task.special && task.history.length) {
+    let emoji = '&#10060;', color = 'red';
+    if (task.history[0]) emoji = '&#9989;', color = 'green';
+    createInfoRect(emoji, `Task was ${task.history[0] ? '' : 'not '}completed`, color);
+  } else if (task.history.length) {
+    qs('#history').innerHTML = 'History will be available soon';
+  }
 }
 
 function createInfoRect(emoji, text, color) {
   const elem = document.createElement('div');
   elem.className = 'infoRect';
-  elem.style.backgroundColor = color;
+  elem.style.setProperty('--color', `--${color}`);
   elem.innerHTML = `
-    <h2 class="emoji">${emoji}</h2>
+    <h4>${emoji}</h4>
     <h3>${text}</h3>
   `;
   qs('.itemsHolder').append(elem);
@@ -273,19 +290,12 @@ async function onTaskCreator({globals}) {
   await taskCreator.onSettingsUpdate(globals);
   qs('#period').addEventListener('change', (e) => onPeriodChange(e, globals));
   qs('#date').min = convertDate(Date.now());
+  if (!globals.pageInfo) globals.pageInfo = history.state;
   const isEdit = globals.pageInfo && globals.pageInfo.taskAction == 'edit';
   let td;
   if (isEdit) {
     td = await enterEditTaskMode(globals);
-    qs('#editButtons').style.display = 'block';
-    qs('#disable').addEventListener('click', async () => {
-      await editTask({globals, id: td.id, field: 'disabled'});
-      safeBack();
-    });
-    qs('#delete').addEventListener('click', async () => {
-      await editTask({globals, id: td.id, field: 'deleted'});
-      safeBack();
-    });
+    enableEditButtons(globals, td);
   }
   qs('#saveTask').addEventListener('click', () => {
     const task = createTask(td);
@@ -322,6 +332,18 @@ async function enterEditTaskMode(globals) {
     qs('#date').style.display = 'block';
   }
   return td;
+}
+
+function enableEditButtons(globals, td) {
+  qs('#editButtons').style.display = 'block';
+  qs('#disable').addEventListener('click', async () => {
+    await editTask({globals, id: td.id, field: 'disabled'});
+    safeBack();
+  });
+  qs('#delete').addEventListener('click', async () => {
+    await editTask({globals, id: td.id, field: 'deleted'});
+    safeBack();
+  });
 }
 
 function setPeriodId(task) {
@@ -408,7 +430,7 @@ function createTask(td = {}) {
 function setPeriodTitle(task) {
   const date = new Date(task.periodStart);
   task.periodStart = date.setHours(0, 0, 0, 0);
-  let startTitle = date.toLocaleDateString(navigator.language);
+  let startTitle = intlDate(date);
   if (task.periodStart == getToday()) startTitle = 'today';
   if (task.periodStart - oneDay == getToday()) startTitle = 'tomorrow';
   
@@ -550,15 +572,18 @@ const settings = {
     page.innerHTML = `
       <h2>Periods</h2>
       <h3>Set up to ${periodsCount} periods that will be shown in Period choise drop down list of task</h3>
+      <div id="periodsContainer"></div>
+      <h3>Custom period creation will be available soon</h3>
     `;
     let first = true;
+    const pc = qs('#periodsContainer');
     for (let per in periods) {
       const period = periods[per];
       const elem = renderToggler({
         name: period.title, id: period.id,
         emoji: getPeriodUsed(per),
         func: updatePeriodsList,
-        args: { globals, periodsCount }, page
+        args: { globals, periodsCount }, page: pc
       });
       if (first) {
         elem.classList.add('first');
