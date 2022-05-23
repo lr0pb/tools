@@ -5,6 +5,8 @@ if ('serviceWorker' in navigator && caches) {
   navigator.serviceWorker.register('./sw.js')
 };
 
+const getUrl = () => location.href.toString();
+
 const globals = {
   db: null,
   pageName: null,
@@ -23,7 +25,7 @@ const globals = {
     }
     content.innerHTML = page.page;
     qs('#footer').innerHTML = page.footer;
-    if (!back) history.pushState({}, '', location.href.toString().replace(/(?<=page=)\w+/, name));
+    if (!back) history.pushState({}, '', getUrl().replace(/(?<=page=)\w+/, name));
     await page.script({globals, page: content});
   },
   message: ({state, text}) => {
@@ -47,7 +49,7 @@ const globals = {
   },
   openSettings: () => {
     qs('#settings').style.display = 'grid';
-    history.pushState({settings: true}, '', location.href.toString() + '&settings=open');
+    history.pushState({settings: true}, '', getUrl() + '&settings=open');
   }
 }
 
@@ -90,6 +92,8 @@ function renderPage(e, back) {
   if (e.type == 'popstate' && e.state.settings) return;
   const page = (params.page && pages[params.page]) ? params.page : 'main';
   const rndr = localStorage.onboarded == 'true' ? page : 'onboarding';
+  const link = getUrl() + getUrl().includes('?') ? '' : '?' + 'page=' + rndr;
+  if (!back) history.replaceState({}, '', link);
   globals.paintPage(rndr, back);
 }
 
