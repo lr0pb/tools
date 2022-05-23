@@ -11,7 +11,8 @@ const globals = {
   db: null,
   pageName: null,
   pageInfo: null,
-  paintPage: async (name, back) => {
+  settings: false,
+  paintPage: async (name, back, replaceState) => {
     globals.pageName = name;
     const page = pages[name];
     const content = qs('body > .content');
@@ -25,7 +26,9 @@ const globals = {
     }
     content.innerHTML = page.page;
     qs('#footer').innerHTML = page.footer;
-    if (!back) history.pushState(globals.pageInfo || {}, '', getUrl().replace(/(?<=page=)\w+/, name));
+    const link = getUrl().replace(/(?<=page=)\w+/, name);
+    if (replaceState) history.replaceState({}, '', link);
+    else if (!back) history.pushState(globals.pageInfo || {}, '', link);
     await page.script({globals, page: content});
   },
   message: ({state, text}) => {
@@ -43,7 +46,7 @@ const globals = {
   },
   openPopup: ({text, action}) => {
     qs('#popup').style.display = 'flex';
-    qs('#popup > h2').innerHTML = text;
+    qs('#popup h2').innerHTML = text;
     qs('[data-action="confirm"]').onclick = action;
   },
   closePopup: () => {
@@ -58,10 +61,12 @@ const globals = {
   },
   openSettings: (back) => {
     qs('#settings').style.display = 'grid';
+    globals.settings = true;
     if (back !== true) history.pushState({settings: true}, '', getUrl() + '&settings=open');
   },
   closeSettings: async (back) => {
     qs('#settings').style.display = 'none';
+    globals.settings = false;
     if (back !== true) history.back();
     if (!pages[globals.pageName].onSettingsUpdate) return;
     await pages[globals.pageName].onSettingsUpdate(globals);
@@ -104,7 +109,7 @@ function renderPage(e, back) {
       params[splitted[0]] = splitted[1];
     });
   if (params.settings == 'open') return globals.openSettings(true);
-  if (e.type == 'popstate' && e.state.settings) return globals.closeSettings(true);
+  if (globals.settings) return globals.closeSettings(true);
   const page = (params.page && pages[params.page]) ? params.page : 'main';
   const rndr = localStorage.onboarded == 'true' ? page : 'onboarding';
   const link = getUrl() + (getUrl().includes('?') ? '' : '?') + 'page=' + rndr;
