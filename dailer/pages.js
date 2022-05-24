@@ -258,14 +258,17 @@ async function renderTaskInfo({globals, page}) {
       hb.innerHTML += `<h4> </h4>`;
     }
     let periodCursor = creationDay > task.periodStart ? new Date(creationDay).getDay() : 0;
+    const addValue = () => {
+      periodCursor++;
+      if (task.period.length == periodCursor) periodCursor = 0;
+    };
     for (let item of task.history) {
       while (!task.period[periodCursor]) {
         hb.innerHTML += `<h4>${emjs.blank}</h4>`;
-        periodCursor++;
-        if (task.period.length == periodCursor) periodCursor = 0;
+        addValue();
       }
       hb.innerHTML += `<h4>${item ? emjs.sign : emjs.cross}</h4>`;
-      periodCursor++;
+      addValue();
     }
   }
 }
