@@ -9,7 +9,7 @@ const getLast = (arr) => arr[arr.length - 1];
 const intlDate = (date) => new Date(date).toLocaleDateString(navigator.language);
 
 const emjs = {
-  sign: '&#9899;',
+  sign: '&#9989;',
   blank: '&#11036;',
   cross: '&#10060;',
   back: '&#9194;',
@@ -254,7 +254,7 @@ async function renderTaskInfo({globals, page}) {
     const hb = qs('.historyMonth');
     const creationDay = new Date(Number(task.id)).setHours(0, 0, 0, 0);
     const startDay = new Date(creationDay > task.periodStart ? creationDay : task.periodStart);
-    for (let i = 0; i < startDay.getDay(); i++) {
+    for (let i = 0; i < startDay.getDay() - 1; i++) {
       hb.innerHTML += `<h4> </h4>`;
     }
     let periodCursor = creationDay > task.periodStart ? new Date(creationDay).getDay() : 0;
@@ -262,6 +262,7 @@ async function renderTaskInfo({globals, page}) {
       while (!task.period[periodCursor]) {
         hb.innerHTML += `<h4>${emjs.blank}</h4>`;
         periodCursor++;
+        if (task.period.length == periodCursor) periodCursor = 0;
       }
       hb.innerHTML += `<h4>${item ? emjs.sign : emjs.cross}</h4>`;
       periodCursor++;
