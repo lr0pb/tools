@@ -1,4 +1,4 @@
-const appCache = '24.05-12:30';
+const appCache = '24.05-17:22';
 
 self.addEventListener('install', (e) => {
   skipWaiting();
@@ -28,15 +28,11 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   if (e.request.url.includes('manifest.json')) return;
   const badResponse = new Response(new Blob, { 'status': 400, 'statusText': 'No network' });
-  /*let request = e.request;
-  const url = request.url;
-  const params = url.match(/(?<=\/)[\w\&=\.\?]+$/);
-  if (params && (!params.includes('.') || params.includes('.html')) ) request = new Request(url.replace(params, ''));*/
   e.respondWith(
     (async () => {
-      const fetchResponse = await addCache(request);
+      const fetchResponse = await addCache(e.request);
       let cacheResponse = null;
-      if (!fetchResponse) cacheResponse = await caches.match(request);
+      if (!fetchResponse) cacheResponse = await caches.match(e.request, {ignoreSearch: true});
       return fetchResponse || cacheResponse || badResponse;
     })()
   );
@@ -44,13 +40,15 @@ self.addEventListener('fetch', (e) => {
 
 async function addCache(request) {
   let fetchResponse = null;
-  try {
-    const response = await fetch(request);
-    if (response.ok) {
-      const cache = await caches.open(appCache);
-      cache.put(request, response.clone());
-      fetchResponse = response;
-    };
-  } catch (err) {}
+  const url = request.url;
+  const params = url.match(/(?<=\/)[\w\&=\.\?]+$/);
+  if (params && (!params.includes('.') || params.includes('.html')) ) request = new Request(url.replace(params, ''));
+  console.log(request);
+  const response = await fetch(request);
+  if (response.ok) {
+    const cache = await caches.open(appCache);
+    cache.put(request, response.clone());
+    fetchResponse = response;
+  };
   return fetchResponse;
 };
