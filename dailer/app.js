@@ -7,6 +7,8 @@ if ('serviceWorker' in navigator && caches) {
 
 const getUrl = () => location.href.toString();
 
+const getPageLink = (name) => getUrl().replace(/(?<=page=)\w+/, name);
+
 const globals = {
   db: null,
   pageName: null,
@@ -26,7 +28,7 @@ const globals = {
     }
     content.innerHTML = page.page;
     qs('#footer').innerHTML = page.footer;
-    const link = getUrl().replace(/(?<=page=)\w+/, name);
+    const link = getPageLink(name);
     if (replaceState) history.replaceState({}, '', link);
     else if (!back) history.pushState(globals.pageInfo || {}, '', link);
     await page.script({globals, page: content});
@@ -112,8 +114,14 @@ function renderPage(e, back) {
   if (globals.settings) return globals.closeSettings(true);
   const page = (params.page && pages[params.page]) ? params.page : 'main';
   const rndr = localStorage.onboarded == 'true' ? page : 'onboarding';
-  const link = getUrl() + (getUrl().includes('?') ? '' : '?') + 'page=' + rndr;
-  if (!back) history.replaceState({}, '', link);
+  if (!back) {
+    const getLink = (sign) => getUrl() + sign + 'page=' + rndr;
+    const link = getUrl().includes('?')
+    ? (getUrl().includes('page') ? getPageLink(rndr) : getLink('&'))
+    : getLink('?');
+    history.replaceState({}, '', link);
+  }
+  globals.closePopup();
   globals.paintPage(rndr, back);
 }
 
