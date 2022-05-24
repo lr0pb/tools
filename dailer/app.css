@@ -224,15 +224,19 @@ input:disabled, select:disabled {
   margin: 0;
 }
 
-#historyContainer {
-  width: var(--fullWidth); min-height: 20rem;
-  overflow: auto hidden;
+#history, .historyMonth {
+  display: flex; flex-wrap: wrap;
 }
 #history {
-  width: max-content; height: 20rem;
-  /*background-image: linear-gradient(45deg, #8f7474, transparent);*/
-  display: flex;
+  width: var(--fullWidth); min-height: 35rem;
+  flex-direction: column;
+  overflow: auto hidden;
+  scroll-snap-type: x mandatory;
 }
-#history > h4 {
-  margin: 1rem;
+.historyMonth {
+  scroll-snap-align: start;
+}
+.historyMonth > h4 {
+  width: calc(var(--fullWidth) / 7);
+  text-align: center;
 }
