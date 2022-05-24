@@ -1,4 +1,4 @@
-const appCache = '24.05-17:22';
+const appCache = '24.05-18:23';
 
 self.addEventListener('install', (e) => {
   skipWaiting();
@@ -42,8 +42,9 @@ async function addCache(request) {
   let fetchResponse = null;
   const url = request.url;
   const params = url.match(/(?<=\/)[\w\&=\.\?]+$/);
-  if (params && (!params.includes('.') || params.includes('.html')) ) request = new Request(url.replace(params, ''));
-  console.log(request);
+  if (params && (!params[0].includes('.') || params[0].includes('.html')) ) {
+    request = new Request(url.replace(params, ''));
+  }
   const response = await fetch(request);
   if (response.ok) {
     const cache = await caches.open(appCache);
