@@ -8,14 +8,36 @@ const getLast = (arr) => arr[arr.length - 1];
 
 const intlDate = (date) => new Date(date).toLocaleDateString(navigator.language);
 
+const emjs = {
+  sign: '&#9899;',
+  blank: '&#11036;',
+  cross: '&#10060;',
+  back: '&#9194;',
+  stars: '&#128171;',
+  books: '&#128218;',
+  notes: '&#128209;',
+  paperWPen: '&#128221;',
+  pen: '&#128394;',
+  trashCan: '&#128465;',
+  sword: '&#128481;',
+  empty: '&#128173;',
+  save: '&#128190;',
+  magic: '&#128302;',
+  calendar: '&#128467;',
+  fire: '&#128293;',
+  clock: '&#128337;',
+  oldPaper: '&#128220;',
+  paperList: '&#128203;',
+};
+
 const onboarding = {
   header: '',
   page: `
-    <h2 class="emoji">&#128171;</h2>
+    <h2 class="emoji">${emjs.stars}</h2>
     <h2>Create your everyday plan for manage how you grow yourself over time</h2>
   `,
   centerContent: true,
-  footer: '<button id="create">&#128203; Create now</button>',
+  footer: '<button id="create">${emjs.paperList} Create now</button>',
   script: ({globals, page}) => {
     qs('#openSettings').style.display = 'none';
     qs('#create').addEventListener('click', () => {
@@ -27,18 +49,18 @@ const onboarding = {
 };
 
 const planCreator = {
-  header: '&#128209; Your tasks',
+  header: `${emjs.notes} Your tasks`,
   page: ``,
   footer: `
-    <button id="back" class="secondary">&#9194; Back</button>
-    <button id="addTask">&#128221; Add task</button>
+    <button id="back" class="secondary">${emjs.back} Back</button>
+    <button id="addTask">${emjs.paperWPen} Add task</button>
   `,
   script: onPlanCreator
 };
 
 async function onPlanCreator({globals, page}) {
   globals.pageButton({
-    emoji: '&#128218;',
+    emoji: emjs.books,
     onClick: () => globals.paintPage('tasksArchive')
   });
   qs('#back').addEventListener('click', () => history.back());
@@ -51,9 +73,9 @@ async function onPlanCreator({globals, page}) {
 }
 
 const tasksArchive = {
-  header: '&#128218; Archived tasks',
+  header: `${emjs.books} Archived tasks`,
   page: ``,
-  footer: `<button id="back" class="secondary">&#9194; Back</button>`,
+  footer: `<button id="back" class="secondary">${emjs.back} Back</button>`,
   script: onTasksArchive
 };
 
@@ -80,7 +102,7 @@ async function renderTasksList({globals, page, isBadTask}) {
 function showNoTasks(page) {
   page.classList.add('center');
   page.innerHTML = `
-    <h2 class="emoji">&#128173;</h2><h2>There is nothing yet!</h2>
+    <h2 class="emoji">${emjs.empty}</h2><h2>There is nothing yet!</h2>
   `;
 }
 
@@ -96,7 +118,7 @@ const priorities = [{
   color: 'red'
 }];
 
-function renderToggler({name, id, emoji, func, args, page}) {
+function renderToggler({name, id, emoji, func, args, page, onBodyClick}) {
   const elem = document.createElement('div');
   elem.className = 'task';
   elem.dataset.id = id;
@@ -108,18 +130,18 @@ function renderToggler({name, id, emoji, func, args, page}) {
     args.e = e; args.elem = elem;
     if (e.target.dataset.action == 'complete') {
       await func(args);
-    }
+    } else if (onBodyClick) onBodyClick();
   })
   page.append(elem);
   return elem;
 }
 
-function renderTask({type, globals, td, page}) {
+function renderTask({type, globals, td, page, onBodyClick}) {
   if (type == 'day') return renderToggler({
     name: td.name, id: td.id,
     emoji: getTaskComplete(td),
     func: onTaskCompleteClick,
-    args: { globals }, page
+    args: { globals }, page, onBodyClick
   });
   const task = document.createElement('div');
   task.className = 'task';
@@ -130,8 +152,8 @@ function renderTask({type, globals, td, page}) {
       <p>${td.periodTitle} | ${priorities[td.priority].title}</p>
     </div>
     ${td.disabled ? '' : `
-      <button data-action="edit" class="emojiBtn">&#128394;</button>
-      <button data-action="delete" class="emojiBtn">&#128465;</button>
+      <button data-action="edit" class="emojiBtn">${emjs.pen}</button>
+      <button data-action="delete" class="emojiBtn">${emjs.trashCan}</button>
     `}
    `;
   task.addEventListener('click', async (e) => {
@@ -178,11 +200,11 @@ async function editTask({globals, id, field, onConfirm}) {
 }
 
 const taskInfo = {
-  header: '&#128220; Task info',
+  header: `${emjs.oldPaper} Task info`,
   page: ``,
   footer: `
-    <button id="back" class="secondary">&#9194; Back</button>
-    <button id="edit">&#128394; Edit task</button>
+    <button id="back" class="secondary">${emjs.back} Back</button>
+    <button id="edit">${emjs.pen} Edit task</button>
   `,
   script: renderTaskInfo
 };
@@ -209,26 +231,40 @@ async function renderTaskInfo({globals, page}) {
     <div class="itemsHolder"></div>
     ${!task.history.length || task.special ? '' : `
       <h2>History</h2>
-      <div id="historyContainer" class="hiddenScroll">
-        <div id="history"></div>
+      <div id="history" class="hiddenScroll">
+        <div class="historyMonth"></div>
       </div>
     `}
   `;
   const periodText = !task.special && task.periodStart < getToday()
     ? `${periods[task.periodId].title} from ${intlDate(task.periodStart)}`
     : task.periodTitle;
-  createInfoRect('&#128467;', periodText, 'blue');
+  createInfoRect(emjs.calendar, periodText, 'blue');
+  
   const isActiveText = `Today ${task.period[task.periodDay] ? 'you should do' : "you haven't"} this task`;
-  if (!task.disabled) createInfoRect('&#128337;', isActiveText, task.period[task.periodDay] ? 'green' : 'red');
-  createInfoRect('&#128293;', `Importance: ${priorities[task.priority].title}`, priorities[task.priority].color);
+  if (!task.disabled) createInfoRect(emjs.clock, isActiveText, task.period[task.periodDay] ? 'green' : 'red');
+  
+  createInfoRect(emjs.fire, `Importance: ${priorities[task.priority].title}`, priorities[task.priority].color);
+  
   if (task.special && task.history.length) {
-    let emoji = '&#10060;', color = 'red';
-    if (task.history[0]) emoji = '&#9989;', color = 'green';
+    let emoji = emjs.cross, color = 'red';
+    if (task.history[0]) emoji = emjs.sign, color = 'green';
     createInfoRect(emoji, `Task was ${task.history[0] ? '' : 'not '}completed`, color);
   } else if (task.history.length) {
-    const hb = qs('#history');
+    const hb = qs('.historyMonth');
+    const creationDay = new Date(Number(task.id)).setHours(0, 0, 0, 0);
+    const startDay = new Date(creationDay > task.periodStart ? creationDay : task.periodStart);
+    for (let i = 0; i < startDay.getDay(); i++) {
+      hb.innerHTML += `<h4> </h4>`;
+    }
+    let periodCursor = creationDay > task.periodStart ? new Date(creationDay).getDay() : 0;
     for (let item of task.history) {
-      hb.innerHTML += `<h4>${item ? '&#9989;' : '&#10060;'}</h4>`;
+      while (!task.period[periodCursor]) {
+        hb.innerHTML += `<h4>${emjs.blank}</h4>`;
+        periodCursor++;
+      }
+      hb.innerHTML += `<h4>${item ? emjs.sign : emjs.cross}</h4>`;
+      periodCursor++;
     }
   }
 }
@@ -245,7 +281,7 @@ function createInfoRect(emoji, text, color) {
 }
 
 const taskCreator = {
-  header: '&#128221; <span id="taskAction">Add</span> task',
+  header: `${emjs.paperWPen} <span id="taskAction">Add</span> task`,
   page: `
     <h3 id="nameTitle">Enter task you will control</h3>
     <input type="text" id="name" placeHolder="Task name"></input>
@@ -262,8 +298,8 @@ const taskCreator = {
     </div>
   `,
   footer: `
-    <button id="back" class="secondary">&#9194; Back</button>
-    <button id="saveTask" class="success">&#128190; Save task</button>
+    <button id="back" class="secondary">${emjs.back} Back</button>
+    <button id="saveTask" class="success">${emjs.save} Save task</button>
   `,
   script: onTaskCreator,
   onSettingsUpdate: async (globals) => {
@@ -307,6 +343,8 @@ async function onTaskCreator({globals}) {
   if (isEdit) {
     td = await enterEditTaskMode(globals);
     enableEditButtons(globals, td, safeBack);
+  } else {
+    onPeriodChange({target: qs('#period')}, globals);
   }
   qs('#saveTask').addEventListener('click', () => {
     const task = createTask(td);
@@ -459,12 +497,12 @@ function setPeriodTitle(task) {
 }
 
 const main = {
-  header: `&#128481; Today's tasks`,
+  header: `${emjs.sword} Today's tasks`,
   centerContent: true,
   page: ``,
   footer: `
     <!--<button id="toHistory" class="secondary">&#128198; History</button>-->
-    <button id="toPlan" class="secondary">&#128209; Edit tasks</button>
+    <button id="toPlan" class="secondary">${emjs.notes} Edit tasks</button>
   `,
   script: mainScript
 };
@@ -475,14 +513,17 @@ async function mainScript({globals, page}) {
   );
   const day = await createDay(globals);
   if (day == 'error') return page.innerHTML = `
-    <h2 class="emoji">&#128302;</h2>
+    <h2 class="emoji">${emjs.magic}</h2>
     <h2>You have no tasks today!</h2>
   `;
   page.classList.remove('center');
   for (let i = day.tasks.length - 1; i > -1; i--) {
     for (let id in day.tasks[i]) {
       const td = await globals.db.getItem('tasks', id);
-      renderTask({type: 'day', globals, td, page});
+      renderTask({type: 'day', globals, td, page, onBodyClick: () => {
+        globals.pageInfo = {taskId: td.id};
+        globals.paintPage('taskInfo');
+      }});
     }
   }
 }
@@ -500,7 +541,7 @@ async function onTaskCompleteClick({ e, globals, elem: task }) {
 }
 
 function getTaskComplete(td) {
-  return getLast(td.history) ? '&#9989;' : '&#11036;';
+  return getLast(td.history) ? emjs.sign : emjs.blank;
 }
 
 async function createDay(globals, today = getToday()) {
@@ -634,7 +675,7 @@ function updatePeriodsList({e, globals, periodsCount, elem }) {
 
 function getPeriodUsed(id) {
   return JSON.parse(localStorage.periodsList).includes(id)
-  ? '&#9989;' : '&#11036;';
+  ? emjs.sign : emjs.blank;
 }
 
 export const pages = {
