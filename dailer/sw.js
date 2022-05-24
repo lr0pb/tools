@@ -1,4 +1,4 @@
-const appCache = '23.05-20:55';
+const appCache = '24.05-11:25';
 
 self.addEventListener('install', (e) => {
   skipWaiting();
@@ -29,8 +29,9 @@ self.addEventListener('fetch', (e) => {
   if (e.request.url.includes('manifest.json')) return;
   const badResponse = new Response(new Blob, { 'status': 400, 'statusText': 'No network' });
   let request = e.request;
-  const url = e.request.url.match(/(?<=\/)[\w\&=\.]+$/);
-  if (url && (!url.includes('.') || url.includes('.html')) ) request = new Request(request.replace(url, ''));
+  const url = request.url;
+  const params = url.match(/(?<=\/)[\w\&=\.\?]+$/);
+  if (params && (!params.includes('.') || params.includes('.html')) ) request = new Request(url.replace(params, ''));
   e.respondWith(
     (async () => {
       const fetchResponse = await addCache(request);
