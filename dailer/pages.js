@@ -89,11 +89,11 @@ const priorities = [{
   color: 'green'
 }, {
   title: 'Normal',
-  color: 'green',
+  color: 'yellow',
   selected: true
 }, {
   title: 'Extra important',
-  color: 'yellow'
+  color: 'red'
 }];
 
 function renderToggler({name, id, emoji, func, args, page}) {
@@ -163,7 +163,7 @@ async function onTaskManageClick({ e, globals, task, page }) {
 async function editTask({globals, id, field, onConfirm}) {
   const td = await globals.db.getItem('tasks', id);
   globals.openPopup({
-    text: `Are you sure to ${field.replace(/\w$/, '')} task?`,
+    text: `Are you sure to ${field.replace(/\w$/, '')} this task?`,
     action: async () => {
       td[field] = true;
       await globals.db.setItem('tasks', td);
@@ -208,7 +208,10 @@ async function renderTaskInfo({globals, page}) {
     </div>
     <div class="itemsHolder"></div>
     ${!task.history.length || task.special ? '' : `
-      <h2>History</h2><div id="history"></div>
+      <h2>History</h2>
+      <div id="historyContainer" class="hiddenScroll">
+        <div id="history"></div>
+      </div>
     `}
   `;
   const periodText = !task.special && task.periodStart < getToday()
@@ -223,7 +226,10 @@ async function renderTaskInfo({globals, page}) {
     if (task.history[0]) emoji = '&#9989;', color = 'green';
     createInfoRect(emoji, `Task was ${task.history[0] ? '' : 'not '}completed`, color);
   } else if (task.history.length) {
-    qs('#history').innerHTML = 'History will be available soon';
+    const hb = qs('#history');
+    for (let item of task.history) {
+      hb.innerHTML += `<h4>${item ? '&#9989;' : '&#10060;'}</h4>`;
+    }
   }
 }
 
