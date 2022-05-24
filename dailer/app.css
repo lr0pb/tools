@@ -54,9 +54,11 @@ body, #settings {
   flex-direction: column;
   align-items: start;
   overflow: hidden auto;
+}
+.content, .hiddenScroll {
   scrollbar-width: none;
 }
-.content::-webkit-scrollbar {
+.content::-webkit-scrollbar, .hiddenScroll::-webkit-scrollbar {
   width: 0; height: 0;
 }
 .header, #footer, .content.center {
@@ -169,7 +171,7 @@ button.danger {
 
 #infoBackground {
   width: var(--fullWidth); min-height: 32rem;
-  background-image: linear-gradient(135deg, #5a73f2, #0f0b30 60%);
+  background-image: linear-gradient(135deg, #5a73f2 -10%, #0f0b30 60%);
   display: flex;
   flex-direction: column-reverse;
   margin: 0 0 1rem;
@@ -186,12 +188,12 @@ button.danger {
 .infoRect {
   width: calc(var(--fullWidth) / 2 - 3rem);
   min-height: 24rem;
-  background-image: linear-gradient(150deg, var(--color) -5%, transparent 45%);
+  background-image: linear-gradient(150deg, var(--color) -10%, transparent 40%);
   border-color: rgb(227 227 227 / 50%);
   margin: 1.5rem;
 }
 .infoRect > * {
-  margin: 1.5rem 2.5rem;
+  margin: 2rem 2.5rem;
 }
 
 input, select {
@@ -216,8 +218,21 @@ input:disabled, select:disabled {
   background-color: rgb(0 0 0 / 35%);
 }
 #popup > div {
-  width: calc(var(--fullWidth) - 4rem);
-  height: 40rem;
-  background-color: #6e7174;
+  width: calc(var(--fullWidth) - 5rem);
+  height: 39rem;
+  background-color: #4e4e4e;
   margin: 0;
+}
+
+#historyContainer {
+  width: var(--fullWidth); min-height: 20rem;
+  overflow: auto hidden;
+}
+#history {
+  width: max-content; height: 20rem;
+  /*background-image: linear-gradient(45deg, #8f7474, transparent);*/
+  display: flex;
+}
+#history > h4 {
+  margin: 1rem;
 }
