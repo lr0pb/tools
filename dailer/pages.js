@@ -236,8 +236,8 @@ async function renderTaskInfo({globals, page}) {
       </div>
     `}
   `;
-  const periodText = !task.special && task.periodStart < getToday()
-    ? `${periods[task.periodId].title} from ${intlDate(task.periodStart)}`
+  const periodText = !task.special && task.periodStart <= getToday()
+    ? `${periods[task.periodId].title} from ${task.periodStart == getToday() ? 'today' : intlDate(task.periodStart)}`
     : task.periodTitle;
   createInfoRect(emjs.calendar, periodText, 'blue');
   
@@ -254,13 +254,20 @@ async function renderTaskInfo({globals, page}) {
     const hb = qs('.historyMonth');
     const creationDay = new Date(Number(task.id)).setHours(0, 0, 0, 0);
     const startDay = new Date(creationDay > task.periodStart ? creationDay : task.periodStart);
-    for (let i = 0; i < startDay.getDay() - 1; i++) {
+    let emptyDays = startDay.getDay() - 1;
+    if (emptyDays == -1) emptyDays = 6;
+    for (let i = 0; i < emptyDays; i++) {
       hb.innerHTML += `<h4> </h4>`;
     }
     let periodCursor = creationDay > task.periodStart ? new Date(creationDay).getDay() : 0;
+    let hardUpdate = false;
     const addValue = () => {
       periodCursor++;
-      if (task.period.length == periodCursor) periodCursor = 0;
+      hardUpdate = false;
+      if (task.period.length == periodCursor) {
+        periodCursor = 0;
+        hardUpdate = true;
+      }
     };
     for (let item of task.history) {
       while (!task.period[periodCursor]) {
@@ -268,6 +275,10 @@ async function renderTaskInfo({globals, page}) {
         addValue();
       }
       hb.innerHTML += `<h4>${item ? emjs.sign : emjs.cross}</h4>`;
+      addValue();
+    }
+    while (periodCursor <= task.periodDay && !hardUpdate && !task.period[task.periodDay]) {
+      hb.innerHTML += `<h4>${emjs.blank}</h4>`;
       addValue();
     }
   }
