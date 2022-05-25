@@ -29,7 +29,7 @@ const globals = {
     content.innerHTML = page.page;
     qs('#footer').innerHTML = page.footer;
     const link = getPageLink(name);
-    if (replaceState) history.replaceState({}, '', link);
+    if (replaceState) history.replaceState(history.state, '', link);
     else if (!back) history.pushState(globals.pageInfo || {}, '', link);
     await page.script({globals, page: content});
   },
@@ -95,7 +95,7 @@ window.addEventListener('pagehide', () => {
 
 window.addEventListener('pageshow', (e) => {
   createDb();
-  if (!e.persisted) renderPage(e, false);
+  if (!e.persisted) renderPage(e, false, true);
 });
 
 window.addEventListener('popstate', (e) => renderPage(e, true));
