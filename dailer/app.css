@@ -237,15 +237,13 @@ input:disabled, select:disabled {
   scroll-snap-align: start;
 }
 .historyMonth > h4 {
-  width: calc(var(--fullWidth) / 7); height: 10rem;
+  width: calc(var(--fullWidth) / 7);
   text-align: center;
-  margin-top: 1.5rem;
-  border: 0.8rem solid var(--borderColor);
+  margin: 1rem 0;
+  border: 0.8rem solid transparent;
   border-radius: 2rem;
   box-sizing: border-box;
-  --borderColor: transparent;
 }
 .historyMonth > h4:last-child {
-  /*background-image: radial-gradient(#767676, transparent 72%);*/
-  --borderColor: #ffffff;
+  background-color: aliceblue;
 }
