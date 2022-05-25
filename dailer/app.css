@@ -1,5 +1,6 @@
 :root {
-  --fullWidth: min(92vw, 450px);
+  --desctopWidth: 450px;
+  --fullWidth: min(92vw, var(--desctopWidth));
   --darkShadow: #474747;
   --yellow: #cda61a;
   --red: #a11818;
@@ -28,7 +29,7 @@ body, #settings {
     "... footer ..."
   ;
   grid-template-rows: 16rem 1fr var(--footerHeight);
-  grid-template-columns: minmax(3rem, 1fr) min(calc(100vw - 6rem), 450px) minmax(3rem, 1fr);
+  grid-template-columns: minmax(3rem, 1fr) min(calc(100vw - 6rem), var(--desctopWidth)) minmax(3rem, 1fr);
 }
 #settings {
   display: none;
@@ -215,12 +216,12 @@ input:disabled, select:disabled {
 #popup {
   width: 100vw; height: 100vh;
   position: fixed; z-index: 900;
-  background-color: rgb(0 0 0 / 35%);
+  background-color: rgb(0 0 0 / 40%);
 }
 #popup > div {
   width: calc(var(--fullWidth) - 5rem);
   height: 39rem;
-  background-color: #4e4e4e;
+  background-color: #343434;
   margin: 0;
 }
 
@@ -228,7 +229,7 @@ input:disabled, select:disabled {
   display: flex; flex-wrap: wrap;
 }
 #history {
-  width: var(--fullWidth); min-height: 35rem;
+  width: var(--fullWidth); min-height: 58rem;
   flex-direction: column;
   overflow: auto hidden;
   scroll-snap-type: x mandatory;
@@ -239,10 +240,12 @@ input:disabled, select:disabled {
 .historyMonth > h4 {
   width: calc(var(--fullWidth) / 7);
   text-align: center;
-  margin: 1rem 0;
+  margin: 0.5rem 0;
+  padding: 0.5rem 0;
   border: 0.8rem solid transparent;
   border-radius: 2rem;
   box-sizing: border-box;
+  user-select: none;
 }
 .historyMonth > h4:last-child {
   background-color: aliceblue;
