@@ -55,6 +55,7 @@ body, #settings {
   flex-direction: column;
   align-items: start;
   overflow: hidden auto;
+  scroll-snap-type: y mandatory;
 }
 .content, .hiddenScroll {
   scrollbar-width: none;
@@ -170,6 +171,10 @@ button.danger {
   margin-right: 2rem;
 }
 
+#infoBackground, .itemsHolder, .historyMonth {
+  scroll-snap-align: start;
+}
+
 #infoBackground {
   width: var(--fullWidth); min-height: 32rem;
   background-image: linear-gradient(135deg, #5a73f2 -10%, #0f0b30 60%);
@@ -229,13 +234,10 @@ input:disabled, select:disabled {
   display: flex; flex-wrap: wrap;
 }
 #history {
-  width: var(--fullWidth); min-height: 58rem;
+  width: var(--fullWidth); min-height: 85rem;
   flex-direction: column;
   overflow: auto hidden;
   scroll-snap-type: x mandatory;
-}
-.historyMonth {
-  scroll-snap-align: start;
 }
 .historyMonth > h4 {
   width: calc(var(--fullWidth) / 7);
