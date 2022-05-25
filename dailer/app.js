@@ -68,7 +68,6 @@ const globals = {
   },
   closeSettings: async (back) => {
     qs('#settings').style.display = 'none';
-    globals.settings = false;
     if (back !== true) history.back();
     if (!pages[globals.pageName].onSettingsUpdate) return;
     await pages[globals.pageName].onSettingsUpdate(globals);
@@ -111,7 +110,10 @@ function renderPage(e, back) {
       params[splitted[0]] = splitted[1];
     });
   if (params.settings == 'open') return globals.openSettings(true);
-  if (globals.settings) return globals.closeSettings(true);
+  if (globals.settings) {
+    globals.settings = false;
+    return globals.closeSettings(true);
+  }
   const page = (params.page && pages[params.page]) ? params.page : 'main';
   const rndr = localStorage.onboarded == 'true' ? page : 'onboarding';
   if (!back) {
