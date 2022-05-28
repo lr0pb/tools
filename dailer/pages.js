@@ -361,7 +361,7 @@ async function onTaskCreator({globals}) {
   } else {
     onPeriodChange({target: qs('#period')}, globals);
   }
-  qs('#saveTask').addEventListener('click', () => {
+  qs('#saveTask').addEventListener('click', async () => {
     const task = createTask(td);
     if (task == 'error') return globals.message({
       state: 'fail', text: 'Fill all fields'
