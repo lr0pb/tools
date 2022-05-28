@@ -71,6 +71,12 @@ const globals = {
     if (back !== true) history.back();
     if (!pages[globals.pageName].onSettingsUpdate) return;
     await pages[globals.pageName].onSettingsUpdate(globals);
+  },
+  checkPersist: async () => {
+    if (!navigator.storage || !navigator.storage.persist) return;
+    const isPersisted = await navigator.storage.persisted();
+    if (isPersisted) return;
+    await navigator.storage.persist();
   }
 }
 
@@ -95,7 +101,7 @@ window.addEventListener('pagehide', () => {
 
 window.addEventListener('pageshow', (e) => {
   createDb();
-  if (!e.persisted) renderPage(e, false, true);
+  if (!e.persisted) renderPage(e, false);
 });
 
 window.addEventListener('popstate', (e) => renderPage(e, true));
@@ -117,9 +123,9 @@ function renderPage(e, back) {
   const page = (params.page && pages[params.page]) ? params.page : 'main';
   const rndr = localStorage.onboarded == 'true' ? page : 'onboarding';
   if (!back) {
-    const getLink = (sign) => getUrl() + sign + 'page=' + rndr;
+    const getLink = (sign) => getUrl() + sign + 'page=main';
     const link = getUrl().includes('?')
-    ? (getUrl().includes('page') ? getPageLink(rndr) : getLink('&'))
+    ? (getUrl().includes('page') ? getPageLink('main') : getLink('&'))
     : getLink('?');
     history.replaceState({}, '', link);
   }
