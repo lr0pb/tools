@@ -375,6 +375,7 @@ async function onTaskCreator({globals}) {
       globals.paintPage('main', true, true);
       return;
     }
+    await globals.checkPersist();
     safeBack();
   });
 }
