@@ -1,4 +1,4 @@
-const appCache = '29.05-13:46';
+const appCache = '29.05-14:11';
 
 self.addEventListener('install', (e) => {
   skipWaiting();
@@ -6,7 +6,7 @@ self.addEventListener('install', (e) => {
     (async () => {
       const cache = await caches.open(appCache);
       const response = await fetch('./files.json');
-      await response.json();
+      const offlineFiles = await response.json();
       offlineFiles.forEach( (file) => cache.add(file));
     })()
   );
