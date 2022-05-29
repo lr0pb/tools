@@ -13,7 +13,6 @@ export const settings = {
       <h3>Create your own period for specific task performance</h3>
       <button id="toPeriodCreator">${emjs.calendar} Create custom period</button>
     `;
-    await paintPeriods(globals);
     qs('#toPeriodCreator').addEventListener('click', () => {
       globals.closeSettings(true);
       globals.paintPage('periodCreator');
