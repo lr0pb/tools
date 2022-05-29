@@ -1,4 +1,4 @@
-﻿export const getToday = () => { // date in milliseconds
+export const getToday = () => { // date in milliseconds
   return new Date().setHours(0, 0, 0, 0);
 };
 
@@ -84,7 +84,7 @@ export const periods = {
   }
 };
 
-function getWeekStart() {  // date in milliseconds
+export function getWeekStart() {  // date in milliseconds
   const day = new Date(getToday());
   return day.setDate(day.getDate() - day.getDay());
 }
