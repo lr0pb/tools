@@ -1,10 +1,6 @@
-﻿import {
- getToday, convertDate, oneDay, periods
- } from './highLevel/periods.js'
-
+import { getToday, convertDate, oneDay, periods } from './highLevel/periods.js'
 import { priorities, editTask, setPeriodTitle } from './highLevel/taskThings.js'
-
-import { qs, emjs } from './highLevel/utils.js'
+import { qs, emjs, copyObject } from './highLevel/utils.js'
 
 export const taskCreator = {
   header: `${emjs.paperWPen} <span id="taskAction">Add</span> task`,
@@ -32,6 +28,7 @@ export const taskCreator = {
     if (globals.pageInfo && globals.pageInfo.taskAction == 'edit') return;
     const periodsList = await getPeriods(globals);
     createOptionsList(qs('#period'), periodsList);
+    onPeriodChange({target: qs('#period')}, globals);
   }
 };
 
@@ -64,13 +61,12 @@ async function onTaskCreator({globals}) {
   qs('#period').addEventListener('change', (e) => onPeriodChange(e, globals));
   qs('#date').min = convertDate(Date.now());
   if (!globals.pageInfo) globals.pageInfo = history.state;
+  safeDataInteractions();
   const isEdit = globals.pageInfo && globals.pageInfo.taskAction == 'edit';
   let td;
   if (isEdit) {
     td = await enterEditTaskMode(globals);
     enableEditButtons(globals, td, safeBack);
-  } else {
-    onPeriodChange({target: qs('#period')}, globals);
   }
   qs('#saveTask').addEventListener('click', async () => {
     const task = createTask(td);
@@ -89,6 +85,20 @@ async function onTaskCreator({globals}) {
     await globals.checkPersist();
     safeBack();
   });
+}
+
+function safeDataInteractions() {
+  const elems = ['name', 'priority', 'period', 'date'];
+  for (let elem of elems) {
+    if (history.state[elem]) qs(`#${elem}`).value = history.state[elem];
+    qs(`#${elem}`).addEventListener('change', stateSave);
+  }
+}
+
+function stateSave(e) {
+  const state = copyObject(history.state);
+  state[e.target.id] = e.target.value;
+  history.replaceState(state, '', location.href);
 }
 
 async function enterEditTaskMode(globals) {
@@ -153,7 +163,7 @@ function createOptionsList(elem, options) {
 function onPeriodChange(e, globals) {
   const value = e.target.value;
   if (value == '00') {
-    return globals.openSettings();
+    return globals.openSettings('periods');
   }
   const date = qs('#date');
   date.value = '';
@@ -208,4 +218,3 @@ function createTask(td = {}) {
   ) return 'error';
   return task;
 }
-
