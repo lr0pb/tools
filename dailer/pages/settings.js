@@ -21,7 +21,7 @@ export const settings = {
   }
 };
 
-async function paintPeriods(globals) {
+export async function paintPeriods(globals) {
   let first = true;
   const pc = qs('#periodsContainer');
   pc.innerHTML = '';
