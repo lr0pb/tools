@@ -1,8 +1,6 @@
-import {
- getToday, convertDate, oneDay, periods
-} from './highLevel/periods.js'
-
-import { qs, emjs, getLast } from './highLevel/utils.js'
+import { periods } from './highLevel/periods.js'
+import { renderToggler } from './highLevel/taskThings.js'
+import { qs, emjs } from './highLevel/utils.js'
 
 export const settings = {
   paint: ({globals, page}) => {
