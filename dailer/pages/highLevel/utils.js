@@ -1,8 +1,12 @@
-﻿export const qs = (elem) => document.querySelector(elem);
+export const qs = (elem) => document.querySelector(elem);
 
 export const getLast = (arr) => arr[arr.length - 1];
 
-
+export const copyObject = (obj) => {
+  const response = {};
+  for (let name in obj) response[name] = obj[name];
+  return response;
+};
 
 export const intlDate = (date) => new Date(date).toLocaleDateString(navigator.language);
 
