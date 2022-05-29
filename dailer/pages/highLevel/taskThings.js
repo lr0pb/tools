@@ -1,4 +1,4 @@
-﻿import { qs, emjs, getLast } from './utils.js'
+import { qs, emjs, getLast, intlDate } from './utils.js'
 
 export const priorities = [{
   title: 'Can miss sometimes',
@@ -12,9 +12,7 @@ export const priorities = [{
   color: 'red'
 }];
 
-
-export 
-function renderToggler({name, id, emoji, func, args, page, onBodyClick}) {
+export function renderToggler({name, id, emoji, func, args, page, onBodyClick}) {
   const elem = document.createElement('div');
   elem.className = 'task';
   elem.dataset.id = id;
@@ -58,8 +56,6 @@ export function renderTask({type, globals, td, page, onBodyClick}) {
   page.append(task);
 }
 
-
-
 export async function onTaskManageClick({ e, globals, task, page }) {
   if (e.target.dataset.action == 'edit') {
     globals.pageInfo = {
@@ -79,8 +75,6 @@ export async function onTaskManageClick({ e, globals, task, page }) {
     globals.paintPage('taskInfo');
   };
 }
-
-
 
 export async function editTask({globals, id, field, onConfirm}) {
   const td = await globals.db.getItem('tasks', id);
