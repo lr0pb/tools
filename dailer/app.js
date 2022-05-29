@@ -110,8 +110,8 @@ window.addEventListener('pageshow', (e) => {
   if (!e.persisted) renderPage(e, false);
 });
 
-window.addEventListener('load', () => {
-  pages.settings.paint({globals, page: qs('#settings > .content')});
+window.addEventListener('load', async () => {
+  await pages.settings.paint({globals, page: qs('#settings > .content')});
 }
 
 window.addEventListener('popstate', (e) => renderPage(e, true));
