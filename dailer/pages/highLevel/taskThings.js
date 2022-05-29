@@ -1,4 +1,5 @@
 import { qs, emjs, getLast, intlDate } from './utils.js'
+import { getToday, oneDay } from './periods.js'
 
 export const priorities = [{
   title: 'Can miss sometimes',
@@ -74,6 +75,13 @@ export async function onTaskManageClick({ e, globals, task, page }) {
     globals.pageInfo = { taskId: task.dataset.id };
     globals.paintPage('taskInfo');
   };
+}
+
+export function showNoTasks(page) {
+  page.classList.add('center');
+  page.innerHTML = `
+    <h2 class="emoji">${emjs.empty}</h2><h2>There is nothing yet!</h2>
+  `;
 }
 
 export async function editTask({globals, id, field, onConfirm}) {
