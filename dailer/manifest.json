@@ -1,6 +1,6 @@
 {
   "short_name": "dailer",
-  "name": "dailer stands for easy day planner",
+  "name": "dailer: plan your day",
   "description": "Plan tasks for the day and manage how you grow yourself over time",
   "theme_color": "#000000",
   "background_color": "#000000",
@@ -8,10 +8,22 @@
   "orientation": "portrait",
   "start_url": "./?from=home",
   "icons": [
-    { "src": "./favicon.ico", "type": "image/x-icon", "sizes": "32x32" },
-    { "src": "./icon-192.png", "type": "image/png", "sizes": "192x192" },
-    { "src": "./icon-512.png", "type": "image/png", "sizes": "512x512" },
-    { "src": "./icon-192-maskable.png", "type": "image/png", "sizes": "192x192", "purpose": "maskable" },
-    { "src": "./icon-512-maskable.png", "type": "image/png", "sizes": "512x512", "purpose": "maskable" }
+    { "src": "./icons/favicon.ico", "type": "image/x-icon", "sizes": "32x32" },
+    { "src": "./icons/icon-192.png", "type": "image/png", "sizes": "192x192" },
+    { "src": "./icons/icon-512.png", "type": "image/png", "sizes": "512x512" },
+    { "src": "./icons/icon-192-maskable.png", "type": "image/png", "sizes": "192x192", "purpose": "maskable" },
+    { "src": "./icons/icon-512-maskable.png", "type": "image/png", "sizes": "512x512", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    {
+      "short_name": "Add task",
+      "url": "./?from=home&page=taskCreator",
+      "icons": [{ "src": "./icons/addTask.png", "sizes": "192x192" }]
+    }
+  ],
+  "screenshots": [
+    { "src": "./screenshots/image1.jpg", "type": "image/jpg", "sizes": "606x1280" },
+    { "src": "./screenshots/image2.jpg", "type": "image/jpg", "sizes": "606x1280" },
+    { "src": "./screenshots/image3.jpg", "type": "image/jpg", "sizes": "606x1280" }
   ]
 }
