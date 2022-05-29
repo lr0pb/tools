@@ -3,31 +3,46 @@ import { renderToggler } from './highLevel/taskThings.js'
 import { qs, emjs } from './highLevel/utils.js'
 
 export const settings = {
+  sections: ['periods'],
   paint: ({globals, page}) => {
     const periodsCount = 5;
     page.innerHTML = `
-      <h2>Periods</h2>
+      <h2 data-section="periods">Periods</h2>
       <h3>Set up to ${periodsCount} periods that will be shown in Period choise drop down list of task</h3>
       <div id="periodsContainer"></div>
-      <h3>Custom period creation will be available soon</h3>
+      <h3>Create your own period for specific task performance</h3>
+      <button id="toPeriodCreator">${emjs.calendar} Create custom period</button>
     `;
-    let first = true;
-    const pc = qs('#periodsContainer');
-    for (let per in periods) {
-      const period = periods[per];
-      const elem = renderToggler({
-        name: period.title, id: period.id,
-        emoji: getPeriodUsed(per),
-        func: updatePeriodsList,
-        args: { globals, periodsCount }, page: pc
-      });
-      if (first) {
-        elem.classList.add('first');
-        first = false;
-      }
-    }
+    await paintPeriods(globals);
+    qs('#toPeriodCreator').addEventListener('click', () => {
+      globals.closeSettings(true);
+      globals.paintPage('periodCreator');
+    });
   }
 };
+
+async function paintPeriods(globals) {
+  let first = true;
+  const pc = qs('#periodsContainer');
+  pc.innerHTML = '';
+  const customs = await globals.db.getAll('periods');
+  for (let per of customs) {
+    periods[per.id] = per;
+  }
+  for (let per in periods) {
+    const period = periods[per];
+    const elem = renderToggler({
+      name: period.title, id: period.id,
+      emoji: getPeriodUsed(per),
+      func: updatePeriodsList,
+      args: { globals, periodsCount }, page: pc
+    });
+    if (first) {
+      elem.classList.add('first');
+      first = false;
+    }
+  }
+}
 
 function updatePeriodsList({e, globals, periodsCount, elem }) {
   const list = JSON.parse(localStorage.periodsList);
