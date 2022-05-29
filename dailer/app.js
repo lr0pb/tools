@@ -110,6 +110,10 @@ window.addEventListener('pageshow', (e) => {
   if (!e.persisted) renderPage(e, false);
 });
 
+window.addEventListener('load', () => {
+  pages.settings.paint({globals, page: qs('#settings > .content')});
+}
+
 window.addEventListener('popstate', (e) => renderPage(e, true));
 
 function renderPage(e, back) {
@@ -149,5 +153,3 @@ qs('#popup').addEventListener('click', (e) => {
 if (!localStorage.periodsList) {
   localStorage.periodsList = JSON.stringify(['01', '03', '07', '09']);
 }
-
-pages.settings.paint({globals, page: qs('#settings > .content')});
