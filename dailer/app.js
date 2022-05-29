@@ -1,5 +1,6 @@
 import { pages } from './pages.js'
 import { qs } from './pages/highLevel/utils.js'
+import { paintPeriods } from './pages/settings.js'
 import IDB from './IDB.js'
 
 if ('serviceWorker' in navigator && caches) {
@@ -62,8 +63,9 @@ const globals = {
     pageBtn.onclick = onClick;
     pageBtn.style.display = 'block';
   },
-  openSettings: (section, back) => {
+  openSettings: async (section, back) => {
     qs('#settings').style.display = 'grid';
+    await paintPeriods(this);
     if (section && pages.settings.sections.includes(section)) {
       qs(`[data-section="${section}"]`).scrollIntoView();
     }
