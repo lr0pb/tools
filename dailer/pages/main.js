@@ -1,10 +1,6 @@
-import {
- getToday, convertDate, oneDay, periods
-} from './highLevel/periods.js'
-
-import { qs, emjs, getLast, intlDate } from './highLevel/utils.js'
-
-import { priorities, setPeriodTitle } from './highLevel/taskThings.js'
+import { getToday, oneDay, periods } from './highLevel/periods.js'
+import { qs, emjs } from './highLevel/utils.js'
+import { renderTask, setPeriodTitle } from './highLevel/taskThings.js'
 
 export const main = {
   header: `${emjs.sword} Today's tasks`,
