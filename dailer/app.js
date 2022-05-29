@@ -62,8 +62,11 @@ const globals = {
     pageBtn.onclick = onClick;
     pageBtn.style.display = 'block';
   },
-  openSettings: (back) => {
+  openSettings: (section, back) => {
     qs('#settings').style.display = 'grid';
+    if (section && pages.settings.sections.includes(section)) {
+      qs(`[data-section="${section}"]`).scrollIntoView();
+    }
     globals.settings = true;
     if (back !== true) history.pushState({settings: true}, '', getUrl() + '&settings=open');
   },
@@ -82,13 +85,15 @@ const globals = {
 }
 
 function createDb() {
-  if (!globals.db) globals.db = new IDB('dailer', 2, [
+  if (!globals.db) globals.db = new IDB('dailer', 3, [
     {
       name: 'tasks', index: {keyPath: 'id'}
     }, {
       name: 'days', index: {keyPath: 'date'}
     }, {
       name: 'periods', index: {keyPath: 'id'}
+    }, {
+      name: 'labels', index: {keyPath: 'id'}
     }
   ]);
 }
@@ -116,7 +121,7 @@ function renderPage(e, back) {
       const splitted = elem.split('=');
       params[splitted[0]] = splitted[1];
     });
-  if (params.settings == 'open') return globals.openSettings(true);
+  if (params.settings == 'open') return globals.openSettings(null, true);
   if (globals.settings) {
     globals.settings = false;
     return globals.closeSettings(true);
@@ -131,11 +136,11 @@ function renderPage(e, back) {
     history.replaceState(history.state, '', link);
   }
   globals.closePopup();
-  globals.paintPage(rndr, back);
+  globals.paintPage(rndr, back, !back);
 }
 
-qs('#openSettings').addEventListener('click', globals.openSettings);
-qs('#closeSettings').addEventListener('click', globals.closeSettings);
+qs('#openSettings').addEventListener('click', () => globals.openSettings());
+qs('#closeSettings').addEventListener('click', () => globals.closeSettings());
 
 qs('#popup').addEventListener('click', (e) => {
   if (e.target.dataset.action == 'cancel') globals.closePopup();
