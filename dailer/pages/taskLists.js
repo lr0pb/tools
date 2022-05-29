@@ -1,6 +1,5 @@
-﻿import { qs, emjs } from './highLevel/utils.js'
-
-import { priorities, renderToggler, renderTask, onTaskManageClick, editTask, onTaskCompleteClick } from './highLevel/taskThings.js'
+import { qs, emjs } from './highLevel/utils.js'
+import { renderTask, showNoTasks } from './highLevel/taskThings.js'
 
 export const planCreator = {
   header: `${emjs.notes} Your tasks`,
@@ -51,11 +50,4 @@ async function renderTasksList({globals, page, isBadTask}) {
   if (!page.children.length) {
     showNoTasks(page);
   }
-}
-
-function showNoTasks(page) {
-  page.classList.add('center');
-  page.innerHTML = `
-    <h2 class="emoji">${emjs.empty}</h2><h2>There is nothing yet!</h2>
-  `;
 }
