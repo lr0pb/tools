@@ -76,7 +76,7 @@ function onDaysCountChange(e) {
 }
 
 function toggler({e, elem}) {
-  elem.dataset.value = !elem.dataset.value;
+  elem.dataset.value = Number(elem.dataset.value) ? 0 : 1;
   e.target.innerHTML = elem.dataset.value ? emjs.sign : emjs.blank;
 }
 
