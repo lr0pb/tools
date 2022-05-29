@@ -259,3 +259,6 @@ input:disabled, select:disabled {
 #history .historyMonth > h4:last-child {
   background-color: aliceblue;
 }
+.historyMonth > h4[data-used="false"] {
+  visibility: none;
+}
