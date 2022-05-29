@@ -61,7 +61,7 @@ function appendDays() {
   }
   hm.addEventListener('click', (e) => {
     if (e.target.tagName !== 'H4') return;
-    const value = !Number(e.target.dataset.value);
+    const value = Number(e.target.dataset.value) == 1 ? 0 : 1;
     e.target.dataset.value = value;
     e.target.innerHTML = value ? emjs.sign : emjs.blank;
   });
@@ -93,7 +93,7 @@ function createPeriod() {
   for (let elem of rects) {
     period.days.push(Number(elem.dataset.value));
   }
-  if (!qs('#isRepeatable').dataset.value) period.special = 'oneTime';
+  if (!qs('[data-is="isRepeatable"]').dataset.value) period.special = 'oneTime';
   if (period.title == '') return 'error'
   return period;
 }
