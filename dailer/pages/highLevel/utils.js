@@ -1,4 +1,5 @@
 export const qs = (elem) => document.querySelector(elem);
+export const qsa = (elems) => document.querySelectorAll(elems);
 
 export const getLast = (arr) => arr[arr.length - 1];
 
