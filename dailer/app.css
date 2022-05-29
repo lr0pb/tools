@@ -260,5 +260,5 @@ input:disabled, select:disabled {
   background-color: aliceblue;
 }
 .historyMonth > h4[data-used="false"] {
-  visibility: none;
+  opacity: 0;
 }
