@@ -112,7 +112,7 @@ window.addEventListener('pageshow', (e) => {
 
 window.addEventListener('load', async () => {
   await pages.settings.paint({globals, page: qs('#settings > .content')});
-}
+});
 
 window.addEventListener('popstate', (e) => renderPage(e, true));
 
