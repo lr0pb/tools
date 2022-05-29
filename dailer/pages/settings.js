@@ -1,4 +1,8 @@
-﻿import { qs, emjs, getLast } from './highLevel/utils.js'
+import {
+ getToday, convertDate, oneDay, periods
+} from './highLevel/periods.js'
+
+import { qs, emjs, getLast } from './highLevel/utils.js'
 
 export const settings = {
   paint: ({globals, page}) => {
