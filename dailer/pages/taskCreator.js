@@ -90,7 +90,7 @@ async function onTaskCreator({globals}) {
 function safeDataInteractions() {
   const elems = ['name', 'priority', 'period', 'date'];
   for (let elem of elems) {
-    if (history.state[elem]) qs(`#${elem}`).value = history.state[elem];
+    if (history.state && history.state[elem]) qs(`#${elem}`).value = history.state[elem];
     qs(`#${elem}`).addEventListener('change', stateSave);
   }
 }
