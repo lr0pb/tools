@@ -1,4 +1,5 @@
-import { qs, pages } from './pages.js'
+import { pages } from './pages.js'
+import { qs } from './pages/highLevel/utils.js'
 import IDB from './IDB.js'
 
 if ('serviceWorker' in navigator && caches) {
@@ -127,7 +128,7 @@ function renderPage(e, back) {
     const link = getUrl().includes('?')
     ? (getUrl().includes('page') ? getPageLink('main') : getLink('&'))
     : getLink('?');
-    history.replaceState({}, '', link);
+    history.replaceState(history.state, '', link);
   }
   globals.closePopup();
   globals.paintPage(rndr, back);
