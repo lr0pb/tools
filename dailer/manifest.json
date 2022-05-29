@@ -16,6 +16,7 @@
   ],
   "shortcuts": [
     {
+      "name": "Create new task",
       "short_name": "Add task",
       "url": "./?from=home&page=taskCreator",
       "icons": [{ "src": "./icons/addTask.png", "sizes": "192x192" }]
