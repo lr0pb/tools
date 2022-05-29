@@ -4,7 +4,7 @@ import { qs, emjs } from './highLevel/utils.js'
 
 export const settings = {
   sections: ['periods'],
-  paint: ({globals, page}) => {
+  paint: async ({globals, page}) => {
     const periodsCount = 5;
     page.innerHTML = `
       <h2 data-section="periods">Periods</h2>
