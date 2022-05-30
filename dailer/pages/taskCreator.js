@@ -66,7 +66,7 @@ async function onTaskCreator({globals}) {
     enableEditButtons(globals, td, safeBack);
   }
   qs('#saveTask').addEventListener('click', async () => {
-    const task = await createTask(td);
+    const task = await createTask(globals, td);
     if (task == 'error') return globals.message({
       state: 'fail', text: 'Fill all fields'
     });
@@ -176,7 +176,7 @@ async function onPeriodChange(e, globals) {
   }
 }
 
-async function createTask(td = {}) {
+async function createTask(globals, td = {}) {
   const periods = await globals.getPeriods();
   const value = qs('#period').value;
   const priority = Number(qs('#priority').value);
