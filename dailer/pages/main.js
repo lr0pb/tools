@@ -1,4 +1,4 @@
-import { getToday, oneDay, periods } from './highLevel/periods.js'
+import { getToday, oneDay } from './highLevel/periods.js'
 import { qs, emjs, getLast } from './highLevel/utils.js'
 import { renderTask, setPeriodTitle } from './highLevel/taskThings.js'
 
@@ -17,7 +17,8 @@ async function mainScript({globals, page}) {
   qs('#toPlan').addEventListener(
     'click', () => globals.paintPage('planCreator')
   );
-  const day = await createDay(globals);
+  const periods = await globals.getPeriods();
+  const day = await createDay(globals, periods);
   if (day == 'error') return page.innerHTML = `
     <h2 class="emoji">${emjs.magic}</h2>
     <h2>You have no tasks today!</h2>
@@ -34,13 +35,13 @@ async function mainScript({globals, page}) {
   }
 }
 
-async function createDay(globals, today = getToday()) {
+async function createDay(globals, periods, today = getToday()) {
   if (!localStorage.firstDayEver) {
     localStorage.firstDayEver = today.toString();
   }
   const check = await checkLastDay(globals, today);
   if (!check.check) {
-    await createDay(globals, check.dayBefore);
+    await createDay(globals, periods, check.dayBefore);
   }
   let day = await globals.db.getItem('days', today.toString());
   if (!day || day.lastTasksChange != localStorage.lastTasksChange) {
@@ -55,7 +56,7 @@ async function createDay(globals, today = getToday()) {
   for (let task of tasks) {
     if (task.periodStart <= today) {
       if (day.firstCreation || !task.history.length) {
-        updateTask(task);
+        updateTask(task, periods);
         if (task.period[task.periodDay]) {
           task.history.push(0);
           day.tasks[task.priority][task.id] = 0;
@@ -79,7 +80,7 @@ async function checkLastDay(globals, day) {
   return { check, dayBefore };
 }
 
-function updateTask(task) {
+function updateTask(task, periods) {
   if (task.special == 'oneTime') {
     if (task.history.length) {
       task.periodDay = -1;
