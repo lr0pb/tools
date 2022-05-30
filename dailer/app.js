@@ -1,4 +1,5 @@
 import { pages } from './pages.js'
+import { periods } from './pages/highLevel/periods.js'
 import { qs } from './pages/highLevel/utils.js'
 import { paintPeriods } from './pages/settings.js'
 import IDB from './IDB.js'
@@ -16,6 +17,13 @@ const globals = {
   pageName: null,
   pageInfo: null,
   settings: false,
+  getPeriods: async () => {
+    const customs = await globals.db.getAll('periods');
+    for (let per of customs) {
+      periods[per.id] = per;
+    }
+    return periods;
+  },
   paintPage: async (name, back, replaceState) => {
     globals.pageName = name;
     const page = pages[name];
@@ -65,7 +73,7 @@ const globals = {
   },
   openSettings: async (section, back) => {
     qs('#settings').style.display = 'grid';
-    await paintPeriods(globals);
+    await pages.settings.opening({globals});
     if (section && pages.settings.sections.includes(section)) {
       qs(`[data-section="${section}"]`).scrollIntoView();
     }
@@ -127,7 +135,11 @@ function renderPage(e, back) {
       const splitted = elem.split('=');
       params[splitted[0]] = splitted[1];
     });
-  if (params.settings == 'open') return globals.openSettings(null, true);
+  if (params.settings == 'open') {
+    globals.openSettings(null, true);
+    if (globals.pageName !== params.page) globals.paintPage(params.page, true);
+    return;
+  }
   if (globals.settings) {
     globals.settings = false;
     return globals.closeSettings(true);
