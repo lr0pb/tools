@@ -1,18 +1,18 @@
-import { getToday, convertDate, oneDay, periods, getWeekStart } from './highLevel/periods.js'
+import { getToday, convertDate, oneDay, getWeekStart } from './highLevel/periods.js'
 import { priorities, editTask, setPeriodTitle } from './highLevel/taskThings.js'
-import { qs, emjs, copyObject } from './highLevel/utils.js'
+import { qs, emjs, copyObject, safeDataInteractions } from './highLevel/utils.js'
 
 export const taskCreator = {
   header: `${emjs.paperWPen} <span id="taskAction">Add</span> task`,
   page: `
     <h3 id="nameTitle">Enter task you will control</h3>
-    <input type="text" id="name" placeHolder="Task name"></input>
+    <input type="text" id="name" placeHolder="Task name">
     <h3>How important this task?</h3>
     <select id="priority"></select>
     <h3>How often you will do this task?</h3>
     <select id="period"></select>
     <h3 id="dateTitle"></h3>
-    <input type="date" id="date"></input>
+    <input type="date" id="date">
     <h3 id="description"></h3>
     <div id="editButtons">
       <button id="disable" class="secondary">Disable task</button>
@@ -28,15 +28,12 @@ export const taskCreator = {
     if (globals.pageInfo && globals.pageInfo.taskAction == 'edit') return;
     const periodsList = await getPeriods(globals);
     createOptionsList(qs('#period'), periodsList);
-    onPeriodChange({target: qs('#period')}, globals);
+    await onPeriodChange({target: qs('#period')}, globals);
   }
 };
 
 async function getPeriods(globals) {
-  const customs = await globals.db.getAll('periods');
-  for (let per of customs) {
-    periods[per.id] = per;
-  }
+  const periods = await globals.getPeriods();
   const list = JSON.parse(localStorage.periodsList);
   const periodsList = [];
   for (let per of list) {
@@ -58,10 +55,10 @@ async function onTaskCreator({globals}) {
   if (!localStorage.firstDayEver) qs('#back').style.display = 'none';
   createOptionsList(qs('#priority'), priorities);
   await taskCreator.onSettingsUpdate(globals);
-  qs('#period').addEventListener('change', (e) => onPeriodChange(e, globals));
+  qs('#period').addEventListener('change', async (e) => await onPeriodChange(e, globals));
   qs('#date').min = convertDate(Date.now());
   if (!globals.pageInfo) globals.pageInfo = history.state;
-  safeDataInteractions();
+  safeDataInteractions(['name', 'priority', 'period', 'date']);
   const isEdit = globals.pageInfo && globals.pageInfo.taskAction == 'edit';
   let td;
   if (isEdit) {
@@ -69,7 +66,7 @@ async function onTaskCreator({globals}) {
     enableEditButtons(globals, td, safeBack);
   }
   qs('#saveTask').addEventListener('click', async () => {
-    const task = createTask(td);
+    const task = await createTask(td);
     if (task == 'error') return globals.message({
       state: 'fail', text: 'Fill all fields'
     });
@@ -87,22 +84,9 @@ async function onTaskCreator({globals}) {
   });
 }
 
-function safeDataInteractions() {
-  const elems = ['name', 'priority', 'period', 'date'];
-  for (let elem of elems) {
-    if (history.state && history.state[elem]) qs(`#${elem}`).value = history.state[elem];
-    qs(`#${elem}`).addEventListener('change', stateSave);
-  }
-}
-
-function stateSave(e) {
-  const state = copyObject(history.state);
-  state[e.target.id] = e.target.value;
-  history.replaceState(state, '', location.href);
-}
-
 async function enterEditTaskMode(globals) {
   const td = await globals.db.getItem('tasks', globals.pageInfo.taskId);
+  const periods = await globals.getPeriods();
   qs('#taskAction').innerHTML = 'Edit';
   qs('#nameTitle').innerHTML = 'You can change task name only once';
   qs('#name').value = td.name;
@@ -160,7 +144,8 @@ function createOptionsList(elem, options) {
   }
 }
 
-function onPeriodChange(e, globals) {
+async function onPeriodChange(e, globals) {
+  const periods = await globals.getPeriods();
   const value = e.target.value;
   if (value == '00') {
     return globals.openSettings('periods');
@@ -191,7 +176,8 @@ function onPeriodChange(e, globals) {
   }
 }
 
-function createTask(td = {}) {
+async function createTask(td = {}) {
+  const periods = await globals.getPeriods();
   const value = qs('#period').value;
   const priority = Number(qs('#priority').value);
   const task = {
