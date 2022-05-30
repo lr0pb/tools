@@ -12,7 +12,8 @@ export const periodCreator = {
     <input type="text" id="periodName" placeHolder="Period title">
     <h3>How much days will be in period?</h3>
     <input type="range" id="daysCount" min="1" max="${maxDays}" value="${maxDays}">
-    <h3>Select days in which you need to do the task</h3>
+    <h3>Select the days you need to complete the task</h3>
+    <h3>At least one selected day is required</h3>
     <div>
       <div class="historyMonth"></div>
     </div>
@@ -27,18 +28,34 @@ export const periodCreator = {
 async function onPeriodCreator({globals, page}) {
   qs('#back').addEventListener('click', () => history.back());
   appendDays();
-  qs('#daysCount').addEventListener('change', onDaysCountChange);
+  qs('#daysCount').addEventListener('input', onDaysCountChange);
   let elem = renderToggler({
-    name: 'Task is repeatable',id: 'isRepeatable', emoji: emjs.sign,
-    func: toggler, args: {}, page
+    name: 'Task will be looped', id: 'isRepeatable',
+    emoji: emjs.sign, func: toggler, args: {}, page
   });
   elem.classList.add('first');
   elem.dataset.value = 1;
-  /*elem = renderToggler({
-    name: 'Start task at previous sunday', emoji: emjs.blank,
-    func: toggler, args: {}, page
+  elem = renderToggler({
+    name: 'Start on Sundays', id: 'getWeekStart',
+    emoji: emjs.blank, func: toggler, args: {}, page
   });
-  elem.dataset.value = 0;*/
+  elem.dataset.value = 0;
+  page.innerHTML += `
+    <h3>Automatically set task start day to the previous Sunday</h3>
+    <!--<h3>Limit days to select task start day</h3>-->
+  `;
+  /*elem = renderToggler({
+    name: 'No limit', id: 'noMaxDate',
+    emoji: emjs.sign, func: toggler, args: {}, page
+  });
+  elem.classList.add('first');
+  elem.dataset.value = 1;
+  page.innerHTML += `
+    <div id="maxDateBlock">
+      <input type="range" id="maxDate" min="1" max="13" value="13">
+      <h3>In task creation process you able to select start day from today +<span id="maxDateTitle">13</span> days</h3>
+    </div>
+  `;*/
   qs('#savePeriod').addEventListener('click', async () => {
     const period = createPeriod();
     if (period == 'error') return globals.message({
@@ -49,7 +66,6 @@ async function onPeriodCreator({globals, page}) {
       state: 'success', text: 'Task created'
     });
     await globals.checkPersist();
-    await paintPeriods(globals);
     history.back();
   });
 }
@@ -76,8 +92,9 @@ function onDaysCountChange(e) {
 }
 
 function toggler({e, elem}) {
-  elem.dataset.value = Number(elem.dataset.value) ? 0 : 1;
-  e.target.innerHTML = elem.dataset.value ? emjs.sign : emjs.blank;
+  const value = Number(elem.dataset.value) ? 0 : 1;
+  elem.dataset.value = value;
+  e.target.innerHTML = value ? emjs.sign : emjs.blank;
 }
 
 function createPeriod() {
@@ -93,8 +110,8 @@ function createPeriod() {
   for (let elem of rects) {
     period.days.push(Number(elem.dataset.value));
   }
-  if (!qs('[data-is="isRepeatable"]').dataset.value) period.special = 'oneTime';
-  if (period.title == '') return 'error'
+  if (!qs('[data-id="isRepeatable"]').dataset.value) period.special = 'oneTime';
+  if (qs('[data-id="getWeekStart"]').dataset.value) period.getWeekStart = true;
+  if (period.title == '' || !period.days.includes(1)) return 'error'
   return period;
 }
-
