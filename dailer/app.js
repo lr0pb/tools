@@ -65,7 +65,7 @@ const globals = {
   },
   openSettings: async (section, back) => {
     qs('#settings').style.display = 'grid';
-    await paintPeriods(this);
+    await paintPeriods(globals);
     if (section && pages.settings.sections.includes(section)) {
       qs(`[data-section="${section}"]`).scrollIntoView();
     }
