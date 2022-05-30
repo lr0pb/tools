@@ -178,7 +178,7 @@ button.danger {
   margin-right: 2rem;
 }
 
-#infoBackground, .itemsHolder, .historyMonth {
+#infoBackground, .itemsHolder, #history, #history > .historyMonth {
   scroll-snap-align: start;
 }
 
@@ -241,7 +241,7 @@ input:disabled, select:disabled {
   display: flex; flex-wrap: wrap;
 }
 #history {
-  width: var(--fullWidth); min-height: 85rem;
+  width: var(--fullWidth); min-height: calc(100vh - var(--footerHeight) * 2 - 4rem);
   flex-direction: column;
   overflow: auto hidden;
   scroll-snap-type: x mandatory;
@@ -260,5 +260,5 @@ input:disabled, select:disabled {
   background-color: aliceblue;
 }
 .historyMonth > h4[data-used="false"] {
-  opacity: 0;
+  display: none;
 }
