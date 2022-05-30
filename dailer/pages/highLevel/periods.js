@@ -30,10 +30,9 @@ export const periods = {
     id: '03',
     title: 'Everyday',
     days: [1],
-    get startDate() { return getToday(); },
     selectTitle: 'Select day to start',
     periodDay: -1,
-    get maxDate() { return getToday() + oneDay * 6; }
+    maxDate: 6
   },
   '04': {
     id: '04',
@@ -41,7 +40,7 @@ export const periods = {
     days: [1, 0],
     selectTitle: 'Select day to start',
     periodDay: -1,
-    get maxDate() { return getToday() + oneDay * 13; }
+    maxDate: 13
   },
   '05': {
     id: '05',
@@ -49,21 +48,19 @@ export const periods = {
     days: [1, 1, 0, 0],
     selectTitle: 'Select day to start',
     periodDay: -1,
-    get maxDate() { return getToday() + oneDay * 13; }
+    maxDate: 13
   },
   '06': {
     id: '06',
     title: 'On weekdays',
     days: [0, 1, 1, 1, 1, 1, 0],
-    get startDate() { return getWeekStart(); },
-    get periodDay() { return new Date().getDay() - 1; }
+    getWeekStart: true
   },
   '07': {
     id: '07',
     title: 'Only weekends',
     days: [1, 0, 0, 0, 0, 0, 1],
-    get startDate() { return getWeekStart(); },
-    get periodDay() { return new Date().getDay() - 1; }
+    getWeekStart: true
   },
   '08': {
     id: '08',
@@ -84,7 +81,7 @@ export const periods = {
   }
 };
 
-export function getWeekStart() {  // date in milliseconds
+export function getWeekStart() { // date in milliseconds
   const day = new Date(getToday());
   return day.setDate(day.getDate() - day.getDay());
 }
