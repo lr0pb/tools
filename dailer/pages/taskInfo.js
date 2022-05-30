@@ -1,9 +1,5 @@
-﻿import {
- getToday, convertDate, oneDay, periods
- } from './highLevel/periods.js'
-
+import { getToday, convertDate, oneDay } from './highLevel/periods.js'
 import { priorities } from './highLevel/taskThings.js'
-
 import { qs, emjs, getLast, intlDate } from './highLevel/utils.js'
 
 export const taskInfo = {
@@ -23,6 +19,7 @@ async function renderTaskInfo({globals, page}) {
   });
   if (!globals.pageInfo) globals.pageInfo = history.state;
   const task = await globals.db.getItem('tasks', globals.pageInfo.taskId);
+  const periods = await globals.getPeriods();
   if (task.disabled || task.deleted) {
     qs('#edit').style.display = 'none';
   } else {
@@ -58,41 +55,45 @@ async function renderTaskInfo({globals, page}) {
     if (task.history[0]) emoji = emjs.sign, color = 'green';
     createInfoRect(emoji, `Task was ${task.history[0] ? '' : 'not '}completed`, color);
   } else if (task.history.length) {
-    const hb = qs('.historyMonth');
-    const creationDay = new Date(Number(task.id)).setHours(0, 0, 0, 0);
-    const startDay = new Date(creationDay > task.periodStart ? creationDay : task.periodStart);
-    const borderValues = (value) => {
-      if (value == -1) return 6;
-      if (value == 6) return -1;
-      return value;
-    };
-    const emptyDays = borderValues(startDay.getDay() - 1);
-    for (let i = 0; i < emptyDays; i++) {
-      hb.innerHTML += `<h4> </h4>`;
+    renderHistory(task);
+  }
+}
+
+function renderHistory(task) {
+  const hb = qs('.historyMonth');
+  const creationDay = new Date(Number(task.id)).setHours(0, 0, 0, 0);
+  const startDay = new Date(creationDay > task.periodStart ? creationDay : task.periodStart);
+  const borderValues = (value) => {
+    if (value == -1) return 6;
+    if (value == 6) return -1;
+    return value;
+  };
+  const emptyDays = borderValues(startDay.getDay() - 1);
+  for (let i = 0; i < emptyDays; i++) {
+    hb.innerHTML += `<h4> </h4>`;
+  }
+  let periodCursor = creationDay > task.periodStart ? new Date(creationDay).getDay() : 0;
+  let hardUpdate = false;
+  const addValue = () => {
+    periodCursor++;
+    hardUpdate = false;
+    if (task.period.length == periodCursor) {
+      periodCursor = 0;
+      hardUpdate = true;
     }
-    let periodCursor = creationDay > task.periodStart ? new Date(creationDay).getDay() : 0;
-    let hardUpdate = false;
-    const addValue = () => {
-      periodCursor++;
-      hardUpdate = false;
-      if (task.period.length == periodCursor) {
-        periodCursor = 0;
-        hardUpdate = true;
-      }
-    };
-    for (let item of task.history) {
-      while (!task.period[periodCursor]) {
-        hb.innerHTML += `<h4>${emjs.blank}</h4>`;
-        addValue();
-      }
-      hb.innerHTML += `<h4>${item ? emjs.sign : emjs.cross}</h4>`;
-      addValue();
-    }
-    periodCursor = borderValues(periodCursor);
-    while (periodCursor <= task.periodDay && !hardUpdate && !task.period[task.periodDay]) {
+  };
+  for (let item of task.history) {
+    while (!task.period[periodCursor]) {
       hb.innerHTML += `<h4>${emjs.blank}</h4>`;
       addValue();
     }
+    hb.innerHTML += `<h4>${item ? emjs.sign : emjs.cross}</h4>`;
+    addValue();
+  }
+  periodCursor = borderValues(periodCursor);
+  while (periodCursor <= task.periodDay && !hardUpdate && !task.period[task.periodDay]) {
+    hb.innerHTML += `<h4>${emjs.blank}</h4>`;
+    addValue();
   }
 }
 
