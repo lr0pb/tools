@@ -1,6 +1,6 @@
 import { periods } from './highLevel/periods.js'
 import { renderToggler } from './highLevel/taskThings.js'
-import { qs, qsa, emjs } from './highLevel/utils.js'
+import { qs, qsa, emjs, safeDataInteractions } from './highLevel/utils.js'
 import { paintPeriods } from './settings.js'
 
 const maxDays = 7;
@@ -10,6 +10,8 @@ export const periodCreator = {
   page: `
     <h3>Enter period title</h3>
     <input type="text" id="periodName" placeHolder="Period title">
+    <h3>You also can type period description</h3>
+    <input type="text" id="periodDesc" placeHolder="Period description">
     <h3>How much days will be in period?</h3>
     <input type="range" id="daysCount" min="1" max="${maxDays}" value="${maxDays}">
     <h3>Select the days you need to complete the task</h3>
@@ -20,7 +22,7 @@ export const periodCreator = {
   `,
   footer: `
     <button id="back" class="secondary">${emjs.back} Back</button>
-    <button id="savePeriod" class="success">${emjs.save} Save task</button>
+    <button id="savePeriod" class="success">${emjs.save} Save period</button>
   `,
   script: onPeriodCreator
 };
@@ -58,6 +60,7 @@ async function onPeriodCreator({globals, page}) {
       <h3>In task creation process you able to select start day from today +<span id="maxDateTitle">13</span> days</h3>
     </div>
   `;*/
+  safeDataInteractions(['periodName', 'periodDesc', 'daysCount']);
   qs('#savePeriod').addEventListener('click', async () => {
     const period = createPeriod();
     if (period == 'error') return globals.message({
@@ -65,9 +68,10 @@ async function onPeriodCreator({globals, page}) {
     });
     globals.db.setItem('periods', period);
     globals.message({
-      state: 'success', text: 'Task created'
+      state: 'success', text: 'Period created'
     });
     await globals.checkPersist();
+    await paintPeriods(globals);
     history.back();
   });
 }
@@ -112,8 +116,13 @@ function createPeriod() {
   for (let elem of rects) {
     period.days.push(Number(elem.dataset.value));
   }
-  if (!qs('[data-id="isRepeatable"]').dataset.value) period.special = 'oneTime';
-  if (qs('[data-id="getWeekStart"]').dataset.value) period.getWeekStart = true;
+  if (qs('#periodDesc').value !== '') period.description = qs('#periodDesc').value;
+  if (!getValue('[data-id="isRepeatable"]')) period.special = 'oneTime';
+  if (getValue('[data-id="getWeekStart"]')) period.getWeekStart = true;
   if (period.title == '' || !period.days.includes(1)) return 'error'
   return period;
+}
+
+function getValue(elem) {
+  return Number(qs(elem).dataset.value);
 }
