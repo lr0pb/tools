@@ -40,11 +40,13 @@ async function onPeriodCreator({globals, page}) {
     emoji: emjs.blank, func: toggler, args: {}, page
   });
   elem.dataset.value = 0;
-  page.innerHTML += `
-    <h3>Automatically set task start day to the previous Sunday</h3>
+  const text = document.createElement('h3');
+  text.innerHTML = 'Automatically set task start day to the previous Sunday';
+  page.append(text);
+  /*page.innerHTML += `
     <!--<h3>Limit days to select task start day</h3>-->
   `;
-  /*elem = renderToggler({
+  elem = renderToggler({
     name: 'No limit', id: 'noMaxDate',
     emoji: emjs.sign, func: toggler, args: {}, page
   });
