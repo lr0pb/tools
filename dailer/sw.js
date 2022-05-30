@@ -1,4 +1,4 @@
-const appCache = '29.05-14:11';
+const appCache = '30.05-13:23';
 
 self.addEventListener('install', (e) => {
   skipWaiting();
@@ -43,11 +43,13 @@ async function addCache(request) {
   if (params && (!params[0].includes('.') || params[0].includes('.html')) ) {
     request = new Request(url.replace(params, ''));
   }
-  const response = await fetch(request);
-  if (response.ok) {
-    const cache = await caches.open(appCache);
-    cache.put(request, response.clone());
-    fetchResponse = response;
-  };
+  try {
+    const response = await fetch(request);
+    if (response.ok) {
+      const cache = await caches.open(appCache);
+      cache.put(request, response.clone());
+      fetchResponse = response;
+    };
+  } catch (err) {}
   return fetchResponse;
 };
