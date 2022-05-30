@@ -1,4 +1,4 @@
-import { getToday, convertDate, oneDay, periods } from './highLevel/periods.js'
+import { getToday, convertDate, oneDay, periods, getWeekStart } from './highLevel/periods.js'
 import { priorities, editTask, setPeriodTitle } from './highLevel/taskThings.js'
 import { qs, emjs, copyObject } from './highLevel/utils.js'
 
@@ -171,18 +171,22 @@ function onPeriodChange(e, globals) {
   date.style.display = 'none';
   qs('#dateTitle').style.display = 'none';
   qs('#description').style.display = 'none';
-  if (periods[value].selectTitle) {
-    qs('#dateTitle').innerHTML = periods[value].selectTitle;
+  const per = periods[value];
+  if (per.selectTitle) {
+    qs('#dateTitle').innerHTML = per.selectTitle;
     qs('#dateTitle').style.display = 'block';
     date.style.display = 'block';
-    if (periods[value].startDate) {
-      date.value = convertDate(periods[value].startDate);
+    let day;
+    if (per.special && per.startDate) day = per.startDate;
+    else if (per.getWeekStart) day = getWeekStart();
+    else day = getToday();
+    date.value = convertDate(day);
+    if (per.maxDate) {
+      const maxDate = getToday() + oneDay * per.maxDate;
+      date.max = convertDate(maxDate);
     }
-    if (periods[value].maxDate) {
-      date.max = convertDate(periods[value].maxDate);
-    }
-  } else if (periods[value].description) {
-    qs('#description').innerHTML = periods[value].description;
+  } else if (per.description) {
+    qs('#description').innerHTML = per.description;
     qs('#description').style.display = 'block';
   }
 }
@@ -202,7 +206,11 @@ function createTask(td = {}) {
     : (td.periodId ? periods[td.periodId].selectTitle : periods[value].selectTitle)
     ? new Date(qs('#date').value).getTime()
     : td.periodStart || periods[value].startDate,
-    periodDay: td.periodId ? td.periodDay : periods[value].periodDay,
+    periodDay: td.periodId
+    ? td.periodDay
+    : (periods[value].getWeekStart
+       ? new Date().getDay() - 1
+       : periods[value].periodDay),
     history: td.history || [],
     special: td.periodId ? td.special : periods[value].special,
     nameEdited: td.periodId ? td.nameEdited : false,
