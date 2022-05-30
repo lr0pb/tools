@@ -1,4 +1,3 @@
-import { periods } from './highLevel/periods.js'
 import { renderToggler } from './highLevel/taskThings.js'
 import { qs, emjs } from './highLevel/utils.js'
 
@@ -18,17 +17,19 @@ export const settings = {
       globals.closeSettings(true);
       globals.paintPage('periodCreator');
     });
+  },
+  opening: async ({globals}) => {
+    if (!qs('#periodsContainer').children.length) {
+      await paintPeriods(globals);
+    }
   }
 };
 
 export async function paintPeriods(globals) {
   let first = true;
   const pc = qs('#periodsContainer');
+  const periods = await globals.getPeriods();
   pc.innerHTML = '';
-  const customs = await globals.db.getAll('periods');
-  for (let per of customs) {
-    periods[per.id] = per;
-  }
   for (let per in periods) {
     const period = periods[per];
     const elem = renderToggler({
