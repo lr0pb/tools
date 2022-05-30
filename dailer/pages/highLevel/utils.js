@@ -32,3 +32,16 @@ export const emjs = {
   oldPaper: '&#128220;',
   paperList: '&#128203;',
 };
+
+export function safeDataInteractions(elems) {
+  for (let elem of elems) {
+    if (history.state && history.state[elem]) qs(`#${elem}`).value = history.state[elem];
+    qs(`#${elem}`).addEventListener('input', stateSave);
+  }
+}
+
+function stateSave(e) {
+  const state = copyObject(history.state);
+  state[e.target.id] = e.target.value;
+  history.replaceState(state, '', location.href);
+}
