@@ -2,10 +2,11 @@ import { periods } from './highLevel/periods.js'
 import { renderToggler } from './highLevel/taskThings.js'
 import { qs, emjs } from './highLevel/utils.js'
 
+const periodsCount = 5;
+
 export const settings = {
   sections: ['periods'],
   paint: async ({globals, page}) => {
-    const periodsCount = 5;
     page.innerHTML = `
       <h2 data-section="periods">Periods</h2>
       <h3>Set up to ${periodsCount} periods that will be shown in Period choise drop down list of task</h3>
