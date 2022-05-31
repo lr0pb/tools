@@ -1,5 +1,5 @@
-export const qs = (elem) => document.querySelector(`.current > ${elem}`);
-export const qsa = (elem) => document.querySelectorAll(`.current > ${elem}`);
+export const qs = (elem) => document.querySelector(`.current ${elem}`);
+export const qsa = (elem) => document.querySelectorAll(`.current ${elem}`);
 
 export const getLast = (arr) => arr[arr.length - 1];
 
