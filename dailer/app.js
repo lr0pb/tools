@@ -10,6 +10,8 @@ if ('serviceWorker' in navigator && caches) {
 
 const qs = (elem) => document.querySelector(elem);
 
+const qsa = (elem) => document.querySelectorAll(elem);
+
 const getUrl = () => location.href.toString();
 
 const getPageLink = (name) => getUrl().replace(/(?<=page=)\w+/, name);
@@ -30,7 +32,7 @@ const globals = {
     globals.pageName = name;
     const page = pages[name];
     const container = document.createElement('div');
-    container.className = 'page current';
+    container.className = 'page current showing';
     container.id = name;
     container.innerHTML = `
       <div class="header">
@@ -44,6 +46,9 @@ const globals = {
       <div class="footer">${page.footer}</div>
     `;
     qs('.current').classList.remove('current');
+    for (let elem of qsa('.hided')) {
+      elem.remove();
+    }
     document.body.append(container);
     if (page.noSettings) {
       localQs('.openSettings').style.display = 'none';
@@ -170,6 +175,7 @@ function renderPage(e, back) {
   }
   globals.closePopup();
   if (back) {
+    qs('.current').classList.add('hided');
     qs('.current').classList.remove('current');
     qs(`#${rndr}`).classList.add('current');
   } else globals.paintPage(rndr, back, !back);
