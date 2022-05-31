@@ -95,7 +95,7 @@ body, .page, #settings {
 .content::-webkit-scrollbar, .hiddenScroll::-webkit-scrollbar {
   width: 0; height: 0;
 }
-.header, #footer, .content.center {
+.header, .footer, .content.center {
   align-items: center;
 }
 .footer, .center {
