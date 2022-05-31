@@ -31,7 +31,7 @@ body, .page, #settings {
   margin: 0;
 }
 .page, #settings {
-  position: absolute;
+  position: fixed;
   display: grid;
   top: 0; left: 0;
   --footerHeight: 18rem;
@@ -45,7 +45,6 @@ body, .page, #settings {
 }
 #settings {
   display: none;
-  position: fixed;
   --footerHeight: 0;
 }
 .page {
