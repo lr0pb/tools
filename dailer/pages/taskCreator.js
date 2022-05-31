@@ -29,7 +29,8 @@ export const taskCreator = {
     const periodsList = await getPeriods(globals);
     createOptionsList(qs('#period'), periodsList);
     await onPeriodChange({target: qs('#period')}, globals);
-  }
+  },
+  onPageShow: () => safeDataInteractions(['name', 'priority', 'period', 'date']);
 };
 
 async function getPeriods(globals) {
@@ -58,7 +59,6 @@ async function onTaskCreator({globals}) {
   qs('#period').addEventListener('change', async (e) => await onPeriodChange(e, globals));
   qs('#date').min = convertDate(Date.now());
   if (!globals.pageInfo) globals.pageInfo = history.state;
-  safeDataInteractions(['name', 'priority', 'period', 'date']);
   const isEdit = globals.pageInfo && globals.pageInfo.taskAction == 'edit';
   let td;
   if (isEdit) {
@@ -157,20 +157,21 @@ async function onPeriodChange(e, globals) {
   qs('#dateTitle').style.display = 'none';
   qs('#description').style.display = 'none';
   const per = periods[value];
-  if (per.selectTitle) {
+  let day;
+  if (per.special && per.startDate) day = per.startDate;
+  else if (per.getWeekStart) day = getWeekStart();
+  else day = getToday();
+  date.value = convertDate(day);
+  if (per.selectTitle && !per.getWeekStart) {
     qs('#dateTitle').innerHTML = per.selectTitle;
     qs('#dateTitle').style.display = 'block';
     date.style.display = 'block';
-    let day;
-    if (per.special && per.startDate) day = per.startDate;
-    else if (per.getWeekStart) day = getWeekStart();
-    else day = getToday();
-    date.value = convertDate(day);
     if (per.maxDate) {
       const maxDate = getToday() + oneDay * per.maxDate;
       date.max = convertDate(maxDate);
     }
-  } else if (per.description) {
+  }
+  if (per.description) {
     qs('#description').innerHTML = per.description;
     qs('#description').style.display = 'block';
   }
@@ -207,8 +208,6 @@ async function createTask(globals, td = {}) {
   if (td.name && task.name != td.name) task.nameEdited = true;
   setPeriodTitle(task);
   console.log(task);
-  if (
-    task.name == '' || isNaN(task.periodStart)
-  ) return 'error';
+  if (task.name == '' || isNaN(task.periodStart)) return 'error';
   return task;
 }
