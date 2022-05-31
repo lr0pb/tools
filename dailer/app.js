@@ -89,7 +89,7 @@ const globals = {
     pageBtn.style.display = 'block';
   },
   openSettings: async (section, back) => {
-    qs('#settings').style.display = 'grid';
+    qs('#settings').style.transform = 'none';
     await pages.settings.opening({globals});
     if (section && pages.settings.sections.includes(section)) {
       qs(`[data-section="${section}"]`).scrollIntoView();
@@ -98,7 +98,7 @@ const globals = {
     if (back !== true) history.pushState({settings: true}, '', getUrl() + '&settings=open');
   },
   closeSettings: async (back) => {
-    qs('#settings').style.display = 'none';
+    qs('#settings').removeAttribute('style');
     if (back !== true) history.back();
     if (!pages[globals.pageName].onSettingsUpdate) return;
     await pages[globals.pageName].onSettingsUpdate(globals);
@@ -154,10 +154,7 @@ function renderPage(e, back) {
     });
   if (params.settings == 'open') {
     globals.openSettings(null, true);
-    if (globals.pageName !== params.page) {
-      qs('.current').classList.remove('current');
-      qs(`#${params.page}`).classList.add('current');
-    }
+    if (globals.pageName !== params.page) goBack(params.page);
     return;
   }
   if (globals.settings) {
@@ -174,11 +171,16 @@ function renderPage(e, back) {
     history.replaceState(history.state, '', link);
   }
   globals.closePopup();
-  if (back) {
-    qs('.current').classList.add('hided');
-    qs('.current').classList.remove('current');
-    qs(`#${rndr}`).classList.add('current');
-  } else globals.paintPage(rndr, back, !back);
+  if (back) goBack(rndr);
+  else globals.paintPage(rndr, back, !back);
+}
+
+function goBack(page) {
+  qs('.current').classList.add('hided');
+  qs('.current').classList.remove('current');
+  const elem = qs(`#${page}`)
+  if (elem) elem.classList.add('current');
+  else globals.paintPage(page, true, false);
 }
 
 qs('#closeSettings').addEventListener('click', () => globals.closeSettings());
