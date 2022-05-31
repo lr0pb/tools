@@ -23,12 +23,17 @@ html {
   html { font-size: 0.65vmin; }
 }
 
-body, #settings {
+body, .page, #settings {
   width: 100vw; height: 100vh;
   overflow: hidden;
   background-color: black;
   color: white;
+  margin: 0;
+}
+.page, #settings {
+  position: absolute;
   display: grid;
+  top: 0; left: 0;
   --footerHeight: 18rem;
   grid-template-areas:
     "... header ..."
@@ -41,21 +46,32 @@ body, #settings {
 #settings {
   display: none;
   position: fixed;
-  top: 0; left: 0;
   --footerHeight: 0;
+}
+.page {
+  transform: translateX(-35vw);
+  transition: transform 0.3s;
+}
+.current {
+  transform: translateX(0);
+  animation: pageShowing 0.3s;
+}
+@keyframes pageShowing {
+  0% {transform: translateX(85vw);}
+  100% {transform: translateX(0);}
 }
 
 .header { grid-area: header; }
 .content { grid-area: content; }
-#footer { grid-area: footer; }
+.footer { grid-area: footer; }
 
-.header, .content, #footer {
+.header, .content, .footer {
   display: flex;
 }
 .header > h1, .header > h4 {
   margin-right: auto;
 }
-#pageBtn {
+.pageBtn {
   display: none;
 }
 .content {
@@ -73,7 +89,7 @@ body, #settings {
 .header, #footer, .content.center {
   align-items: center;
 }
-#footer, .center {
+.footer, .center {
   justify-content: center;
 }
 .center {
@@ -155,6 +171,14 @@ button.danger {
   transform: translateX(-50%);
   background-image: linear-gradient(90deg, var(--color) 0%, #191a1a 75%);
   border-color: var(--color);
+}
+
+@keyframes elemShowing {
+  0% {opacity: 0;}
+  100% {opacity: 1;}
+}
+.task, .itemsHolder, #history {
+  animation: elemShowing 0.2s;
 }
 
 .task {
