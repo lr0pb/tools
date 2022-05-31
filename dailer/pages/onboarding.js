@@ -1,4 +1,4 @@
-﻿import { qs, emjs } from './highLevel/utils.js'
+import { qs, emjs } from './highLevel/utils.js'
 
 export const onboarding = {
   header: '',
@@ -7,9 +7,9 @@ export const onboarding = {
     <h2>Create your everyday plan for manage how you grow yourself over time</h2>
   `,
   centerContent: true,
+  noSettings: true,
   footer: `<button id="create">${emjs.paperList} Create now</button>`,
   script: ({globals, page}) => {
-    qs('#openSettings').style.display = 'none';
     qs('#create').addEventListener('click', () => {
       localStorage.onboarded = 'true';
       qs('#openSettings').style.display = 'block';
