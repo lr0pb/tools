@@ -44,8 +44,10 @@ body, .page, #settings {
   grid-template-columns: minmax(3rem, 1fr) var(--gridContent) minmax(3rem, 1fr);
 }
 #settings {
-  display: none;
+  z-index: 1;
   --footerHeight: 0;
+  transform: translateY(-100vh);
+  transition: transform 0.2s cubic-bezier(0.4, 0, 1, 1);
 }
 .page {
   transform: translateX(-35vw);
