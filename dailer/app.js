@@ -1,5 +1,5 @@
 import { pages } from './pages.js'
-import { qs as localQs } from './pages/highLevel/periods.js'
+import { qs as localQs } from './pages/highLevel/utils.js'
 import { periods } from './pages/highLevel/periods.js'
 import { paintPeriods } from './pages/settings.js'
 import IDB from './IDB.js'
