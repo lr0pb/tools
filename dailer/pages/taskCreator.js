@@ -30,7 +30,7 @@ export const taskCreator = {
     createOptionsList(qs('#period'), periodsList);
     await onPeriodChange({target: qs('#period')}, globals);
   },
-  onPageShow: () => safeDataInteractions(['name', 'priority', 'period', 'date']);
+  onPageShow: () => safeDataInteractions(['name', 'priority', 'period', 'date'])
 };
 
 async function getPeriods(globals) {
