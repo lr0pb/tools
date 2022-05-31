@@ -45,7 +45,11 @@ const globals = {
     `;
     qs('.current').classList.remove('current');
     document.body.append(container);
-    localQs('.openSettings').addEventListener('click', () => globals.openSettings());
+    if (page.noSettings) {
+      localQs('.openSettings').style.display = 'none';
+    } else {
+      localQs('.openSettings').addEventListener('click', () => globals.openSettings());
+    }
     const link = getPageLink(name);
     if (replaceState) history.replaceState(history.state, '', link);
     else if (!back) history.pushState(globals.pageInfo || {}, '', link);
