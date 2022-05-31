@@ -12,7 +12,6 @@ export const onboarding = {
   script: ({globals, page}) => {
     qs('#create').addEventListener('click', () => {
       localStorage.onboarded = 'true';
-      qs('#openSettings').style.display = 'block';
       globals.paintPage('taskCreator', true);
     });
   }
