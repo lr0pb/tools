@@ -24,6 +24,7 @@ export const periodCreator = {
     <button id="back" class="secondary">${emjs.back} Back</button>
     <button id="savePeriod" class="success">${emjs.save} Save period</button>
   `,
+  noSettings: true,
   script: onPeriodCreator
 };
 
