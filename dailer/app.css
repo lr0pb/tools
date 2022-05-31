@@ -52,13 +52,21 @@ body, .page, #settings {
   transform: translateX(-35vw);
   transition: transform 0.3s;
 }
-.current {
+.showing {
   transform: translateX(0);
   animation: pageShowing 0.3s;
 }
 @keyframes pageShowing {
   0% {transform: translateX(85vw);}
   100% {transform: translateX(0);}
+}
+.hided {
+  transform: translateX(0);
+  animation: pageHiding 0.3s forwards;
+}
+@keyframes pageHiding {
+  0% {transform: translateX(0);}
+  100% {transform: translateX(100vw);}
 }
 
 .header { grid-area: header; }
