@@ -1,7 +1,7 @@
 import { renderToggler } from './highLevel/taskThings.js'
 import { emjs } from './highLevel/utils.js'
 
-const qs = (elem) => document.qerySelector(elem);
+const qs = (elem) => document.querySelector(elem);
 
 const periodsCount = 5;
 
