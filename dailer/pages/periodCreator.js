@@ -25,7 +25,7 @@ export const periodCreator = {
     <button id="savePeriod" class="success">${emjs.save} Save period</button>
   `,
   script: onPeriodCreator,
-  onPageShow: () => safeDataInteractions(['periodName', 'periodDesc', 'daysCount']);
+  onPageShow: () => safeDataInteractions(['periodName', 'periodDesc', 'daysCount'])
 };
 
 async function onPeriodCreator({globals, page}) {
