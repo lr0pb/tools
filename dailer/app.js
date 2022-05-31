@@ -36,7 +36,7 @@ const globals = {
       <div class="header">
         <h1>${page.header}</h1>
         <button class="pageBtn emojiBtn"></button>
-        <button id="openSettings" class="emojiBtn">&#128736;</button>
+        <button class="openSettings emojiBtn">&#128736;</button>
       </div>
       <div class="content ${page.centerContent ? 'center' : ''}">
         ${page.page}
@@ -45,6 +45,7 @@ const globals = {
     `;
     qs('.current').classList.remove('current');
     document.body.append(container);
+    localQs('.openSettings').addEventListener('click', () => globals.openSettings());
     const link = getPageLink(name);
     if (replaceState) history.replaceState(history.state, '', link);
     else if (!back) history.pushState(globals.pageInfo || {}, '', link);
@@ -170,7 +171,6 @@ function renderPage(e, back) {
   } else globals.paintPage(rndr, back, !back);
 }
 
-qs('#openSettings').addEventListener('click', () => globals.openSettings());
 qs('#closeSettings').addEventListener('click', () => globals.closeSettings());
 
 qs('#popup').addEventListener('click', (e) => {
