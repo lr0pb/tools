@@ -29,8 +29,7 @@ export const taskCreator = {
     const periodsList = await getPeriods(globals);
     createOptionsList(qs('#period'), periodsList);
     await onPeriodChange({target: qs('#period')}, globals);
-  },
-  onPageShow: () => safeDataInteractions(['name', 'priority', 'period', 'date'])
+  }
 };
 
 async function getPeriods(globals) {
@@ -55,6 +54,7 @@ async function onTaskCreator({globals}) {
   qs('#back').addEventListener('click', safeBack);
   if (!localStorage.firstDayEver) qs('#back').style.display = 'none';
   createOptionsList(qs('#priority'), priorities);
+  safeDataInteractions(['name', 'priority', 'period', 'date']);
   await taskCreator.onSettingsUpdate(globals);
   qs('#period').addEventListener('change', async (e) => await onPeriodChange(e, globals));
   qs('#date').min = convertDate(Date.now());
