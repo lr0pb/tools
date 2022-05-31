@@ -24,8 +24,7 @@ export const periodCreator = {
     <button id="back" class="secondary">${emjs.back} Back</button>
     <button id="savePeriod" class="success">${emjs.save} Save period</button>
   `,
-  script: onPeriodCreator,
-  onPageShow: () => safeDataInteractions(['periodName', 'periodDesc', 'daysCount'])
+  script: onPeriodCreator
 };
 
 async function onPeriodCreator({globals, page}) {
@@ -61,6 +60,7 @@ async function onPeriodCreator({globals, page}) {
       <h3>In task creation process you able to select start day from today +<span id="maxDateTitle">13</span> days</h3>
     </div>
   `;*/
+  safeDataInteractions(['periodName', 'periodDesc', 'daysCount']);
   qs('#savePeriod').addEventListener('click', async () => {
     const period = createPeriod();
     if (period == 'error') return globals.message({
