@@ -49,7 +49,6 @@ const globals = {
     if (replaceState) history.replaceState(history.state, '', link);
     else if (!back) history.pushState(globals.pageInfo || {}, '', link);
     await page.script({globals, page: container.querySelector('.content')});
-    page.onPageShow();
   },
   message: ({state, text}) => {
     const msg = qs('#message');
