@@ -1,12 +1,14 @@
 import { pages } from './pages.js'
+import { qs: localQs } from './pages/highLevel/periods.js'
 import { periods } from './pages/highLevel/periods.js'
-import { qs } from './pages/highLevel/utils.js'
 import { paintPeriods } from './pages/settings.js'
 import IDB from './IDB.js'
 
 if ('serviceWorker' in navigator && caches) {
   navigator.serviceWorker.register('./sw.js')
 };
+
+const qs = (elem) => document.querySelector(elem);
 
 const getUrl = () => location.href.toString();
 
@@ -27,21 +29,27 @@ const globals = {
   paintPage: async (name, back, replaceState) => {
     globals.pageName = name;
     const page = pages[name];
-    const content = qs('body > .content');
-    qs('h1').innerHTML = page.header;
-    qs('#pageBtn').onclick = null;
-    qs('#pageBtn').style.display = 'none';
-    if (page.centerContent) {
-      content.classList.add('center');
-    } else {
-      content.classList.remove('center');
-    }
-    content.innerHTML = page.page;
-    qs('#footer').innerHTML = page.footer;
+    const container = document.createElement('div');
+    container.className = 'page current';
+    container.id = name;
+    container.innerHTML = `
+      <div class="header">
+        <h1>${page.header}</h1>
+        <button class="pageBtn emojiBtn"></button>
+        <button id="openSettings" class="emojiBtn">&#128736;</button>
+      </div>
+      <div class="content ${page.centerContent ? 'center' : ''}">
+        ${page.page}
+      </div>
+      <div class="footer">${page.footer}</div>
+    `;
+    qs('.current').classList.remove('current');
+    document.body.append(container);
     const link = getPageLink(name);
     if (replaceState) history.replaceState(history.state, '', link);
     else if (!back) history.pushState(globals.pageInfo || {}, '', link);
-    await page.script({globals, page: content});
+    await page.script({globals, page: container.querySelector('.content')});
+    page.onPageShow();
   },
   message: ({state, text}) => {
     const msg = qs('#message');
@@ -66,7 +74,7 @@ const globals = {
     qs('[data-action="confirm"]').onclick = null;
   },
   pageButton: ({emoji, onClick}) => {
-    const pageBtn = qs('#pageBtn');
+    const pageBtn = localQs('.pageBtn');
     pageBtn.innerHTML = emoji;
     pageBtn.onclick = onClick;
     pageBtn.style.display = 'block';
@@ -137,7 +145,10 @@ function renderPage(e, back) {
     });
   if (params.settings == 'open') {
     globals.openSettings(null, true);
-    if (globals.pageName !== params.page) globals.paintPage(params.page, true);
+    if (globals.pageName !== params.page) {
+      qs('.current').classList.remove('current');
+      qs(`#${params.page}`).classList.add('current');
+    }
     return;
   }
   if (globals.settings) {
@@ -154,7 +165,10 @@ function renderPage(e, back) {
     history.replaceState(history.state, '', link);
   }
   globals.closePopup();
-  globals.paintPage(rndr, back, !back);
+  if (back) {
+    qs('.current').classList.remove('current');
+    qs(`#${rndr}`).classList.add('current');
+  } else globals.paintPage(rndr, back, !back);
 }
 
 qs('#openSettings').addEventListener('click', () => globals.openSettings());
