@@ -1,5 +1,5 @@
 import { pages } from './pages.js'
-import { qs as localQs } from './pages/highLevel/utils.js'
+import { qs as localQs, copyObject } from './pages/highLevel/utils.js'
 import { periods } from './pages/highLevel/periods.js'
 import { paintPeriods } from './pages/settings.js'
 import IDB from './IDB.js'
@@ -14,7 +14,15 @@ const qsa = (elem) => document.querySelectorAll(elem);
 
 const getUrl = () => location.href.toString();
 
-const getPageLink = (name) => getUrl().replace(/(?<=page=)\w+/, name);
+const getPageLink = (name) => {
+  const getLink = (sign) => getUrl() + sign + `page=${name}`;
+  const link = getUrl().includes('?')
+  ? (getUrl().includes('page')
+     ? getUrl().replace(/(?<=page=)\w+/, name)
+     : getLink('&'))
+  : getLink('?');
+  return link;
+}
 
 const globals = {
   db: null,
@@ -28,7 +36,7 @@ const globals = {
     }
     return periods;
   },
-  paintPage: async (name, back, replaceState) => {
+  paintPage: async (name, back, replaceState, noAnim) => {
     globals.pageName = name;
     const page = pages[name];
     const container = document.createElement('div');
@@ -46,7 +54,7 @@ const globals = {
       <div class="footer">${page.footer}</div>
     `;
     document.body.append(container);
-    showPage(qs('.current'), container);
+    showPage(qs('.current'), container, noAnim);
     if (page.noSettings) {
       localQs('.openSettings').style.display = 'none';
     } else {
@@ -54,7 +62,7 @@ const globals = {
     }
     const link = getPageLink(name);
     if (replaceState) history.replaceState(history.state, '', link);
-    else if (!back) history.pushState(globals.pageInfo || {}, '', link);
+    else if (!back) history.pushState(globals.pageInfo || history.state || {}, '', link);
     await page.script({globals, page: container.querySelector('.content')});
   },
   message: ({state, text}) => {
@@ -141,17 +149,10 @@ window.addEventListener('load', async () => {
 window.addEventListener('popstate', (e) => renderPage(e, true));
 
 function renderPage(e, back) {
-  const params = {};
-  location.search
-    .replace('?', '')
-    .split('&')
-    .forEach((elem) => {
-      const splitted = elem.split('=');
-      params[splitted[0]] = splitted[1];
-    });
+  const params = getParams();
   if (params.settings == 'open') {
     globals.openSettings(null, true);
-    if (globals.pageName !== params.page) hidePage(qs('.current'), qs(`#${params.page}`));
+    if (globals.pageName !== params.page) hidePage(qs('.current'), params.page);
     return;
   }
   if (globals.settings) {
@@ -160,30 +161,45 @@ function renderPage(e, back) {
   }
   const page = (params.page && pages[params.page]) ? params.page : 'main';
   const rndr = localStorage.onboarded == 'true' ? page : 'onboarding';
-  if (!back) {
-    const getLink = (sign) => getUrl() + sign + 'page=main';
-    const link = getUrl().includes('?')
-    ? (getUrl().includes('page') ? getPageLink('main') : getLink('&'))
-    : getLink('?');
-    history.replaceState(history.state, '', link);
-  }
   globals.closePopup();
-  if (back) hidePage(qs('.current'), qs(`#${rndr}`));
-  else globals.paintPage(rndr, back, !back);
+  if (back) hidePage(qs('.current'), rndr);
+  else paintFirstPage(rndr);
 }
 
-function showPage(prev, current) {
+function getParams() {
+  const params = {};
+  location.search
+    .replace('?', '')
+    .split('&')
+    .forEach((elem) => {
+      const splitted = elem.split('=');
+      params[splitted[0]] = splitted[1];
+    });
+  return params;
+}
+
+function paintFirstPage(rndr) {
+  if (rndr == 'main' || rndr == 'onboarding') {
+    return globals.paintPage(rndr, false, true);
+  }
+  globals.paintPage('main', false, true, true);
+  globals.paintPage(rndr);
+}
+
+function showPage(prev, current, noAnim) {
   prev.classList.remove('showing', 'current');
   prev.classList.add('hidePrevPage');
   setTimeout(() => {
     current.classList.add('showing');
-  }, 10);
+  }, noAnim ? 0 : 10);
   for (let elem of qsa('.hided')) {
     elem.remove();
   }
 }
 
-function hidePage(current, prev) {
+function hidePage(current, prevName) {
+  const prev = qs(`#${prevName}`);
+  if (!prev) return globals.paintPage(prevName, true, false);
   prev.classList.remove('hidePrevPage', 'hided');
   prev.classList.add('showing', 'current');
   current.classList.remove('showing', 'current');
