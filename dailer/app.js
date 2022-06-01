@@ -32,7 +32,7 @@ const globals = {
     globals.pageName = name;
     const page = pages[name];
     const container = document.createElement('div');
-    container.className = 'page current showing';
+    container.className = 'page current';
     container.id = name;
     container.innerHTML = `
       <div class="header">
@@ -151,7 +151,7 @@ function renderPage(e, back) {
     });
   if (params.settings == 'open') {
     globals.openSettings(null, true);
-    if (globals.pageName !== params.page) goBack(params.page);
+    if (globals.pageName !== params.page) hidePage(qs('.current'), qs(`#${params.page}`));
     return;
   }
   if (globals.settings) {
@@ -172,28 +172,25 @@ function renderPage(e, back) {
   else globals.paintPage(rndr, back, !back);
 }
 
-function goBack(page) {
-  qs('.current').classList.add('hided');
-  qs('.current').classList.remove('current');
-  const elem = qs(`#${page}`)
-  if (elem) elem.classList.add('current');
-  else globals.paintPage(page, true, false);
-}
-
 function showPage(prev, current) {
-  prev.classList.remove('current');
+  prev.classList.remove('showing', 'current');
   prev.classList.add('hidePrevPage');
-  current.classList.add('showing');
+  setTimeout(() => {
+    current.classList.add('showing');
+  }, 10);
   for (let elem of qsa('.hided')) {
     elem.remove();
   }
 }
 
 function hidePage(current, prev) {
-  prev.classList.remove('hidePrevPage');
-  prev.classList.add('current');
+  prev.classList.remove('hidePrevPage', 'hided');
+  prev.classList.add('showing', 'current');
   current.classList.remove('showing', 'current');
   current.classList.add('hided');
+  if (pages[prev.id].onPageShow) {
+    pages[prev.id].onPageShow({globals, page: qs(`#${prev.id} .content`)});
+  }
 }
 
 qs('#closeSettings').addEventListener('click', () => globals.closeSettings());
