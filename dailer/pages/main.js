@@ -10,19 +10,30 @@ export const main = {
     <!--<button id="toHistory" class="secondary">&#128198; History</button>-->
     <button id="toPlan" class="secondary">${emjs.notes} Edit tasks</button>
   `,
-  script: mainScript
+  script: async ({globals, page}) => {
+    qs('#toPlan').addEventListener(
+      'click', () => globals.paintPage('planCreator')
+    );
+    await renderDay({globals, page});
+  },
+  onPageShow: async ({globals, page}) => {
+    const day = await globals.db.getItem('days', getToday().toString());
+    if (day.lastTasksChange != localStorage.lastTasksChange) {
+      await renderDay({globals, page});
+    }
+  }
 };
 
-async function mainScript({globals, page}) {
-  qs('#toPlan').addEventListener(
-    'click', () => globals.paintPage('planCreator')
-  );
+async function renderDay({globals, page}) {
   const periods = await globals.getPeriods();
   const day = await createDay(globals, periods);
-  if (day == 'error') return page.innerHTML = `
-    <h2 class="emoji">${emjs.magic}</h2>
-    <h2>You have no tasks today!</h2>
-  `;
+  if (day == 'error') {
+    page.innerHTML = `
+      <h2 class="emoji">${emjs.magic}</h2>
+      <h2>You have no tasks today!</h2>
+    `;
+    return page.classList.add('center');
+  }
   page.classList.remove('center');
   for (let i = day.tasks.length - 1; i > -1; i--) {
     for (let id in day.tasks[i]) {
