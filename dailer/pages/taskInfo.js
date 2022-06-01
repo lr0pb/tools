@@ -24,6 +24,7 @@ async function renderTaskInfo({globals, page}) {
     qs('#edit').style.display = 'none';
   } else {
     qs('#edit').addEventListener('click', () => {
+      if (!globals.pageInfo) globals.pageInfo = history.state;
       globals.pageInfo.taskAction = 'edit';
       globals.paintPage('taskCreator');
     });
