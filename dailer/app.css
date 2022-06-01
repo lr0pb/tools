@@ -50,14 +50,14 @@ body, .page, #settings {
   transition: transform 0.2s cubic-bezier(0.4, 0, 1, 1);
 }
 .page {
-  transform: transformX(100vw);
+  transform: translateX(100vw);
   transition: transform 0.3s;
 }
 .hidePrevPage {
-  transform: transformX(-35vw);
+  transform: translateX(-35vw);
 }
 .showing {
-  transform: transformX(0);
+  transform: translateX(0);
 }
 
 .header { grid-area: header; }
