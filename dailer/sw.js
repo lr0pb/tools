@@ -1,4 +1,4 @@
-const appCache = '30.05-13:23';
+const appCache = '01.06-13:32';
 
 self.addEventListener('install', (e) => {
   skipWaiting();
@@ -30,8 +30,10 @@ self.addEventListener('fetch', (e) => {
     (async () => {
       const fetchResponse = await addCache(e.request);
       let cacheResponse = null;
-      if (!fetchResponse) cacheResponse = await caches.match(e.request, {ignoreSearch: true});
-      return fetchResponse || cacheResponse || badResponse;
+      if (!fetchResponse || (fetchResponse && !fetchResponse.ok)) {
+        cacheResponse = await caches.match(e.request, {ignoreSearch: true});
+      }
+      return cacheResponse || fetchResponse || badResponse;
     })()
   );
 });
