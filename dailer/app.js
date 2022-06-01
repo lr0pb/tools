@@ -45,11 +45,8 @@ const globals = {
       </div>
       <div class="footer">${page.footer}</div>
     `;
-    qs('.current').classList.remove('current');
-    for (let elem of qsa('.hided')) {
-      elem.remove();
-    }
     document.body.append(container);
+    showPage(qs('.current'), container);
     if (page.noSettings) {
       localQs('.openSettings').style.display = 'none';
     } else {
@@ -171,7 +168,7 @@ function renderPage(e, back) {
     history.replaceState(history.state, '', link);
   }
   globals.closePopup();
-  if (back) goBack(rndr);
+  if (back) hidePage(qs('.current'), qs(`#${rndr}`));
   else globals.paintPage(rndr, back, !back);
 }
 
@@ -181,6 +178,22 @@ function goBack(page) {
   const elem = qs(`#${page}`)
   if (elem) elem.classList.add('current');
   else globals.paintPage(page, true, false);
+}
+
+function showPage(prev, current) {
+  prev.classList.remove('current');
+  prev.classList.add('hidePrevPage');
+  current.classList.add('showing');
+  for (let elem of qsa('.hided')) {
+    elem.remove();
+  }
+}
+
+function hidePage(current, prev) {
+  prev.classList.remove('hidePrevPage');
+  prev.classList.add('current');
+  current.classList.remove('showing', 'current');
+  current.classList.add('hided');
 }
 
 qs('#closeSettings').addEventListener('click', () => globals.closeSettings());
