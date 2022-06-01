@@ -9,6 +9,8 @@
   --red: #a11818;
   --green: #3ea317;
   --blue: #1aa2cd;
+  --fastAnim: 0.2s;
+  --normalAnim: 0.3s;
 }
 
 html {
@@ -21,6 +23,13 @@ html {
     --gridContent: min(var(--defaultGridContent), var(--desctopWidth));
   }
   html { font-size: 0.65vmin; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --fastAnim: 0;
+    --normalAnim: 0;
+  }
 }
 
 body, .page, #settings {
@@ -47,17 +56,17 @@ body, .page, #settings {
   z-index: 1;
   --footerHeight: 0;
   transform: translateY(-100vh);
-  transition: transform 0.2s cubic-bezier(0.4, 0, 1, 1);
+  transition: transform var(--fastAnim) cubic-bezier(0.4, 0, 1, 1);
 }
 .page {
   transform: translateX(100vw);
-  transition: transform 0.3s;
-}
-.hidePrevPage {
-  transform: translateX(-35vw);
+  transition: transform var(--normalAnim);
 }
 .showing {
   transform: translateX(0);
+}
+.hidePrevPage {
+  transform: translateX(-35vw);
 }
 
 .header { grid-area: header; }
@@ -177,7 +186,7 @@ button.danger {
   100% {opacity: 1;}
 }
 .task, .itemsHolder, #history {
-  animation: elemShowing 0.2s;
+  animation: elemShowing var(--normalAnim);
 }
 
 .task {
