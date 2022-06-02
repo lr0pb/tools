@@ -10,16 +10,25 @@ export const taskInfo = {
     <button id="edit">${emjs.pen} Edit task</button>
   `,
   script: renderTaskInfo,
-  onPageShow: ({globals, page}) => {
+  onPageShow: async ({globals, page}) => {
     if (!globals.pageInfo) globals.pageInfo = history.state;
-    const task = await globals.db.getItem('tasks', globals.pageInfo.taskId);
-    if (task.disabled || task.deleted) qs('#edit').style.display = 'none';
+    else Object.assign(globals.pageInfo, history.state);
+    if (globals.pageInfo.stateChangedTaskId) qs('#edit').style.display = 'none';
+    if (!globals.pageInfo.dataChangedTaskId) return;
+    const td = await globals.db.getItem('tasks', globals.pageInfo.taskId);
+    const periods = await globals.getPeriods();
+    qs('#infoBackground h4').innerHTML = td.name;
+    qs('.itemsHolder').innerHTML = '';
+    renderItemHolder(td, periods);
   }
 };
 
 async function renderTaskInfo({globals, page}) {
   qs('#back').addEventListener('click', () => {
-    globals.pageInfo = null;
+    if (globals.pageInfo) {
+      delete globals.pageInfo.taskId;
+      delete globals.pageInfo.taskAction;
+    }
     history.back();
   });
   if (!globals.pageInfo) globals.pageInfo = history.state;
@@ -46,6 +55,17 @@ async function renderTaskInfo({globals, page}) {
       </div>
     `}
   `;
+  renderItemHolder(task, periods);
+  if (task.special && task.history.length) {
+    let emoji = emjs.cross, color = 'red';
+    if (task.history[0]) emoji = emjs.sign, color = 'green';
+    createInfoRect(emoji, `Task was ${task.history[0] ? '' : 'not '}completed`, color);
+  } else if (task.history.length) {
+    renderHistory(task);
+  }
+}
+
+function renderItemHolder(task, periods) {
   const periodText = !task.special && task.periodStart <= getToday()
     ? `${periods[task.periodId].title} from ${task.periodStart == getToday() ? 'today' : intlDate(task.periodStart)}`
     : task.periodTitle;
@@ -55,14 +75,17 @@ async function renderTaskInfo({globals, page}) {
   if (!task.disabled) createInfoRect(emjs.clock, isActiveText, task.period[task.periodDay] ? 'green' : 'red');
   
   createInfoRect(emjs.fire, `Importance: ${priorities[task.priority].title}`, priorities[task.priority].color);
-  
-  if (task.special && task.history.length) {
-    let emoji = emjs.cross, color = 'red';
-    if (task.history[0]) emoji = emjs.sign, color = 'green';
-    createInfoRect(emoji, `Task was ${task.history[0] ? '' : 'not '}completed`, color);
-  } else if (task.history.length) {
-    renderHistory(task);
-  }
+}
+
+function createInfoRect(emoji, text, color) {
+  const elem = document.createElement('div');
+  elem.className = 'infoRect';
+  elem.style.setProperty('--color', `var(--${color})`);
+  elem.innerHTML = `
+    <h4>${emoji}</h4>
+    <h3>${text}</h3>
+  `;
+  qs('.itemsHolder').append(elem);
 }
 
 function renderHistory(task) {
@@ -101,15 +124,4 @@ function renderHistory(task) {
     hb.innerHTML += `<h4>${emjs.blank}</h4>`;
     addValue();
   }
-}
-
-function createInfoRect(emoji, text, color) {
-  const elem = document.createElement('div');
-  elem.className = 'infoRect';
-  elem.style.setProperty('--color', `var(--${color})`);
-  elem.innerHTML = `
-    <h4>${emoji}</h4>
-    <h3>${text}</h3>
-  `;
-  qs('.itemsHolder').append(elem);
 }
