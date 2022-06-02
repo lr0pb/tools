@@ -48,7 +48,10 @@ async function getPeriods(globals) {
 
 async function onTaskCreator({globals}) {
   const safeBack = () => {
-    globals.pageInfo = null;
+    if (globals.pageInfo) {
+      delete globals.pageInfo.taskId;
+      delete globals.pageInfo.taskAction;
+    }
     history.back();
   };
   qs('#back').addEventListener('click', safeBack);
@@ -66,7 +69,8 @@ async function onTaskCreator({globals}) {
     enableEditButtons(globals, td, safeBack);
   }
   qs('#saveTask').addEventListener('click', async () => {
-    const task = await createTask(globals, td);
+    const periods = await globals.getPeriods();
+    const task = createTask(periods, td);
     if (task == 'error') return globals.message({
       state: 'fail', text: 'Fill all fields'
     });
@@ -75,11 +79,11 @@ async function onTaskCreator({globals}) {
     globals.message({
       state: 'success', text: isEdit ? 'Task saved' : 'Task added'
     });
-    if (!localStorage.firstDayEver) {
-      globals.paintPage('main', true, true);
-      return;
-    }
+    globals.pageInfo.dataChangedTaskId = task.id;
     await globals.checkPersist();
+    if (!localStorage.firstDayEver) {
+      return globals.paintPage('main', true, true);
+    }
     safeBack();
   });
 }
@@ -92,7 +96,7 @@ async function enterEditTaskMode(globals) {
   qs('#name').value = td.name;
   if (td.nameEdited) qs('#name').disabled = 'disabled';
   qs('#priority').value = td.priority;
-  if (!td.periodId) setPeriodId(td);
+  if (!td.periodId) setPeriodId(td, periods);
   const opt = document.createElement('option');
   opt.selected = 'selected';
   opt.innerHTML = td.ogTitle || periods[td.periodId].title || td.periodTitle;
@@ -122,7 +126,7 @@ function enableEditButtons(globals, td, safeBack) {
   });
 }
 
-function setPeriodId(task) {
+function setPeriodId(task, periods) {
   for (let per in periods) {
     const title = periods[per].title;
     if (title == task.periodTitle || title == task.ogTitle) {
@@ -177,8 +181,7 @@ async function onPeriodChange(e, globals) {
   }
 }
 
-async function createTask(globals, td = {}) {
-  const periods = await globals.getPeriods();
+function createTask(periods, td = {}) {
   const value = qs('#period').value;
   const priority = Number(qs('#priority').value);
   const task = {
