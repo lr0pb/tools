@@ -1,5 +1,13 @@
-export const qs = (elem) => document.querySelector(`.current ${elem}`);
-export const qsa = (elem) => document.querySelectorAll(`.current ${elem}`);
+export const qs = (elem, page) => q('querySelector', elem, page);
+export const qsa = (elem, page) => q('querySelectorAll', elem, page);
+
+function q(func, elem, page) {
+  if (page) {
+    if (!document.querySelector(`#${page}`)) return null;
+    return document[func](`#${page} ${elem}`);
+  }
+  return document[func](`.current ${elem}`);
+}
 
 export const getLast = (arr) => arr[arr.length - 1];
 
