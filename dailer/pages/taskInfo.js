@@ -9,7 +9,12 @@ export const taskInfo = {
     <button id="back" class="secondary">${emjs.back} Back</button>
     <button id="edit">${emjs.pen} Edit task</button>
   `,
-  script: renderTaskInfo
+  script: renderTaskInfo,
+  onPageShow: ({globals, page}) => {
+    if (!globals.pageInfo) globals.pageInfo = history.state;
+    const task = await globals.db.getItem('tasks', globals.pageInfo.taskId);
+    if (task.disabled || task.deleted) qs('#edit').style.display = 'none';
+  }
 };
 
 async function renderTaskInfo({globals, page}) {
