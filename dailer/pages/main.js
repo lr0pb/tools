@@ -35,6 +35,7 @@ async function renderDay({globals, page}) {
     return page.classList.add('center');
   }
   page.classList.remove('center');
+  page.innerHTML = '';
   for (let i = day.tasks.length - 1; i > -1; i--) {
     for (let id in day.tasks[i]) {
       const td = await globals.db.getItem('tasks', id);
