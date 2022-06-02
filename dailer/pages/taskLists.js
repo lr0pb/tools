@@ -8,7 +8,21 @@ export const planCreator = {
     <button id="back" class="secondary">${emjs.back} Back</button>
     <button id="addTask">${emjs.paperWPen} Add task</button>
   `,
-  script: onPlanCreator
+  script: onPlanCreator,
+  onPageShow: async ({globals, page}) => {
+    if (!globals.pageInfo) globals.pageInfo = history.state;
+    let id = globals.pageInfo.stateChangedTaskId;
+    if (id) qs(`[data-id="${id}"]`).remove();
+    if (!page.children.length) showNoTasks(page);
+    delete globals.pageInfo.stateChangedTaskId;
+    id = globals.pageInfo.dataChangedTaskId;
+    if (!id) return;
+    const td = await globals.db.getItem('tasks', id);
+    const elem = qs(`[data-id="${id}"]`);
+    const task = renderTask({type: 'edit', globals, td, page: elem ? null : page});
+    if (elem && task) elem.replaceWith(task);
+    delete globals.pageInfo.dataChangedTaskId;
+  }
 };
 
 async function onPlanCreator({globals, page}) {
@@ -47,7 +61,5 @@ async function renderTasksList({globals, page, isBadTask}) {
     if (isBadTask(td)) continue;
     renderTask({type: 'edit', globals, td, page});
   }
-  if (!page.children.length) {
-    showNoTasks(page);
-  }
+  if (!page.children.length) showNoTasks(page);
 }
