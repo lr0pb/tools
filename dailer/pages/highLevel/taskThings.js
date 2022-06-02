@@ -54,7 +54,8 @@ export function renderTask({type, globals, td, page, onBodyClick}) {
   task.addEventListener('click', async (e) => {
     await onTaskManageClick({e, globals, task, page});
   })
-  page.append(task);
+  if (page) page.append(task);
+  return task;
 }
 
 export async function onTaskManageClick({ e, globals, task, page }) {
@@ -96,6 +97,8 @@ export async function editTask({globals, id, field, onConfirm}) {
       globals.message({
         state: 'success', text: `Task ${field}`
       });
+      if (!globals.pageInfo) globals.pageInfo = {};
+      globals.pageInfo.stateChangedTaskId = id;
       onConfirm();
     }
   });
