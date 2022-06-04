@@ -17,9 +17,9 @@ async function renderPage({globals, page}) {
   const memory = navigator.storage && navigator.storage.estimate
   ? await navigator.storage.estimate()
   : { quota: 0, usage: 0, usageDetails: { caches: 0, indexedDB: 0 } };
-  const days = await globals.getAll('days');
-  const tasks = await globals.getAll('tasks');
-  const periods = await globals.getAll('periods');
+  const days = await globals.db.getAll('days');
+  const tasks = await globals.db.getAll('tasks');
+  const periods = await globals.db.getAll('periods');
   page.innerHTML = `
     <h3>Is storage persisted:</h3>
     <p>${isPersisted.toString()}</p>
