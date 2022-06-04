@@ -68,7 +68,7 @@ const globals = {
   },
   message: ({state, text}) => {
     const msg = qs('#message');
-    msg.style.display = 'block';
+    msg.classList.add('animate');
     msg.style.setProperty(
       '--color', state == 'fail' ? '#a30000' : '#008000'
     );
@@ -76,7 +76,7 @@ const globals = {
       ${state == 'fail' ? '&#10060;' : '&#9989;'} ${text}
     `;
     setTimeout( () => {
-      msg.style.display = 'none';
+      msg.classList.remove('animate');
     }, 2000);
   },
   openPopup: ({text, action}) => {

@@ -17,10 +17,13 @@ async function renderPage({globals, page}) {
   const memory = navigator.storage && navigator.storage.estimate
   ? await navigator.storage.estimate()
   : { quota: 0, usage: 0, usageDetails: { caches: 0, indexedDB: 0 } };
+  const days = await globals.getAll('days');
+  const tasks = await globals.getAll('tasks');
+  const periods = await globals.getAll('periods');
   page.innerHTML = `
     <h3>Is storage persisted:</h3>
     <p>${isPersisted.toString()}</p>
-    <h3>Available memory:</h3>
+    <h3>Theoretical available memory:</h3>
     <p>${convertBytes(memory.quota, 'Mb')}</p>
     <h3>Used memory:</h3>
     <p>${convertBytes(memory.usage, 'kb')}</p>
@@ -32,6 +35,12 @@ async function renderPage({globals, page}) {
     <p>${intlDate(Number(localStorage.firstDayEver))}</p>
     <h3>Periods list:</h3>
     <p>${localStorage.periodsList}</p>
+    <h3>Days amount:</h3>
+    <p>${days.length}</p>
+    <h3>Tasks amount:</h3>
+    <p>${tasks.length}</p>
+    <h3>Periods amount:</h3>
+    <p>${periods.length}</p>
   `;
 }
 

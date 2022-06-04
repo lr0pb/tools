@@ -185,25 +185,27 @@ async function onPeriodChange(e, globals) {
 function createTask(periods, td = {}) {
   const value = qs('#period').value;
   const priority = Number(qs('#priority').value);
+  const per = periods[value];
+  const tdPer = td.periodId ? periods[td.periodId] : {};
   const task = {
     id: td.id || Date.now().toString(),
     name: qs('#name').value,
     priority,
-    period: td.period || periods[value].days,
-    periodId: td.periodId || td.ogTitle || periods[value].id,
-    periodTitle: td.periodId ? periods[td.periodId].title : periods[value].title,
+    period: td.period || per.days,
+    periodId: td.periodId || td.ogTitle || per.id,
+    periodTitle: tdPer.title || per.title,
     periodStart: td.periodStart && td.periodStart <= getToday()
     ? td.periodStart
-    : (td.periodId ? periods[td.periodId].selectTitle : periods[value].selectTitle)
+    : tdPer.selectTitle || per.selectTitle
     ? new Date(qs('#date').value).getTime()
-    : td.periodStart || periods[value].startDate,
+    : td.periodStart || per.startDate,
     periodDay: td.periodId
     ? td.periodDay
-    : (periods[value].getWeekStart
+    : (per.getWeekStart
        ? new Date().getDay() - 1
-       : periods[value].periodDay),
+       : per.periodDay),
     history: td.history || [],
-    special: td.periodId ? td.special : periods[value].special,
+    special: td.periodId ? td.special : per.special,
     nameEdited: td.periodId ? td.nameEdited : false,
     disabled: false,
     deleted: false

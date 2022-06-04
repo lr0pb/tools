@@ -70,6 +70,13 @@ function updatePeriodsList({e, globals, periodsCount, elem }) {
       })
     : list.push(id);
   }
+  list.sort((el1, el2) => {
+    el1 = Number(el1);
+    el2 = Number(el2);
+    if (el1 > el2) return 1;
+    if (el1 == el2) return 0;
+    return -1;
+  });
   localStorage.periodsList = JSON.stringify(list);
   e.target.innerHTML = getPeriodUsed(id);
 }
