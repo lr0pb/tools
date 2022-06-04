@@ -47,7 +47,7 @@ body, .page, #settings {
   grid-template-areas:
     "... header ..."
     "... content ..."
-    "... footer ..."
+    "footer footer footer"
   ;
   grid-template-rows: 16rem 1fr var(--footerHeight);
   grid-template-columns: minmax(3rem, 1fr) var(--gridContent) minmax(3rem, 1fr);
@@ -146,6 +146,7 @@ button, .task, #message, #infoBackground, .infoRect, #popup > div {
 }
 
 button {
+  min-height: 11.6rem;
   font-size: 4.3em;
   font-weight: 700;
   padding: 2rem 4rem;
@@ -155,6 +156,7 @@ button {
   user-select: none;
 }
 button.emojiBtn {
+  min-height: 0;
   font-size: 5em;
   --bgColor: transparent;
   border-color: transparent;

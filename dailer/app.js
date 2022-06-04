@@ -16,11 +16,12 @@ const getUrl = () => location.href.toString();
 
 const getPageLink = (name) => {
   const getLink = (sign) => getUrl() + sign + `page=${name}`;
-  const link = getUrl().includes('?')
+  let link = getUrl().includes('?')
   ? (getUrl().includes('page')
      ? getUrl().replace(/(?<=page=)\w+/, name)
      : getLink('&'))
   : getLink('?');
+  link = link.replace(/\&settings=\w+/, '');
   return link;
 }
 
