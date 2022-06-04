@@ -36,6 +36,9 @@ html {
 
 body, .page, #settings {
   width: 100vw; height: 100vh;
+  height: -webkit-fill-available;
+  height: -moz-available;
+  height: stretch;
   overflow: hidden;
   background-color: black;
   color: white;
@@ -133,12 +136,14 @@ p {
   font-size: 9em;
 }
 
-button, .task, #message, input, select, #infoBackground, .infoRect, #popup > div {
+button, .task, #message, input, select, #infoBackground,
+.infoRect, #popup > div, .floatingMsg {
   box-sizing: border-box;
   background-origin: border-box;
 }
 
-button, .task, #message, #infoBackground, .infoRect, #popup > div {
+button, .task, #message, #infoBackground,
+.infoRect, #popup > div, .floatingMsg {
   border-radius: 2.5rem;
   border: 0.9rem solid rgb(51 51 51 / 50%);
   margin: 2.5rem 1.5rem;
@@ -188,12 +193,29 @@ button.danger {
   display: block;
   animation: msgShowing var(--msgShowing);
 }
-
 @keyframes msgShowing {
   0% {opacity: 0;}
   15% {opacity: 1;}
   80% {opacity: 1;}
   100% {opacity: 0;}
+}
+
+.floatingMsg {
+  width: var(--fullWidth);
+  background-color: #6f879c;
+  margin: 0;
+  align-items: center;
+  display: flex;
+  position: fixed;
+  bottom: var(--footerHeight);
+}
+.floatingMsg h3 {
+  margin: 0 1rem 0 3rem;
+}
+.floatingMsg button {
+  margin-left: auto;
+  margin-right: 3rem;
+  padding: 1rem 5rem;
 }
 
 @keyframes elemShowing {

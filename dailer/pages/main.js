@@ -45,6 +45,7 @@ async function renderDay({globals, page}) {
       }});
     }
   }
+  await checkPersist(globals, page);
 }
 
 async function createDay(globals, periods, today = getToday()) {
@@ -125,4 +126,20 @@ function isEmpty(day) {
     if (Object.keys(tasks).length > 0) return false;
   }
   return true;
+}
+
+async function checkPersist(globals, page) {
+  const response = await globals.checkPersist();
+  if (response === false) {
+    const elem = document.createElement('div');
+    elem.className = 'floatingMsg';
+    elem.innerHTML = `
+      <h3>Protect your data from accidental deletion</h3>
+      <button id="toSafeStorage">Go</button>
+    `;
+    page.append(elem);
+    qs('#toSafeStorage').addEventListener('click', () => {
+      globals.openSettings('storage');
+    });
+  }
 }

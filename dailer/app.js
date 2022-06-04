@@ -110,10 +110,12 @@ const globals = {
     await pages[globals.pageName].onSettingsUpdate(globals);
   },
   checkPersist: async () => {
-    if (!navigator.storage || !navigator.storage.persist) return;
+    if (!navigator.storage || !navigator.storage.persist) return undefined;
     const isPersisted = await navigator.storage.persisted();
-    if (isPersisted) return;
+    if (isPersisted) return isPersisted;
     await navigator.storage.persist();
+    const response = await navigator.storage.persisted();
+    return response;
   }
 }
 

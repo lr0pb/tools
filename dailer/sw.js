@@ -24,7 +24,9 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
-  if (e.request.url.includes('manifest.json')) return;
+  if (
+    e.request.url.includes('manifest.json') || e.request.url.includes('screenshots')
+  ) return;
   const badResponse = new Response(new Blob, { 'status': 400, 'statusText': 'No network' });
   e.respondWith(
     (async () => {
