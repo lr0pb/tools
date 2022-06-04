@@ -5,7 +5,9 @@ import { planCreator, tasksArchive } from './pages/taskLists.js'
 import { taskCreator } from './pages/taskCreator.js'
 import { taskInfo } from './pages/taskInfo.js'
 import { periodCreator } from './pages/periodCreator.js'
+import { debugPage } from './pages/debugPage.js'
 
 export const pages = {
-  onboarding, main, settings, planCreator, taskCreator, tasksArchive, taskInfo, periodCreator
+  onboarding, main, settings, planCreator, taskCreator, tasksArchive, taskInfo, periodCreator,
+  debugPage
 };
