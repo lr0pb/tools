@@ -14,10 +14,15 @@ export const settings = {
       <div id="periodsContainer"></div>
       <h3>Create your own period for specific task performance</h3>
       <button id="toPeriodCreator">${emjs.calendar} Create custom period</button>
+      <button id="toDebug" class="secondary">${emjs.construction} Open debug page</button>
     `;
     qs('#toPeriodCreator').addEventListener('click', () => {
       globals.closeSettings(true);
       globals.paintPage('periodCreator');
+    });
+    qs('#toDebug').addEventListener('click', () => {
+      globals.closeSettings(true);
+      globals.paintPage('debugPage');
     });
   },
   opening: async ({globals}) => {

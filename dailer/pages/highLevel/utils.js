@@ -39,6 +39,7 @@ export const emjs = {
   clock: '&#128337;',
   oldPaper: '&#128220;',
   paperList: '&#128203;',
+  construction: '&#127959;',
 };
 
 export function safeDataInteractions(elems) {

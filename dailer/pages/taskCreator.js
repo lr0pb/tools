@@ -79,6 +79,7 @@ async function onTaskCreator({globals}) {
     globals.message({
       state: 'success', text: isEdit ? 'Task saved' : 'Task added'
     });
+    if (!globals.pageInfo) globals.pageInfo = {};
     globals.pageInfo.dataChangedTaskId = task.id;
     await globals.checkPersist();
     if (!localStorage.firstDayEver) {
