@@ -130,7 +130,7 @@ function isEmpty(day) {
 }
 
 export async function checkInstall(globals) {
-  if (navigator.standalone === null && !globals.installPrompt) return;
+  if (navigator.standalone === undefined && !globals.installPrompt) return;
   const response = await globals.checkPersist();
   const prevElem = qs('.floatingMsg', 'main');
   if (prevElem) prevElem.remove();

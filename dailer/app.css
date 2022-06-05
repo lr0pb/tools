@@ -211,6 +211,7 @@ button.danger {
 }
 .floatingMsg h3 {
   margin: 3rem;
+  text-align: left;
 }
 .floatingMsg button {
   margin-left: auto;

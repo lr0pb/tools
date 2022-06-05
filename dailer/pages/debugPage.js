@@ -41,6 +41,12 @@ async function renderPage({globals, page}) {
     <p>${tasks.length}</p>
     <h3>Periods amount:</h3>
     <p>${periods.length}</p>
+    <h3>Is app installed:</h3>
+    <p>${localStorage.installed}</p>
+    <h3>Network connection type:</h3>
+    <p>${navigator.connection.effectiveType}</p>
+    <h3>Is online:</h3>
+    <p>${navigator.onLine}</p>
   `;
 }
 
