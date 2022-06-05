@@ -6,7 +6,7 @@ const qs = (elem) => document.querySelector(elem);
 const periodsCount = 5;
 
 export const settings = {
-  sections: ['periods', 'storage'],
+  sections: ['periods'],
   paint: async ({globals, page}) => {
     page.innerHTML = `
       <h2 data-section="periods">Periods</h2>
@@ -14,9 +14,9 @@ export const settings = {
       <div id="periodsContainer"></div>
       <h3>Create your own period for specific task performance</h3>
       <button id="toPeriodCreator">${emjs.calendar} Create custom period</button>
-      <h2 data-section="storage">Protect your data</h2>
+      <!--<h2 data-section="storage">Protect your data</h2>
       <h3>We store your data on your device and have no remote access to it</h3>
-      <h3>Install app to the home screen to show your browser importance of the site's data to activate site's data protection</h3>
+      <h3>Install app to the home screen to show your browser importance of the site's data to activate site's data protection</h3>-->
       <button id="toDebug" class="secondary">${emjs.construction} Open debug page</button>
     `;
     qs('#toPeriodCreator').addEventListener('click', () => {

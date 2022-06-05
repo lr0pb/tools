@@ -1,4 +1,5 @@
 import { pages } from './pages.js'
+import { checkInstall } from './pages/main.js'
 import { qs as localQs, copyObject } from './pages/highLevel/utils.js'
 import { periods } from './pages/highLevel/periods.js'
 import { paintPeriods } from './pages/settings.js'
@@ -113,8 +114,7 @@ const globals = {
     if (!navigator.storage || !navigator.storage.persist) return undefined;
     const isPersisted = await navigator.storage.persisted();
     if (isPersisted) return isPersisted;
-    await navigator.storage.persist();
-    const response = await navigator.storage.persisted();
+    const response = await navigator.storage.persist();
     return response;
   }
 }
@@ -150,6 +150,19 @@ window.addEventListener('load', async () => {
 });
 
 window.addEventListener('popstate', (e) => renderPage(e, true));
+
+window.addEventListener('appinstalled', () => {
+  localStorage.installed = 'true';
+  const elem = qs('#main .floatingMsg');
+  if (elem) elem.remove();
+});
+
+window.addEventListener('beforeinstallprompt', await (e) => {
+  e.preventDefault();
+  localStorage.installed = 'false';
+  globals.installPrompt = e;
+  if (qs('#main')) await checkInstall(globals);
+});
 
 function renderPage(e, back) {
   const params = getParams();
@@ -220,4 +233,10 @@ qs('#popup').addEventListener('click', (e) => {
 
 if (!localStorage.periodsList) {
   localStorage.periodsList = JSON.stringify(['01', '03', '07', '09']);
+}
+
+if (
+  window.matchMedia('(display-mode: standalone)').matches || navigator.standalone
+) {
+  localStorage.installed = 'true';
 }

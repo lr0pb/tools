@@ -18,7 +18,7 @@ export const main = {
   },
   onPageShow: async ({globals, page}) => {
     const day = await globals.db.getItem('days', getToday().toString());
-    if (day.lastTasksChange != localStorage.lastTasksChange) {
+    if (!day || day.lastTasksChange != localStorage.lastTasksChange) {
       await renderDay({globals, page});
     }
   }
@@ -32,6 +32,7 @@ async function renderDay({globals, page}) {
       <h2 class="emoji">${emjs.magic}</h2>
       <h2>You have no tasks today!</h2>
     `;
+    await checkInstall(globals);
     return page.classList.add('center');
   }
   page.classList.remove('center');
@@ -45,7 +46,7 @@ async function renderDay({globals, page}) {
       }});
     }
   }
-  await checkPersist(globals, page);
+  await checkInstall(globals);
 }
 
 async function createDay(globals, periods, today = getToday()) {
@@ -128,18 +129,26 @@ function isEmpty(day) {
   return true;
 }
 
-async function checkPersist(globals, page) {
+export async function checkInstall(globals) {
+  if (navigator.standalone === null && !globals.installPrompt) return;
   const response = await globals.checkPersist();
-  if (response === false) {
+  const prevElem = qs('.floatingMsg', 'main');
+  if (prevElem) prevElem.remove();
+  if (response === false || localStorage.installed !== 'true') {
     const elem = document.createElement('div');
     elem.className = 'floatingMsg';
     elem.innerHTML = `
-      <h3>Protect your data from accidental deletion</h3>
-      <button id="toSafeStorage">Go</button>
+      <h3>To protect your data, install dailer app on your home screen${
+        navigator.standalone === false ? ': click Share > Add to home screen' : ''
+      }</h3>
+      ${globals.installPrompt ? '<button id="installApp">Install</button>' : ''}
     `;
-    page.append(elem);
-    qs('#toSafeStorage').addEventListener('click', () => {
-      globals.openSettings('storage');
+    qs('.content', 'main').append(elem);
+    qs('#installApp', 'main').addEventListener('click', async () => {
+      globals.installPrompt.prompt();
+      await globals.installPrompt.userChoice;
+      delete globals.installPrompt;
+      elem.remove();
     });
   }
 }

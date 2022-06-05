@@ -196,7 +196,7 @@ function createTask(periods, td = {}) {
     periodTitle: tdPer.title || per.title,
     periodStart: td.periodStart && td.periodStart <= getToday()
     ? td.periodStart
-    : tdPer.selectTitle || per.selectTitle
+    : tdPer.selectTitle || per.selectTitle || per.getWeekStart
     ? new Date(qs('#date').value).getTime()
     : td.periodStart || per.startDate,
     periodDay: td.periodId
