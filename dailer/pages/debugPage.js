@@ -20,7 +20,7 @@ async function renderPage({globals, page}) {
   const days = await globals.db.getAll('days');
   const tasks = await globals.db.getAll('tasks');
   const periods = await globals.db.getAll('periods');
-  page.innerHTML = `
+  page.innerHTML = `<div>
     <h3>Is storage persisted:</h3>
     <p>${isPersisted.toString()}</p>
     <h3>Theoretical available memory:</h3>
@@ -47,7 +47,7 @@ async function renderPage({globals, page}) {
     <p>${navigator.connection.effectiveType}</p>
     <h3>Is online:</h3>
     <p>${navigator.onLine}</p>
-  `;
+  </div>`;
 }
 
 function convertBytes(value, unit) {
