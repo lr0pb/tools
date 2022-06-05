@@ -157,7 +157,7 @@ window.addEventListener('appinstalled', () => {
   if (elem) elem.remove();
 });
 
-window.addEventListener('beforeinstallprompt', await (e) => {
+window.addEventListener('beforeinstallprompt', async (e) => {
   e.preventDefault();
   localStorage.installed = 'false';
   globals.installPrompt = e;
