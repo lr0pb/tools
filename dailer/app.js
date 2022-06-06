@@ -95,6 +95,21 @@ const globals = {
     pageBtn.onclick = onClick;
     pageBtn.style.display = 'block';
   },
+  floatingMsg: ({text, button, onClick, pageName}) => {
+    const prevElem = localQs('.floatingMsg', pageName);
+    if (prevElem) prevElem.remove();
+    const elem = document.createElement('div');
+    elem.className = 'floatingMsg';
+    elem.innerHTML = `
+      <h3>${text}</h3>
+      ${button ? `<button>${button}</button>` : ''}
+    `;
+    localQs('.content', pageName).append(elem);
+    if (button) {
+      localQs('.floatingMsg button', pageName).addEventListener('click', onClick);
+    }
+    return elem;
+  },
   openSettings: async (section, back) => {
     qs('#settings').style.transform = 'none';
     await pages.settings.opening({globals});

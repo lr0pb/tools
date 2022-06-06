@@ -107,7 +107,7 @@ function toggler({e, elem}) {
 function createPeriod() {
   if (!localStorage.lastPeriodId) localStorage.lastPeriodId = 50;
   const period = {
-    id: Number(localStorage.lastPeriodId) + 1,
+    id: String(Number(localStorage.lastPeriodId) + 1),
     title: qs('#periodName').value,
     days: [],
     selectTitle: 'Select day to start',

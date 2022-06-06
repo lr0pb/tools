@@ -11,9 +11,11 @@ export const taskCreator = {
     <select id="priority"></select>
     <h3>How often you will do this task?</h3>
     <select id="period"></select>
-    <h3 id="dateTitle"></h3>
-    <input type="date" id="date">
-    <h3 id="description"></h3>
+    <h3 id="description" class="hidedUI"></h3>
+    <h3 id="dateTitle" class="hidedUI"></h3>
+    <input type="date" id="date" class="hidedUI">
+    <h3 id="endDateTitle" class="hidedUI">Select </h3>
+    <input type="date" id="endDate" class="hidedUI">
     <div id="editButtons">
       <button id="disable" class="secondary">Disable task</button>
       <button id="delete" class="danger">Delete task</button>
@@ -182,7 +184,7 @@ async function onPeriodChange(e, globals) {
   }
 }
 
-function createTask(periods, td = {}) {
+export function createTask(periods, td = {}) {
   const value = qs('#period').value;
   const priority = Number(qs('#priority').value);
   const per = periods[value];
@@ -207,7 +209,7 @@ function createTask(periods, td = {}) {
     history: td.history || [],
     special: td.periodId ? td.special : per.special,
     nameEdited: td.periodId ? td.nameEdited : false,
-    disabled: false,
+    disabled: td.disabled || false,
     deleted: false
   };
   if (!task.special) delete task.special;

@@ -110,7 +110,7 @@ export function setPeriodTitle(task) {
   let startTitle = intlDate(date);
   if (task.periodStart == getToday()) startTitle = 'today';
   if (task.periodStart - oneDay == getToday()) startTitle = 'tomorrow';
-  
+
   if (task.special == 'oneTime') {
     task.periodTitle = `Only ${startTitle}`;
   } else if (task.periodStart > getToday()) {
@@ -121,6 +121,12 @@ export function setPeriodTitle(task) {
 export async function onTaskCompleteClick({ e, globals, elem: task }) {
   const td = await globals.db.getItem('tasks', task.dataset.id);
   const day = await globals.db.getItem('days', getToday().toString());
+  if (!day) return globals.floatingMsg({
+    text: 'Day is expired! So you need to reload tasks for today',
+    button: 'Reload',
+    onClick: () => location.reload(),
+    pageName: 'main'
+  });
   const value = getLast(td.history) == 1 ? 0 : 1;
   td.history.pop();
   td.history.push(value);

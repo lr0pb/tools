@@ -1,12 +1,15 @@
 import { renderToggler } from './highLevel/taskThings.js'
 import { emjs } from './highLevel/utils.js'
+import { getToday, oneDay } from './highLevel/periods.js'
 
 const qs = (elem) => document.querySelector(elem);
+
+const qsa = (elem) => document.querySelectorAll(elem);
 
 const periodsCount = 5;
 
 export const settings = {
-  sections: ['periods'],
+  sections: ['periods', 'import'],
   paint: async ({globals, page}) => {
     page.innerHTML = `
       <h2 data-section="periods">Periods</h2>
@@ -17,6 +20,13 @@ export const settings = {
       <!--<h2 data-section="storage">Protect your data</h2>
       <h3>We store your data on your device and have no remote access to it</h3>
       <h3>Install app to the home screen to show your browser importance of the site's data to activate site's data protection</h3>-->
+      <!--<h2 data-section="import">Data management</h2>
+      <h3>Backup your data to be safe and prevent accidental deleting or to swap it to other device</h3>
+      <button id="uploadData">Upload existent backup</button>
+      <input type="file" accept=".dailer" id="chooseFile">
+      <progress class="uploadUI"></progress>
+      <h3 class="uploadUI">Be patient and don't quit the app before uploading done</h3>
+      <button id="getData" disabled>Backup your current data</button>-->
       <button id="toDebug" class="secondary">${emjs.construction} Open debug page</button>
     `;
     qs('#toPeriodCreator').addEventListener('click', () => {
@@ -27,6 +37,7 @@ export const settings = {
       globals.closeSettings(true);
       globals.paintPage('debugPage');
     });
+    qs('#uploadData').addEventListener('click', async () => await uploadData(globals));
   },
   opening: async ({globals}) => {
     if (!qs('#periodsContainer').children.length) {
@@ -87,4 +98,40 @@ function updatePeriodsList({e, globals, periodsCount, elem }) {
 function getPeriodUsed(id) {
   return JSON.parse(localStorage.periodsList).includes(id)
   ? emjs.sign : emjs.blank;
+}
+
+async function uploadData(globals) {
+  const chooser = qs('#chooseFile');
+  chooser.addEventListener('change', () => {
+    const file = chooser.files[0];
+    const reader = new FileReader();
+    reader.readAsText(file);
+    reader.onload = async () => {
+      qsa('.uploadUI').display = 'block';
+      const data = JSON.parse(reader.result);
+      await uploading(globals, data);
+    };
+  });
+  chooser.click();
+}
+
+async function uploading(globals, data) {
+  const periods = await globals.getPeriods();
+  let earliestDay = getToday();
+  const tasks = [];
+  for (let td of data.tasks) {
+    td.id: Date.now().toString();
+    if (td.periodStart < earliestDay) earliestDay = td.periodStart;
+    const task = createTask(periods, td);
+    tasks.push(task);
+    await globals.db.setItem('tasks', task);
+  }
+  const diff = (getToday() - earliestDay) / oneDay;
+  for (let i = 0; i < diff; i++) {
+    const date = earliestDay + oneDay * i;
+    let day = await globals.db.getItem('days', date);
+    if (!day) day = getRawDay(date, true);
+    //
+    await globals.db.setItem('days', day);
+  }
 }

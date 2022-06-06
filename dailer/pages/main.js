@@ -59,11 +59,7 @@ async function createDay(globals, periods, today = getToday()) {
   }
   let day = await globals.db.getItem('days', today.toString());
   if (!day || day.lastTasksChange != localStorage.lastTasksChange) {
-    day = {
-      date: today.toString(), tasks: [{}, {}, {}], // 3 objects for 3 priorities
-      completed: false, lastTasksChange: localStorage.lastTasksChange,
-      firstCreation: !day
-    };
+    day = getRawDay(today.toString(), !day);
   } else return day;
   let tasks = await globals.db.getAll('tasks');
   tasks = tasks.filter( (elem) => !elem.disabled && !elem.deleted );
@@ -84,6 +80,14 @@ async function createDay(globals, periods, today = getToday()) {
   if (isEmpty(day)) return 'error';
   await globals.db.setItem('days', day);
   return day;
+}
+
+export function getRawDay(date, firstCreation) {
+  return {
+    date, tasks: [{}, {}, {}], // 3 objects for 3 priorities
+    completed: false, lastTasksChange: localStorage.lastTasksChange,
+    firstCreation
+  };
 }
 
 async function checkLastDay(globals, day) {
@@ -132,23 +136,19 @@ function isEmpty(day) {
 export async function checkInstall(globals) {
   if (navigator.standalone === undefined && !globals.installPrompt) return;
   const response = await globals.checkPersist();
-  const prevElem = qs('.floatingMsg', 'main');
-  if (prevElem) prevElem.remove();
   if (response === false || localStorage.installed !== 'true') {
-    const elem = document.createElement('div');
-    elem.className = 'floatingMsg';
-    elem.innerHTML = `
-      <h3>To protect your data, install dailer app on your home screen${
+    globals.floatingMsg({
+      text: `To protect your data, install dailer app on your home screen${
         navigator.standalone === false ? ': click Share > Add to home screen' : ''
-      }</h3>
-      ${globals.installPrompt ? '<button id="installApp">Install</button>' : ''}
-    `;
-    qs('.content', 'main').append(elem);
-    qs('#installApp', 'main').addEventListener('click', async () => {
-      globals.installPrompt.prompt();
-      await globals.installPrompt.userChoice;
-      delete globals.installPrompt;
-      elem.remove();
+      }`,
+      button: globals.installPrompt ? 'Install' : null,
+      onClick: async (e) => {
+        globals.installPrompt.prompt();
+        await globals.installPrompt.userChoice;
+        delete globals.installPrompt;
+        e.target.parentElement.remove();
+      },
+      pageName: 'main'
     });
   }
 }

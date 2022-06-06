@@ -290,7 +290,8 @@ input:disabled, select:disabled {
   background-color: var(--darkShadow);
   color: white;
 }
-#dateTitle, #date, #description, #editButtons, #popup {
+.hidedUI, #editButtons, #popup,
+input[type="file"], .uploadUI {
   display: none;
 }
 
