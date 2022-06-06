@@ -120,7 +120,7 @@ async function uploading(globals, data) {
   let earliestDay = getToday();
   const tasks = [];
   for (let td of data.tasks) {
-    td.id: Date.now().toString();
+    td.id = Date.now().toString();
     if (td.periodStart < earliestDay) earliestDay = td.periodStart;
     const task = createTask(periods, td);
     tasks.push(task);
