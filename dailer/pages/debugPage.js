@@ -62,7 +62,7 @@ function convertBytes(value, unit) {
 }
 
 async function clearDatabase(globals) {
-  const stores = globals.db.objectStoreNames;
+  const stores = globals.db.db.objectStoreNames;
   for (let store of stores) {
     const items = await globals.db.getAll(store);
     for (let item of items) {
