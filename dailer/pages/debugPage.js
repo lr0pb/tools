@@ -41,6 +41,8 @@ async function renderPage({globals, page}) {
     <p>${tasks.length}</p>
     <h3>Periods amount:</h3>
     <p>${periods.length}</p>
+    <h3>Last period id:</h3>
+    <p>${localStorage.lastPeriodId || 50}</p>
     <h3>Is app installed:</h3>
     <p>${localStorage.installed}</p>
     <h3>Network connection type:</h3>

@@ -16,13 +16,16 @@ export const main = {
     );
     await renderDay({globals, page});
   },
-  onPageShow: async ({globals, page}) => {
-    const day = await globals.db.getItem('days', getToday().toString());
-    if (!day || day.lastTasksChange != localStorage.lastTasksChange) {
-      await renderDay({globals, page});
-    }
-  }
+  onPageShow: updatePage,
+  onSettingsUpdate: updatePage
 };
+
+async function updatePage({globals, page}) {
+  const day = await globals.db.getItem('days', getToday().toString());
+  if (!day || day.lastTasksChange != localStorage.lastTasksChange) {
+    await renderDay({globals, page});
+  }
+}
 
 async function renderDay({globals, page}) {
   const periods = await globals.getPeriods();

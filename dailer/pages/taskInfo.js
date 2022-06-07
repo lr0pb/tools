@@ -61,7 +61,7 @@ async function renderTaskInfo({globals, page}) {
     if (task.history[0]) emoji = emjs.sign, color = 'green';
     createInfoRect(emoji, `Task was ${task.history[0] ? '' : 'not '}completed`, color);
   } else if (task.history.length) {
-    renderHistory(task);
+    await renderHistory(task);
   }
 }
 
@@ -70,10 +70,10 @@ function renderItemHolder(task, periods) {
     ? `${periods[task.periodId].title} from ${task.periodStart == getToday() ? 'today' : intlDate(task.periodStart)}`
     : task.periodTitle;
   createInfoRect(emjs.calendar, periodText, 'blue');
-  
+
   const isActiveText = `Today ${task.period[task.periodDay] ? 'you should do' : "you haven't"} this task`;
   if (!task.disabled) createInfoRect(emjs.clock, isActiveText, task.period[task.periodDay] ? 'green' : 'red');
-  
+
   createInfoRect(emjs.fire, `Importance: ${priorities[task.priority].title}`, priorities[task.priority].color);
 }
 
@@ -88,8 +88,17 @@ function createInfoRect(emoji, text, color) {
   qs('.itemsHolder').append(elem);
 }
 
-function renderHistory(task) {
+async function renderHistory(task) {
   const hb = qs('.historyMonth');
+  await getHistory({
+    task,
+    onEmptyDays: () => hb.innerHTML += `<h4> </h4>`,
+    onBlankDay: () => hb.innerHTML += `<h4>${emjs.blank}</h4>`,
+    onActiveDay: (date, item) => hb.innerHTML += `<h4>${item ? emjs.sign : emjs.cross}</h4>`
+  });
+}
+
+export async function getHistory({task, onEmptyDays, onBlankDay, onActiveDay}) {
   const creationDay = new Date(Number(task.id)).setHours(0, 0, 0, 0);
   const startDay = new Date(creationDay > task.periodStart ? creationDay : task.periodStart);
   const borderValues = (value) => {
@@ -98,14 +107,16 @@ function renderHistory(task) {
     return value;
   };
   const emptyDays = borderValues(startDay.getDay() - 1);
-  for (let i = 0; i < emptyDays; i++) {
-    hb.innerHTML += `<h4> </h4>`;
+  if (onEmptyDays) for (let i = 0; i < emptyDays; i++) {
+    onEmptyDays();
   }
   let periodCursor = creationDay > task.periodStart ? new Date(creationDay).getDay() : 0;
   let hardUpdate = false;
+  let day = startDay;
   const addValue = () => {
     periodCursor++;
     hardUpdate = false;
+    day += oneDay;
     if (task.period.length == periodCursor) {
       periodCursor = 0;
       hardUpdate = true;
@@ -113,15 +124,14 @@ function renderHistory(task) {
   };
   for (let item of task.history) {
     while (!task.period[periodCursor]) {
-      hb.innerHTML += `<h4>${emjs.blank}</h4>`;
+      if (onBlankDay) onBlankDay();
       addValue();
     }
-    hb.innerHTML += `<h4>${item ? emjs.sign : emjs.cross}</h4>`;
-    addValue();
+    await onActiveDay(day, item); addValue();
   }
   periodCursor = borderValues(periodCursor);
   while (periodCursor <= task.periodDay && !hardUpdate && !task.period[task.periodDay]) {
-    hb.innerHTML += `<h4>${emjs.blank}</h4>`;
+    if (onBlankDay) onBlankDay();
     addValue();
   }
 }

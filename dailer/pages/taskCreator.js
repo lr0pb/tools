@@ -26,7 +26,7 @@ export const taskCreator = {
     <button id="saveTask" class="success">${emjs.save} Save task</button>
   `,
   script: onTaskCreator,
-  onSettingsUpdate: async (globals) => {
+  onSettingsUpdate: async ({globals}) => {
     if (globals.pageInfo && globals.pageInfo.taskAction == 'edit') return;
     const periodsList = await getPeriods(globals);
     createOptionsList(qs('#period'), periodsList);
@@ -39,7 +39,7 @@ async function getPeriods(globals) {
   const list = JSON.parse(localStorage.periodsList);
   const periodsList = [];
   for (let per of list) {
-    periodsList.push(periods[per]);
+    if (periods[per]) periodsList.push(periods[per]);
   }
   periodsList.push({
     id: '00',
@@ -60,7 +60,7 @@ async function onTaskCreator({globals}) {
   if (!localStorage.firstDayEver) qs('#back').style.display = 'none';
   createOptionsList(qs('#priority'), priorities);
   safeDataInteractions(['name', 'priority', 'period', 'date']);
-  await taskCreator.onSettingsUpdate(globals);
+  await taskCreator.onSettingsUpdate({globals});
   qs('#period').addEventListener('change', async (e) => await onPeriodChange(e, globals));
   qs('#date').min = convertDate(Date.now());
   if (!globals.pageInfo) globals.pageInfo = history.state;

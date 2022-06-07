@@ -123,7 +123,9 @@ const globals = {
     qs('#settings').removeAttribute('style');
     if (back !== true) history.back();
     if (!pages[globals.pageName].onSettingsUpdate) return;
-    await pages[globals.pageName].onSettingsUpdate(globals);
+    await pages[globals.pageName].onSettingsUpdate({
+      globals, page: qs('.current .content')
+    });
   },
   checkPersist: async () => {
     if (!navigator.storage || !navigator.storage.persist) return undefined;

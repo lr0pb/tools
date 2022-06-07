@@ -1,6 +1,8 @@
 import { renderToggler } from './highLevel/taskThings.js'
 import { emjs } from './highLevel/utils.js'
 import { getToday, oneDay } from './highLevel/periods.js'
+import { getRawDay } from './main.js'
+import { getHistory } from './taskInfo.js'
 
 const qs = (elem) => document.querySelector(elem);
 
@@ -20,13 +22,14 @@ export const settings = {
       <!--<h2 data-section="storage">Protect your data</h2>
       <h3>We store your data on your device and have no remote access to it</h3>
       <h3>Install app to the home screen to show your browser importance of the site's data to activate site's data protection</h3>-->
-      <!--<h2 data-section="import">Data management</h2>
+      <h2 data-section="import">Data management</h2>
       <h3>Backup your data to be safe and prevent accidental deleting or to swap it to other device</h3>
       <button id="uploadData">Upload existent backup</button>
       <input type="file" accept=".dailer" id="chooseFile">
       <progress class="uploadUI"></progress>
       <h3 class="uploadUI">Be patient and don't quit the app before uploading done</h3>
-      <button id="getData" disabled>Backup your current data</button>-->
+      <h3 id="uploadSuccess">${emjs.sign} Upload successfully completed, go back to check the tasks</h3>
+      <button id="getData" disabled>Backup your current data</button>
       <button id="toDebug" class="secondary">${emjs.construction} Open debug page</button>
     `;
     qs('#toPeriodCreator').addEventListener('click', () => {
@@ -116,10 +119,15 @@ async function uploadData(globals) {
 }
 
 async function uploading(globals, data) {
+  qs('#uploadSuccess').style.display = 'none';
+  for (let elem of qsa('.uploadUI')) {
+    elem.style.display = 'block';
+  }
   const periods = await globals.getPeriods();
+  const days = await globals.db.getAll('days');
   let earliestDay = getToday();
   const tasks = [];
-  for (let td of data.tasks) {
+  for (let td of data.dailer_tasks) {
     td.id = Date.now().toString();
     if (td.periodStart < earliestDay) earliestDay = td.periodStart;
     const task = createTask(periods, td);
@@ -130,8 +138,25 @@ async function uploading(globals, data) {
   for (let i = 0; i < diff; i++) {
     const date = earliestDay + oneDay * i;
     let day = await globals.db.getItem('days', date);
-    if (!day) day = getRawDay(date, true);
-    //
+    if (day) continue;
+    day = getRawDay(date, true);
     await globals.db.setItem('days', day);
   }
+  const prog = qs('progress.uploadUI');
+  prog.max = tasks.length;
+  for (let i = 0; i < tasks.length; i++) {
+    const task = tasks[i];
+    getHistory({ task, onActiveDay: async (date, item) => {
+      const day = await globals.db.getItem('days', date);
+      day.tasks[task.priority][task.id] = item;
+      await globals.db.setItem(day);
+    } });
+    prog.value = i + 1;
+  }
+  prog.removeAttribute('value');
+  //
+  for (let elem of qsa('.uploadUI')) {
+    elem.style.display = 'none';
+  }
+  qs('#uploadSuccess').style.display = 'block';
 }
