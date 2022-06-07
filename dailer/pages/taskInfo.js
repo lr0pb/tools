@@ -119,7 +119,7 @@ export async function getHistory({task, onEmptyDays, onBlankDay, onActiveDay}) {
   }
   let periodCursor = creationDay > task.periodStart ? new Date(creationDay).getDay() : 0;
   let hardUpdate = false;
-  let day = startDay;
+  let day = startDay.setHours(0, 0, 0, 0);
   const addValue = () => {
     periodCursor++;
     hardUpdate = false;

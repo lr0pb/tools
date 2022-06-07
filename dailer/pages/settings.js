@@ -141,7 +141,7 @@ async function uploading(globals, data) {
   }
   const diff = (getToday() - earliestDay) / oneDay;
   for (let i = 0; i < diff; i++) {
-    const date = earliestDay + oneDay * i;
+    const date = String(earliestDay + oneDay * i);
     let day = await globals.db.getItem('days', date);
     if (day) continue;
     day = getRawDay(date, true);

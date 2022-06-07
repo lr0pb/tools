@@ -66,7 +66,7 @@ async function clearDatabase(globals) {
   for (let store of stores) {
     const items = await globals.db.getAll(store);
     for (let item of items) {
-      await globals.db.deleteItem(store, item.id);
+      await globals.db.deleteItem(store, item.id || item.date);
     }
   }
   delete localStorage.lastPeriodId;
