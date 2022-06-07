@@ -3,7 +3,7 @@ import { emjs } from './highLevel/utils.js'
 import { getToday, oneDay } from './highLevel/periods.js'
 import { createTask } from './taskCreator.js'
 import { getRawDay } from './main.js'
-import { getHistory } from './taskInfo.js'
+import { isHistoryAvailable, getHistory } from './taskInfo.js'
 
 const qs = (elem) => document.querySelector(elem);
 
@@ -108,6 +108,9 @@ async function uploadData(globals) {
   const chooser = qs('#chooseFile');
   chooser.addEventListener('change', () => {
     const file = chooser.files[0];
+    if (!file.name.includes('.dailer')) return globals.message({
+      state: 'fail', text: 'Wrong file choosed'
+    });
     const reader = new FileReader();
     reader.readAsText(file);
     reader.onload = async () => {
@@ -120,6 +123,7 @@ async function uploadData(globals) {
 }
 
 async function uploading(globals, data) {
+  qs('#uploadData').style.display = 'none';
   qs('#uploadSuccess').style.display = 'none';
   for (let elem of qsa('.uploadUI')) {
     elem.style.display = 'block';
@@ -147,11 +151,16 @@ async function uploading(globals, data) {
   prog.max = tasks.length;
   for (let i = 0; i < tasks.length; i++) {
     const task = tasks[i];
-    getHistory({ task, onActiveDay: async (date, item) => {
+    const iha = isHistoryAvailable(task);
+    const onActiveDay = async (date, item) => {
       const day = await globals.db.getItem('days', date);
       day.tasks[task.priority][task.id] = item;
       await globals.db.setItem(day);
-    } });
+    };
+    if (iha) getHistory({ task, onActiveDay });
+    else if (iha === false && task.special == 'oneTime') {
+      onActiveDay(task.periodStart, task.history[0]);
+    }
     prog.value = i + 1;
   }
   prog.removeAttribute('value');
@@ -159,5 +168,6 @@ async function uploading(globals, data) {
   for (let elem of qsa('.uploadUI')) {
     elem.style.display = 'none';
   }
+  qs('#uploadData').style.display = 'block';
   qs('#uploadSuccess').style.display = 'block';
 }

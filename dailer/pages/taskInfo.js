@@ -56,12 +56,13 @@ async function renderTaskInfo({globals, page}) {
     `}
   `;
   renderItemHolder(task, periods);
-  if (task.special && task.history.length) {
+  const iha = isHistoryAvailable(task);
+  if (iha) {
+    await renderHistory(task);
+  } else if (iha === false) {
     let emoji = emjs.cross, color = 'red';
     if (task.history[0]) emoji = emjs.sign, color = 'green';
     createInfoRect(emoji, `Task was ${task.history[0] ? '' : 'not '}completed`, color);
-  } else if (task.history.length) {
-    await renderHistory(task);
   }
 }
 
@@ -86,6 +87,12 @@ function createInfoRect(emoji, text, color) {
     <h3>${text}</h3>
   `;
   qs('.itemsHolder').append(elem);
+}
+
+export function isHistoryAvailable(task) {
+  if (task.special && task.history.length) return false;
+  if (task.history.length) return true;
+  return undefined;
 }
 
 async function renderHistory(task) {
@@ -117,7 +124,7 @@ export async function getHistory({task, onEmptyDays, onBlankDay, onActiveDay}) {
     periodCursor++;
     hardUpdate = false;
     day += oneDay;
-    if (task.period.length == periodCursor) {
+    if (periodCursor >= task.period.length) {
       periodCursor = 0;
       hardUpdate = true;
     }

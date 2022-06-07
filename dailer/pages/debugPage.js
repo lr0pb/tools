@@ -49,11 +49,25 @@ async function renderPage({globals, page}) {
     <p>${navigator.connection.effectiveType}</p>
     <h3>Is online:</h3>
     <p>${navigator.onLine}</p>
-  </div>`;
+  </div>
+  <button id="clear">Clear database</button>
+  `;
+  qs('#clear').addEventListener('click', () => clearDatabase(globals));
 }
 
 function convertBytes(value, unit) {
   const divisioner = unit == 'Gb'
   ? 1e9 : (unit == 'Mb' ? 1e6 : 1e3);
   return Math.round(value / divisioner) + unit;
+}
+
+async function clearDatabase(globals) {
+  const stores = globals.db.objectStoreNames;
+  for (let store of stores) {
+    const items = await globals.db.getAll(store);
+    for (let item of items) {
+      await globals.db.deleteItem(store, item.id);
+    }
+  }
+  delete localStorage.lastPeriodId;
 }
