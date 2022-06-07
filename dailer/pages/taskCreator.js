@@ -185,13 +185,13 @@ async function onPeriodChange(e, globals) {
 }
 
 export function createTask(periods, td = {}) {
-  const value = qs('#period').value;
-  const priority = Number(qs('#priority').value);
+  const value = qs('#period') ? qs('#period').value : td.periodId;
+  const priority = qs('#priority') ? Number(qs('#priority').value) : td.priority;
   const per = periods[value];
   const tdPer = td.periodId ? periods[td.periodId] : {};
   const task = {
     id: td.id || Date.now().toString(),
-    name: qs('#name').value,
+    name: qs('#name') ? qs('#name').value : td.name,
     priority,
     period: td.period || per.days,
     periodId: td.periodId || td.ogTitle || per.id,

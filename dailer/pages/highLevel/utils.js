@@ -40,6 +40,8 @@ export const emjs = {
   oldPaper: '&#128220;',
   paperList: '&#128203;',
   construction: '&#127959;',
+  upload: '&#128228;',
+  download: '&#128229;',
 };
 
 export function safeDataInteractions(elems) {

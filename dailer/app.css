@@ -293,7 +293,10 @@ input:disabled, select:disabled {
   background-color: var(--darkShadow);
   color: white;
 }
-progress { min-height: 4rem; }
+progress {
+  min-height: 4rem;
+  margin: 5rem 0;
+}
 .hidedUI, #editButtons, #popup, input[type="file"],
 .uploadUI, #uploadSuccess {
   display: none;

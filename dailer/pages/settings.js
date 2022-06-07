@@ -24,13 +24,13 @@ export const settings = {
       <h3>We store your data on your device and have no remote access to it</h3>
       <h3>Install app to the home screen to show your browser importance of the site's data to activate site's data protection</h3>-->
       <h2 data-section="import">Data management</h2>
-      <h3>Backup your data to be safe and prevent accidental deleting or to swap it to other device</h3>
-      <button id="uploadData">Upload existent backup</button>
+      <h3>Backup your data to be safe and prevent accidental deletion or transfer it to other device or upload your existent backup to this device</h3>
+      <button id="uploadData">${emjs.upload} Upload existent backup</button>
       <input type="file" accept=".dailer" id="chooseFile">
       <progress class="uploadUI"></progress>
       <h3 class="uploadUI">Be patient and don't quit the app before uploading done</h3>
       <h3 id="uploadSuccess">${emjs.sign} Upload successfully completed, go back to check the tasks</h3>
-      <button id="getData" disabled>Backup your current data</button>
+      <!--<button id="getData" class="success">${emjs.download} Backup your current data</button>-->
       <button id="toDebug" class="secondary">${emjs.construction} Open debug page</button>
     `;
     qs('#toPeriodCreator').addEventListener('click', () => {
