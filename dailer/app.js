@@ -1,17 +1,15 @@
 import { pages } from './pages.js'
-import { checkInstall } from './pages/main.js'
-import { qs as localQs, copyObject } from './pages/highLevel/utils.js'
+import {
+  qs as localQs, globQs as qs, globQsa as qsa, copyObject
+} from './pages/highLevel/utils.js'
 import { periods } from './pages/highLevel/periods.js'
 import { paintPeriods } from './pages/settings.js'
+import { checkInstall } from './pages/main.js'
 import IDB from './IDB.js'
 
 if ('serviceWorker' in navigator && caches) {
   navigator.serviceWorker.register('./sw.js')
 };
-
-const qs = (elem) => document.querySelector(elem);
-
-const qsa = (elem) => document.querySelectorAll(elem);
 
 const getUrl = () => location.href.toString();
 

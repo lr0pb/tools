@@ -106,7 +106,7 @@ async function renderHistory(task) {
 }
 
 export async function getHistory({task, onEmptyDays, onBlankDay, onActiveDay}) {
-  const creationDay = new Date(Number(task.id)).setHours(0, 0, 0, 0);
+  const creationDay = new Date(Number(task.created || task.id)).setHours(0, 0, 0, 0);
   const startDay = new Date(creationDay > task.periodStart ? creationDay : task.periodStart);
   const borderValues = (value) => {
     if (value == -1) return 6;

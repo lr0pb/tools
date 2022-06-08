@@ -1,5 +1,7 @@
 import { getToday, convertDate, oneDay, getWeekStart } from './highLevel/periods.js'
-import { priorities, editTask, setPeriodTitle } from './highLevel/taskThings.js'
+import {
+  priorities, editTask, setPeriodTitle, renderToggler, toggleFunc
+} from './highLevel/taskThings.js'
 import { qs, emjs, copyObject, safeDataInteractions } from './highLevel/utils.js'
 
 export const taskCreator = {
@@ -14,7 +16,8 @@ export const taskCreator = {
     <h3 id="description" class="hidedUI"></h3>
     <h3 id="dateTitle" class="hidedUI"></h3>
     <input type="date" id="date" class="hidedUI">
-    <h3 id="endDateTitle" class="hidedUI">Select </h3>
+    <div id="endDateToggler"></div>
+    <h3 id="endDateTitle" class="hidedUI">Select end date</h3>
     <input type="date" id="endDate" class="hidedUI">
     <div id="editButtons">
       <button id="disable" class="secondary">Disable task</button>
@@ -59,10 +62,20 @@ async function onTaskCreator({globals}) {
   qs('#back').addEventListener('click', safeBack);
   if (!localStorage.firstDayEver) qs('#back').style.display = 'none';
   createOptionsList(qs('#priority'), priorities);
-  safeDataInteractions(['name', 'priority', 'period', 'date']);
+  renderToggler({
+    name: 'No limit to end date', id: 'noEndDate', emoji: emjs.sign,
+    page: qs('#endDateToggler'), value: 1, first: true,
+    func: ({e, elem}) => {
+      const value = toggleFunc({e, elem});
+      qs('#endDateTitle').style.display = value ? 'none' : 'block';
+      qs('#endDate').style.display = value ? 'none' : 'block';
+    }
+  });
+  safeDataInteractions(['name', 'priority', 'period', 'date', 'endDate']);
   await taskCreator.onSettingsUpdate({globals});
   qs('#period').addEventListener('change', async (e) => await onPeriodChange(e, globals));
   qs('#date').min = convertDate(Date.now());
+  qs('#date').addEventListener('change', onDateChange);
   if (!globals.pageInfo) globals.pageInfo = history.state;
   const isEdit = globals.pageInfo && globals.pageInfo.taskAction == 'edit';
   let td;
@@ -111,6 +124,10 @@ async function enterEditTaskMode(globals) {
     qs('#dateTitle').style.display = 'block';
     qs('#date').max = convertDate(periods[td.periodId].maxDate);
     qs('#date').style.display = 'block';
+  }
+  if (td.endDate) {
+    qs('[data-id="noEndDate"]').children[1].click();
+    qs('#endDate').value = convertDate(td.endDate);
   }
   return td;
 }
@@ -182,6 +199,20 @@ async function onPeriodChange(e, globals) {
     qs('#description').innerHTML = per.description;
     qs('#description').style.display = 'block';
   }
+  if (per.special == 'oneTime') {
+    const toggler = qs('[data-id="noEndDate"]');
+    if (!toggler.value) toggler.click();
+    toggler.style.display = 'none';
+  } else qs('[data-id="noEndDate"]').style.display = 'block';
+}
+
+function onDateChange(e) {
+  if (e.target.value == '') return;
+  const value = new Date(e.target.value).getTime();
+  const endValue = new Date(qs('#endDate').value).getTime();
+  const newEnd = value + oneDay;
+  qs('#endDate').min = convertDate(newEnd);
+  if (endValue <= newEnd) qs('#endDate').value = convertDate(newEnd);
 }
 
 export function createTask(periods, td = {}) {
@@ -214,6 +245,17 @@ export function createTask(periods, td = {}) {
   };
   if (!task.special) delete task.special;
   if (td.name && task.name != td.name) task.nameEdited = true;
+  if (td.created) task.created = td.created;
+  const noEndDate = qs('[data-id="noEndDate"]');
+  if (!noEndDate) {
+    if (td.endDate) task.endDate = td.endDate;
+    return;
+  }
+  if (qs('#endDate').value === '') return task.endDate = null;
+  if (!noEndDate.dataset.value) {
+    const endDate = new Date(qs('#endDate').value).getTime();
+    task.endDate = endDate;
+  } else task.endDate = null;
   setPeriodTitle(task);
   console.log(task);
   if (task.name == '' || isNaN(task.periodStart)) return 'error';

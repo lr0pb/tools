@@ -70,4 +70,16 @@ async function clearDatabase(globals) {
     }
   }
   delete localStorage.lastPeriodId;
+  const list = JSON.parse(localStorage.periodsList);
+  const toDelete = []
+  for (let item of list) {
+    if (item.startsWith('5')) toDelete.push(item);
+  }
+  for (let item of toDelete) {
+    const idx = list.indexOf(item);
+    list.splice(idx, 1);
+  }
+  localStorage.periodsList = JSON.stringify(list);
+  globals.paintPage('main');
+  location.reload();
 }

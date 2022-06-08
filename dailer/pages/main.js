@@ -65,7 +65,7 @@ async function createDay(globals, periods, today = getToday()) {
     day = getRawDay(today.toString(), !day);
   } else return day;
   let tasks = await globals.db.getAll('tasks');
-  tasks = tasks.filter( (elem) => !elem.disabled && !elem.deleted );
+  tasks = tasks.filter( (elem) => !elem.disabled || !elem.deleted );
   for (let task of tasks) {
     if (task.periodStart <= today) {
       if (day.firstCreation || !task.history.length) {
@@ -116,6 +116,7 @@ function updateTask(task, periods) {
     if (task.history[0] == 1) {
       task.periodDay = -1;
       task.disabled = true;
+      task.endDate = getToday() - oneDay;
     } else {
       task.periodDay = 0;
       task.history.length = 0;
@@ -123,6 +124,10 @@ function updateTask(task, periods) {
     return;
   }
   task.periodTitle = task.ogTitle || (task.periodId && periods[task.periodId].title) || task.periodTitle;
+  if (task.endDate && task.endDate == getToday()) {
+    task.periodDay = -1;
+    task.disabled = true;
+  }
   task.periodDay++;
   if (task.periodDay == task.period.length) {
     task.periodDay = 0;

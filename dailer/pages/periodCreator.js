@@ -32,17 +32,14 @@ async function onPeriodCreator({globals, page}) {
   qs('#back').addEventListener('click', () => history.back());
   appendDays();
   qs('#daysCount').addEventListener('input', onDaysCountChange);
-  let elem = renderToggler({
+  renderToggler({
     name: 'Task will be looped', id: 'isRepeatable',
-    emoji: emjs.sign, func: toggler, args: {}, page
+    emoji: emjs.sign, page, value: 1, first: true
   });
-  elem.classList.add('first');
-  elem.dataset.value = 1;
-  elem = renderToggler({
+  renderToggler({
     name: 'Start on Sundays', id: 'getWeekStart',
-    emoji: emjs.blank, func: toggler, args: {}, page
+    emoji: emjs.blank, page, value: 0
   });
-  elem.dataset.value = 0;
   const text = document.createElement('h3');
   text.innerHTML = 'Automatically set task start day to the previous Sunday';
   page.append(text);
@@ -96,12 +93,6 @@ function onDaysCountChange(e) {
   for (let i = 0; i < maxDays; i++) {
     rects[i].dataset.used = i < value ? 'true' : 'false';
   }
-}
-
-function toggler({e, elem}) {
-  const value = Number(elem.dataset.value) ? 0 : 1;
-  elem.dataset.value = value;
-  e.target.innerHTML = value ? emjs.sign : emjs.blank;
 }
 
 function createPeriod() {

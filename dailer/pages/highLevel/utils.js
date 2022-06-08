@@ -1,12 +1,15 @@
-export const qs = (elem, page) => q('querySelector', elem, page);
-export const qsa = (elem, page) => q('querySelectorAll', elem, page);
+export const qs = (elem, page) => q('querySelector', elem, page, true);
+export const qsa = (elem, page) => q('querySelectorAll', elem, page, true);
 
-function q(func, elem, page) {
+export const globQs = (elem) => q('querySelector', elem);
+export const globQsa = (elem) => q('querySelectorAll', elem);
+
+function q(func, elem, page, local) {
   if (page) {
     if (!document.querySelector(`#${page}`)) return null;
     return document[func](`#${page} ${elem}`);
   }
-  return document[func](`.current ${elem}`);
+  return document[func](`${local ? '.current ' : ''}${elem}`);
 }
 
 export const getLast = (arr) => arr[arr.length - 1];

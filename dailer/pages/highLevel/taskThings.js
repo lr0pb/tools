@@ -13,9 +13,11 @@ export const priorities = [{
   color: 'red'
 }];
 
-export function renderToggler({name, id, emoji, func, args, page, onBodyClick}) {
+export function renderToggler({
+  name, id, emoji, func = toggleFunc, args = {}, page, onBodyClick, value, first
+}) {
   const elem = document.createElement('div');
-  elem.className = 'task';
+  elem.className = `task ${first ? 'first' : ''}`;
   elem.dataset.id = id;
   elem.innerHTML = `
     <div><h2>${name}</h2></div>
@@ -27,8 +29,16 @@ export function renderToggler({name, id, emoji, func, args, page, onBodyClick}) 
       await func(args);
     } else if (onBodyClick) onBodyClick();
   })
+  if (value !== undefined) elem.dataset.value = value;
   page.append(elem);
   return elem;
+}
+
+export function toggleFunc({e, elem}) {
+  const value = Number(elem.dataset.value) ? 0 : 1;
+  elem.dataset.value = value;
+  e.target.innerHTML = value ? emjs.sign : emjs.blank;
+  return value;
 }
 
 export function renderTask({type, globals, td, page, onBodyClick}) {
