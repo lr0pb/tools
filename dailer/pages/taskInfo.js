@@ -68,8 +68,10 @@ async function renderTaskInfo({globals, page}) {
 
 function renderItemHolder(task, periods) {
   const periodText = !task.special && task.periodStart <= getToday()
-    ? `${periods[task.periodId].title} from ${task.periodStart == getToday() ? 'today' : intlDate(task.periodStart)}`
-    : task.periodTitle;
+    ? `${periods[task.periodId].title} from ${task.periodStart == getToday() ? 'today' : intlDate(task.periodStart)}${
+      task.endDate && task.disabled ? ` to ${intlDate(task.endDate)}` : ''
+    }`
+    : (task.endDate ? `${periods[task.periodId].title}. Completed ${intlDate(task.endDate)}` : task.periodTitle);
   createInfoRect(emjs.calendar, periodText, 'blue');
 
   const isActiveText = `Today ${task.period[task.periodDay] ? 'you should do' : "you haven't"} this task`;

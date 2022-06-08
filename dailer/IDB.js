@@ -58,7 +58,7 @@ export default class IDB {
     return this;
   }
   async getItem(store, title) {
-    if (typeof store != 'string' || typeof title != 'string') return;
+    if (typeof store != 'string' || !title) return;
     await this.isComplete();
     const getter = this.db
       .transaction(store, 'readonly')
@@ -97,7 +97,7 @@ export default class IDB {
     return result;
   }
   async deleteItem(store, title) {
-    if (typeof store != 'string' || typeof title != 'string') return;
+    if (typeof store != 'string' || !title) return;
     await this.isComplete();
     const deleter = this.db
       .transaction(store, 'readwrite')
