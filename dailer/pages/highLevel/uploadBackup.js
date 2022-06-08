@@ -35,7 +35,8 @@ export async function uploading(globals, data) {
     const task = tasks[i];
     const iha = isHistoryAvailable(task);
     const onActiveDay = async (date, item) => {
-      const day = await globals.db.getItem('days', date);
+      const day = await globals.db.getItem('days', String(date));
+      console.log(`${task.name} ${day.date}`);
       day.tasks[task.priority][task.id] = item;
       await globals.db.setItem(day);
     };
