@@ -36,13 +36,13 @@ export async function uploading(globals, data) {
     const iha = isHistoryAvailable(task);
     const onActiveDay = async (date, item) => {
       const day = await globals.db.getItem('days', String(date));
-      console.log(`${task.name} ${day.date}`);
+      console.log(`${task.name} ${intlDate(day.date)}`);
       day.tasks[task.priority][task.id] = item;
-      await globals.db.setItem(day);
+      await globals.db.setItem('days', day);
     };
-    if (iha) getHistory({ task, onActiveDay });
+    if (iha) await getHistory({ task, onActiveDay });
     else if (iha === false && task.special == 'oneTime') {
-      onActiveDay(task.periodStart, task.history[0]);
+      await onActiveDay(task.periodStart, task.history[0]);
     }
     prog.value = i + 1;
   }

@@ -5,7 +5,7 @@
 export default class IDB {
   constructor(name, version, objectStores) {
     if (typeof name != 'string' || typeof version != 'number' || !Array.isArray(objectStores)) {
-      return console.error(`IDB Wrong arguments data types, can't open database`);
+      return console.error(`[IDB] Wrong arguments data types, can't open database`);
     }
     this.idb = indexedDB.open(name, version);
     this.idb.addEventListener('upgradeneeded', () => this.upgradeneeded(objectStores));
@@ -13,7 +13,7 @@ export default class IDB {
     return this;
   }
   upgradeneeded(objectStores) {
-    console.log('IDB Upgradeneeded event');
+    console.log('[IDB] Upgradeneeded event');
     this.db = this.idb.result;
     const actualStores = {};
     for (let store of objectStores) {
@@ -29,7 +29,7 @@ export default class IDB {
     };
   }
   success() {
-    console.log('IDB Database successfully opened');
+    console.log('[IDB] Database successfully opened');
     this.db = this.idb.result;
   }
   async isComplete() {
@@ -39,11 +39,14 @@ export default class IDB {
     });
     return true;
   }
+  static wrongArguments(functionName) {
+    console.error('[IDB] Wrong arguments passed to db.' + functionName);
+  }
 /**
 * @item - object e.g. {title: 'title', author: 'name', data: new ArrayBuffer(32)}
 */
   async setItem(store, item) {
-    if (typeof store != 'string' || typeof item != 'object') return;
+    if (typeof store != 'string' || typeof item != 'object') return this.wrongArguments('setItem');
     await this.isComplete();
     const setter = this.db
       .transaction(store, 'readwrite')
@@ -58,7 +61,7 @@ export default class IDB {
     return this;
   }
   async getItem(store, title) {
-    if (typeof store != 'string' || !title) return;
+    if (typeof store != 'string' || !title) return this.wrongArguments('getItem');
     await this.isComplete();
     const getter = this.db
       .transaction(store, 'readonly')
@@ -73,10 +76,10 @@ export default class IDB {
     return getter.result;
   }
   async getAll(store) {
-    if (typeof store != 'string') return;
+    if (typeof store != 'string') return this.wrongArguments('getAll');
     await this.isComplete();
     if (!this.db.objectStoreNames.contains(store)) {
-      return console.error(`IDB Database haven't "${store}" store`);
+      return console.error(`[IDB] Database haven't "${store}" store`);
     }
     const getter = this.db
       .transaction(store, 'readonly')
@@ -97,7 +100,7 @@ export default class IDB {
     return result;
   }
   async deleteItem(store, title) {
-    if (typeof store != 'string' || !title) return;
+    if (typeof store != 'string' || !title) return this.wrongArguments('deleteItem');
     await this.isComplete();
     const deleter = this.db
       .transaction(store, 'readwrite')
