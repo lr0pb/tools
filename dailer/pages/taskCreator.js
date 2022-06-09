@@ -201,9 +201,10 @@ async function onPeriodChange(e, globals) {
   }
   if (per.special == 'oneTime') {
     const toggler = qs('[data-id="noEndDate"]');
-    if (!toggler.value) toggler.click();
+    if (!toggler.dataset.value) toggler.children[1].click();
     toggler.style.display = 'none';
-  } else qs('[data-id="noEndDate"]').style.display = 'block';
+  } else qs('[data-id="noEndDate"]').style.display = 'flex';
+  onDateChange({ target: qs('#date') });
 }
 
 function onDateChange(e) {
