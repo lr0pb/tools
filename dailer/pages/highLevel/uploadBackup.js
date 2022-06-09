@@ -1,4 +1,4 @@
-import { globQs as qs, globQsa as qsa } from './utils.js'
+import { globQs as qs, globQsa as qsa, intlDate } from './utils.js'
 import { getToday, oneDay } from './periods.js'
 import { createTask } from '../taskCreator.js'
 import { getRawDay } from '../main.js'
