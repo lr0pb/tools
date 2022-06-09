@@ -8,8 +8,8 @@ import { checkInstall } from './pages/main.js'
 import IDB from './IDB.js'
 
 if ('serviceWorker' in navigator && caches) {
-  navigator.serviceWorker.register('./sw.js')
-};
+  navigator.serviceWorker.register('./sw.js');
+}
 
 const getUrl = () => location.href.toString();
 
@@ -230,7 +230,10 @@ function showPage(prev, current, noAnim) {
 
 function hidePage(current, prevName) {
   const prev = qs(`#${prevName}`);
-  if (!prev) return globals.paintPage(prevName, true, false);
+  if (!prev) {
+    if (!qs('#main')) globals.paintPage('main', false, true);
+    return globals.paintPage(prevName, true, false);
+  }
   prev.classList.remove('hidePrevPage', 'hided');
   prev.classList.add('showing', 'current');
   current.classList.remove('showing', 'current');

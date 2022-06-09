@@ -5,8 +5,10 @@ import { getRawDay } from '../main.js'
 import { isHistoryAvailable, getHistory } from '../taskInfo.js'
 
 export async function uploading(globals, data) {
-  qs('#uploadData').style.display = 'none';
   qs('#uploadSuccess').style.display = 'none';
+  for (let elem of qsa('.beforeUpload')) {
+    elem.style.display = 'none';
+  }
   for (let elem of qsa('.uploadUI')) {
     elem.style.display = 'block';
   }
@@ -21,7 +23,7 @@ export async function uploading(globals, data) {
     tasks.push(task);
     await globals.db.setItem('tasks', task);
   }
-  const diff = (getToday() - earliestDay) / oneDay;
+  const diff = (getToday() - earliestDay + oneDay) / oneDay;
   for (let i = 0; i < diff; i++) {
     const date = String(earliestDay + oneDay * i);
     let day = await globals.db.getItem('days', date);
@@ -50,9 +52,11 @@ export async function uploading(globals, data) {
   }
   prog.removeAttribute('value');
   //
+  /*for (let elem of qsa('.beforeUpload')) {
+    elem.style.display = 'block';
+  }*/
   for (let elem of qsa('.uploadUI')) {
     elem.style.display = 'none';
   }
-  qs('#uploadData').style.display = 'block';
   qs('#uploadSuccess').style.display = 'block';
 }

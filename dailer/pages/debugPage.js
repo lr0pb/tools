@@ -50,7 +50,7 @@ async function renderPage({globals, page}) {
     <h3>Is online:</h3>
     <p>${navigator.onLine}</p>
   </div>
-  <button id="clear">Clear database</button>
+  <button id="clear" class="danger">Clear database</button>
   `;
   qs('#clear').addEventListener('click', () => clearDatabase(globals));
 }

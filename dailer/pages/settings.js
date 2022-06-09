@@ -24,7 +24,8 @@ export const settings = {
       <progress class="uploadUI"></progress>
       <h3 class="uploadUI">Be patient and don't quit the app before uploading done</h3>
       <h3 id="uploadSuccess">${emjs.sign} Upload successfully completed, go back to check the tasks</h3>
-      <!--<button id="getData" class="success">${emjs.download} Backup your current data</button>-->
+      <button id="getData" class="success">${emjs.download} Backup your current data</button>
+      <h3>Backup downloading will be available soon</h3>
       <button id="toDebug" class="secondary">${emjs.construction} Open debug page</button>
     `;
     qs('#toPeriodCreator').addEventListener('click', () => {
@@ -36,6 +37,7 @@ export const settings = {
       globals.paintPage('debugPage');
     });
     qs('#uploadData').addEventListener('click', async () => await uploadData(globals));
+    //qs('#getData').addEventListener('click', async () => await downloadData(globals));
   },
   opening: async ({globals}) => {
     if (!qs('#periodsContainer').children.length) {

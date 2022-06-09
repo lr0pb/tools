@@ -128,7 +128,10 @@ async function enterEditTaskMode(globals) {
   if (td.endDate) {
     qs('[data-id="noEndDate"]').children[1].click();
     qs('#endDate').value = convertDate(td.endDate);
+  } else if (td.special == 'oneTime') {
+    qs('[data-id="noEndDate"]').style.display = 'none';
   }
+  qs('#endDate').min = convertDate(getToday() + oneDay);
   return td;
 }
 
