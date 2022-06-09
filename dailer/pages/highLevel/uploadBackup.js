@@ -31,12 +31,14 @@ export async function uploading(globals, data) {
   }
   const prog = qs('progress.uploadUI');
   prog.max = tasks.length;
+  prog.value = 0;
   for (let i = 0; i < tasks.length; i++) {
     const task = tasks[i];
     const iha = isHistoryAvailable(task);
     const onActiveDay = async (date, item) => {
       const day = await globals.db.getItem('days', String(date));
-      console.log(`${task.name} ${intlDate(day.date)}`);
+      if (!day) return;
+      console.log(`${task.name} ${intlDate(date)}`);
       day.tasks[task.priority][task.id] = item;
       await globals.db.setItem('days', day);
     };
