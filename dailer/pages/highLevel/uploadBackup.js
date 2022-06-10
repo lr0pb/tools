@@ -5,7 +5,6 @@ import { getRawDay } from '../main.js'
 import { isHistoryAvailable, getHistory } from '../taskInfo.js'
 
 export async function uploading(globals, data) {
-  qs('#uploadSuccess').style.display = 'none';
   for (let elem of qsa('.beforeUpload')) {
     elem.style.display = 'none';
   }
@@ -55,8 +54,11 @@ export async function uploading(globals, data) {
   /*for (let elem of qsa('.beforeUpload')) {
     elem.style.display = 'block';
   }*/
+  globals.pageInfo = { backupUploaded: true };
   for (let elem of qsa('.uploadUI')) {
     elem.style.display = 'none';
   }
-  qs('#uploadSuccess').style.display = 'block';
+  for (let elem of qsa('.uploadSuccess')) {
+    elem.style.display = 'block';
+  }
 }

@@ -120,6 +120,7 @@ const globals = {
   closeSettings: async (back) => {
     qs('#settings').removeAttribute('style');
     if (back !== true) history.back();
+    globals.settings = false;
     if (!pages[globals.pageName].onSettingsUpdate) return;
     await pages[globals.pageName].onSettingsUpdate({
       globals, page: qs('.current .content')

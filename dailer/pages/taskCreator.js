@@ -17,7 +17,7 @@ export const taskCreator = {
     <h3 id="dateTitle" class="hidedUI"></h3>
     <input type="date" id="date" class="hidedUI">
     <div id="endDateToggler"></div>
-    <h3 id="endDateTitle" class="hidedUI">Select end date</h3>
+    <h3 id="endDateTitle" class="hidedUI">Select tasks end date</h3>
     <input type="date" id="endDate" class="hidedUI">
     <div id="editButtons">
       <button id="disable" class="secondary">Disable task</button>

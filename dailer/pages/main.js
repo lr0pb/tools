@@ -22,8 +22,12 @@ export const main = {
 
 async function updatePage({globals, page}) {
   const day = await globals.db.getItem('days', getToday().toString());
-  if (!day || day.lastTasksChange != localStorage.lastTasksChange) {
+  if (
+    !day || day.lastTasksChange != localStorage.lastTasksChange ||
+    (globals.pageInfo && globals.pageInfo.backupUploaded)
+  ) {
     await renderDay({globals, page});
+    delete globals.pageInfo.backupUploaded;
   }
 }
 
@@ -63,7 +67,9 @@ async function createDay(globals, periods, today = getToday()) {
   let day = await globals.db.getItem('days', today.toString());
   if (!day || day.lastTasksChange != localStorage.lastTasksChange) {
     day = getRawDay(today.toString(), !day);
-  } else return day;
+  } else {
+    return isEmpty(day) ? 'error' : day;
+  }
   let tasks = await globals.db.getAll('tasks');
   tasks = tasks.filter( (elem) => !elem.disabled || !elem.deleted );
   for (let task of tasks) {
@@ -80,8 +86,8 @@ async function createDay(globals, periods, today = getToday()) {
       }
     }
   }
-  if (isEmpty(day)) return 'error';
   await globals.db.setItem('days', day);
+  if (isEmpty(day)) return 'error';
   return day;
 }
 

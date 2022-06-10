@@ -52,7 +52,11 @@ async function renderPage({globals, page}) {
   </div>
   <button id="clear" class="danger">Clear database</button>
   `;
-  qs('#clear').addEventListener('click', () => clearDatabase(globals));
+  qs('#clear').addEventListener('click', async () => {
+    await clearDatabase(globals);
+    globals.paintPage('main');
+    location.reload();
+  });
 }
 
 function convertBytes(value, unit) {
@@ -61,7 +65,7 @@ function convertBytes(value, unit) {
   return Math.round(value / divisioner) + unit;
 }
 
-async function clearDatabase(globals) {
+export async function clearDatabase(globals) {
   const stores = globals.db.db.objectStoreNames;
   for (let store of stores) {
     const items = await globals.db.getAll(store);
@@ -80,6 +84,4 @@ async function clearDatabase(globals) {
     list.splice(idx, 1);
   }
   localStorage.periodsList = JSON.stringify(list);
-  globals.paintPage('main');
-  location.reload();
 }

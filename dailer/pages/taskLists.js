@@ -10,6 +10,7 @@ export const planCreator = {
   `,
   script: onPlanCreator,
   onPageShow: async ({globals, page}) => {
+    await onBackupUploaded({globals, page});
     if (!globals.pageInfo) globals.pageInfo = history.state;
     let id = globals.pageInfo.stateChangedTaskId;
     if (id) qs(`[data-id="${id}"]`).remove();
@@ -22,7 +23,13 @@ export const planCreator = {
     const task = renderTask({type: 'edit', globals, td, page: elem ? null : page});
     if (elem && task) elem.replaceWith(task);
     delete globals.pageInfo.dataChangedTaskId;
-  }
+  },
+  onSettingsUpdate: onBackupUploaded
+};
+
+const bads = {
+  planCreator: (td) => td.deleted || td.disabled,
+  tasksArchive: (td) => td.deleted || !td.disabled
 };
 
 async function onPlanCreator({globals, page}) {
@@ -34,27 +41,25 @@ async function onPlanCreator({globals, page}) {
   qs('#addTask').addEventListener(
     'click', () => globals.paintPage('taskCreator')
   );
-  await renderTasksList({
-    globals, page, isBadTask: (td) => td.deleted || td.disabled
-  });
+  await renderTasksList({ globals, page, isBadTask: bads.planCreator });
 }
 
 export const tasksArchive = {
   header: `${emjs.books} Archived tasks`,
   page: ``,
   footer: `<button id="back" class="secondary">${emjs.back} Back</button>`,
-  script: onTasksArchive
+  script: onTasksArchive,
+  onSettingsUpdate: onBackupUploaded
 };
 
 async function onTasksArchive({globals, page}) {
   qs('#back').addEventListener('click', () => history.back());
-  await renderTasksList({
-    globals, page, isBadTask: (td) => td.deleted || !td.disabled
-  });
+  await renderTasksList({ globals, page, isBadTask: bads.tasksArchive });
 }
 
 async function renderTasksList({globals, page, isBadTask}) {
   const tasks = await globals.db.getAll('tasks');
+  page.innerHTML = '';
   if (!tasks.length) {
     showNoTasks(page);
   } else for (let td of tasks) { // td stands for task's data
@@ -62,4 +67,9 @@ async function renderTasksList({globals, page, isBadTask}) {
     renderTask({type: 'edit', globals, td, page});
   }
   if (!page.children.length) showNoTasks(page);
+}
+
+async function onBackupUploaded({globals, page}) {
+  if (!globals.pageInfo || !globals.pageInfo.backupUploaded) return;
+  await renderTasksList({globals, page, isBadTask: bads[globals.pageName] });
 }

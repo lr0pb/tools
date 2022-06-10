@@ -135,6 +135,7 @@ p {
 }
 .emoji {
   font-size: 9em;
+  min-height: 14rem;
 }
 
 button, .task, #message, input, select, #infoBackground,
@@ -298,7 +299,7 @@ progress {
   margin: 5rem 0;
 }
 .hidedUI, #editButtons, #popup, input[type="file"],
-.uploadUI, #uploadSuccess {
+.uploadUI, .uploadSuccess, .downloadLink {
   display: none;
 }
 

@@ -1,6 +1,7 @@
 import { renderToggler } from './highLevel/taskThings.js'
 import { emjs, globQs as qs } from './highLevel/utils.js'
 import { uploading } from './highLevel/uploadBackup.js'
+import { getData } from './highLevel/createBackup.js'
 
 const periodsCount = 5;
 
@@ -23,9 +24,10 @@ export const settings = {
       <input type="file" accept=".dailer" id="chooseFile">
       <progress class="uploadUI"></progress>
       <h3 class="uploadUI">Be patient and don't quit the app before uploading done</h3>
-      <h3 id="uploadSuccess">${emjs.sign} Upload successfully completed, go back to check the tasks</h3>
+      <h2 class="uploadSuccess emoji">${emjs.sign}</h2>
+      <h3 class="uploadSuccess">Upload successfully completed, go back to check the tasks</h3>
       <button id="getData" class="success">${emjs.download} Backup your current data</button>
-      <h3>Backup downloading will be available soon</h3>
+      <a id="downloadData" class="downloadLink"></a>
       <button id="toDebug" class="secondary">${emjs.construction} Open debug page</button>
     `;
     qs('#toPeriodCreator').addEventListener('click', () => {
@@ -37,7 +39,7 @@ export const settings = {
       globals.paintPage('debugPage');
     });
     qs('#uploadData').addEventListener('click', async () => await uploadData(globals));
-    //qs('#getData').addEventListener('click', async () => await downloadData(globals));
+    qs('#getData').addEventListener('click', async () => await downloadData(globals));
   },
   opening: async ({globals}) => {
     if (!qs('#periodsContainer').children.length) {
@@ -115,4 +117,14 @@ async function uploadData(globals) {
     };
   });
   chooser.click();
+}
+
+async function downloadData(globals) {
+  const data = await getData(globals);
+  const blob = new Blob([JSON.stringify(data)], {type: 'application/vnd.dailer+json'});
+  const link = qs('#downloadData');
+  const name = String(data.dailer_created).match(/(?<=\d\d)\d{6}/)[0];
+  link.download = `${name}.dailer`;
+  link.href = URL.createObjectURL(blob);
+  link.click();
 }
