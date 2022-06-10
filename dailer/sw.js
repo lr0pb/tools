@@ -24,11 +24,10 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
-  console.log(location);
-  console.log(navigator ? navigator.connection : null);
-  console.log(e.request.url);
+  console.log(navigator.onLine);
   if (
-    e.request.url.includes('manifest.json') || e.request.url.includes('screenshots')
+    e.request.url.includes('manifest.json') || e.request.url.includes('screenshots') ||
+    !e.request.url.includes(location.origin)
   ) return;
   const badResponse = new Response(new Blob, { 'status': 400, 'statusText': 'No network' });
   e.respondWith(
