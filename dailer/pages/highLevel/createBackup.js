@@ -9,7 +9,7 @@ export async function getData(globals) {
     if (td.deleted) return;
     const task = {
       name: td.name,
-      period: td.name,
+      period: td.period,
       periodId: td.periodId,
       periodDay: td.periodDay,
       periodStart: td.periodStart,
