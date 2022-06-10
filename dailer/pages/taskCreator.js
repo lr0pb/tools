@@ -255,7 +255,7 @@ export function createTask(periods, td = {}) {
     if (td.endDate) task.endDate = td.endDate;
   } else if (qs('#endDate').value === '') {
     task.endDate = null;
-  } else if (!noEndDate.dataset.value) {
+  } else if (!Number(noEndDate.dataset.value)) {
     const endDate = new Date(qs('#endDate').value).getTime();
     task.endDate = endDate;
   } else task.endDate = null;

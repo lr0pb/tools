@@ -1,12 +1,13 @@
 export async function getData(globals) {
   const data = {
-    dailer_about: `dailer user's data file exported from the app`,
-    dailer_created: Date.now().toString(),
+    dailer_about: `User's data backup from dailer app`,
+    dailer_link: location.origin + location.pathname,
+    dailer_created: Date.now(),
     dailer_tasks: []
   };
   const tasks = await globals.db.getAll('tasks');
   for (let td of tasks) { // td - task data
-    if (td.deleted) return;
+    if (td.deleted) continue;
     const task = {
       name: td.name,
       period: td.period,

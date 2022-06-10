@@ -19,14 +19,14 @@ export const settings = {
       <h3>Install app to the home screen to show your browser importance of the site's data to activate site's data protection</h3>-->
       <h2 data-section="import">Data management</h2>
       <h3>Backup your data to be safe and prevent accidental deletion or transfer it to other device or upload your existent backup to this device</h3>
-      <button id="uploadData" class="beforeUpload">${emjs.upload} Upload existent backup</button>
+      <button id="uploadData" class="beforeUpload">${emjs.crateDown} Upload existent backup</button>
       <h3 class="beforeUpload">Accepted .dailer files only</h3>
       <input type="file" accept=".dailer" id="chooseFile">
       <progress class="uploadUI"></progress>
       <h3 class="uploadUI">Be patient and don't quit the app before uploading done</h3>
       <h2 class="uploadSuccess emoji">${emjs.sign}</h2>
       <h3 class="uploadSuccess">Upload successfully completed, go back to check the tasks</h3>
-      <button id="getData" class="success">${emjs.download} Backup your current data</button>
+      <button id="getData" class="success">${emjs.crateUp} Backup your current data</button>
       <a id="downloadData" class="downloadLink"></a>
       <button id="toDebug" class="secondary">${emjs.construction} Open debug page</button>
     `;

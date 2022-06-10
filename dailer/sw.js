@@ -24,6 +24,9 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
+  console.log(location);
+  console.log(navigator ? navigator.connection : null);
+  console.log(e.request.url);
   if (
     e.request.url.includes('manifest.json') || e.request.url.includes('screenshots')
   ) return;
