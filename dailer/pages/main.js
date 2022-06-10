@@ -107,32 +107,30 @@ async function checkLastDay(globals, day) {
   return { check, dayBefore };
 }
 
+function disable(task) {
+  task.periodDay = -1;
+  task.disabled = true;
+}
+
 function updateTask(task, periods) {
   if (task.special == 'oneTime') {
     if (task.history.length) {
-      task.periodDay = -1;
-      task.disabled = true;
-      setPeriodTitle(task);
+      disable(task); setPeriodTitle(task);
     } else if (getToday() == task.periodStart) {
-      task.periodDay = 0;
-      task.periodTitle = 'Only today';
+      task.periodDay = 0; task.periodTitle = 'Only today';
     }
     return;
   } else if (task.special == 'untilComplete') {
     if (task.history[0] == 1) {
-      task.periodDay = -1;
-      task.disabled = true;
-      task.endDate = getToday() - oneDay;
+      disable(task); task.endDate = getToday() - oneDay;
     } else {
-      task.periodDay = 0;
-      task.history.length = 0;
+      task.periodDay = 0; task.history.length = 0;
     }
     return;
   }
-  task.periodTitle = task.ogTitle || (task.periodId && periods[task.periodId].title) || task.periodTitle;
+  task.periodTitle = (task.periodId && periods[task.periodId].title) || task.ogTitle || task.periodTitle;
   if (task.endDate && task.endDate == getToday()) {
-    task.periodDay = -1;
-    task.disabled = true;
+    disable(task);
   }
   task.periodDay++;
   if (task.periodDay == task.period.length) {

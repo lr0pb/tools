@@ -11,6 +11,7 @@ export async function uploading(globals, data) {
   for (let elem of qsa('.uploadUI')) {
     elem.style.display = 'block';
   }
+  if (!localStorage.lastTasksChange) localStorage.lastTasksChange = Date.now().toString();
   const periods = await globals.getPeriods();
   const days = await globals.db.getAll('days');
   let earliestDay = getToday();
@@ -38,7 +39,7 @@ export async function uploading(globals, data) {
     const iha = isHistoryAvailable(task);
     const onActiveDay = async (date, item) => {
       const day = await globals.db.getItem('days', String(date));
-      if (!day) return console.log(date, intlDate(date));
+      if (!day) return;
       console.log(`${task.name} ${intlDate(date)}`);
       day.tasks[task.priority][task.id] = item;
       await globals.db.setItem('days', day);
@@ -46,6 +47,11 @@ export async function uploading(globals, data) {
     if (iha) await getHistory({ task, onActiveDay });
     else if (iha === false && task.special == 'oneTime') {
       await onActiveDay(task.periodStart, task.history[0]);
+    } else if (iha === false && task.special == 'untilComplete') {
+      for (let i = task.periodStart; i < getToday(); i += oneDay) {
+        await onActiveDay(i, 0);
+      }
+      await onActiveDay(getToday(), task.history[0]);
     }
     prog.value = i + 1;
   }

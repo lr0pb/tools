@@ -62,16 +62,20 @@ async function renderTaskInfo({globals, page}) {
   } else if (iha === false) {
     let emoji = emjs.cross, color = 'red';
     if (task.history[0]) emoji = emjs.sign, color = 'green';
-    createInfoRect(emoji, `Task was ${task.history[0] ? '' : 'not '}completed`, color);
+    createInfoRect(emoji, `Task ${
+      task.history.length && task.disabled ? 'was' : 'is'
+    } ${task.history[0] ? '' : 'not '}completed`, color);
   }
 }
 
 function renderItemHolder(task, periods) {
+  const perTitle = periods[task.periodId].title;
   const periodText = !task.special && task.periodStart <= getToday()
-    ? `${periods[task.periodId].title} from ${task.periodStart == getToday() ? 'today' : intlDate(task.periodStart)}${
-      task.endDate ? ` to ${intlDate(task.endDate)}` : ''
+    ? `${perTitle} from ${task.periodStart == getToday() ? 'today' : intlDate(task.periodStart)}${
+      task.endDate ? ` to ${task.endDate == getToday() + oneDay ? 'tomorrow' : intlDate(task.endDate)}` : ''
     }`
-    : (task.endDate ? `${periods[task.periodId].title}. Ended ${intlDate(task.endDate)}` : task.periodTitle);
+    : (task.endDate ? `${perTitle}. Ended ${intlDate(task.endDate)}` :
+      (task.periodStart < getToday() ? `${perTitle} from ${intlDate(task.periodStart)}` : task.periodTitle));
   createInfoRect(emjs.calendar, periodText, 'blue');
 
   const isActiveText = `Today ${task.period[task.periodDay] ? 'you should do' : "you haven't"} this task`;

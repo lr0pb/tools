@@ -14,7 +14,7 @@ export async function getData(globals) {
       periodId: td.periodId,
       periodDay: td.periodDay,
       periodStart: td.periodStart,
-      created: new Date(Number(td.id)).setHours(0, 0, 0, 0),
+      created: td.created || new Date(Number(td.id)).setHours(0, 0, 0, 0),
       priority: td.priority,
       history: td.history
     };

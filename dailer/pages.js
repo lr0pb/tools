@@ -8,6 +8,6 @@ import { periodCreator } from './pages/periodCreator.js'
 import { debugPage } from './pages/debugPage.js'
 
 export const pages = {
-  onboarding, main, settings, planCreator, taskCreator, tasksArchive, taskInfo, periodCreator,
-  debugPage
+  onboarding, main, settings, planCreator, taskCreator, tasksArchive, taskInfo,
+  periodCreator, debugPage
 };
