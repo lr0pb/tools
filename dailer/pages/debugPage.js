@@ -42,7 +42,7 @@ async function renderPage({globals, page}) {
     'Last period id': localStorage.lastPeriodId,
     'Is app installed': localStorage.installed,
     'Network connection type': navigator.connection.effectiveType,
-    'Is onLine': navigator.onLine,
+    'Is online': navigator.onLine,
   };
   const container = qs('#dataContainer');
   for (let title in data) {

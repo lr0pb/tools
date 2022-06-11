@@ -86,7 +86,7 @@ async function renderTasksList({globals, page, isBadTask, sort}) {
         td = tasks[prevTaskId];
         setPrev(tasks[i], i);
       } else if (resp === 1) {
-        td = tasks[prevTaskId];
+        td = prevTaskId ? tasks[prevTaskId] : td;
         setPrev(null, null);
       }
     }
