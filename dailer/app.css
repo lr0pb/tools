@@ -4,7 +4,6 @@
   --fullWidth: var(--defaultFullWidth);
   --defaultGridContent: calc(100vw - 6rem);
   --gridContent: var(--defaultGridContent);
-  --darkShadow: #474747;
   --yellow: #cda61a;
   --red: #a11818;
   --green: #3ea317;
@@ -12,6 +11,26 @@
   --fastAnim: 0.2s;
   --normalAnim: 0.3s;
   --msgShowing: 2s;
+
+  /* Color section */
+  --mainBg: black;
+  --mainBgRgb: 0, 0, 0;
+  --mainText: white;
+  --darkBorder: rgba(51, 51, 51, 0.5);
+  --darkShadow: #474747;
+  --accentBlue: #3877cd;
+  --accentGrey: #5c5e60;
+  --accentGreen: #379b00;
+  --accentRed: #cb3a3a;
+  --msgBg: #191a1a;
+  --lightBlueBg: #6f879c;
+  --taskBg: #46454582;
+  --gradientLight: #5a73f2;
+  --gradientDark: #0f0b30;
+  --infoRectBg: #22222275;
+  --lightBorder: rgba(227, 227, 227, 0.35);
+  --popupBg: #343434;
+  --marker: aliceblue;
 }
 
 html {
@@ -34,13 +53,36 @@ html {
   }
 }
 
+@media (prefers-color-scheme: light) {
+  :root {
+    --mainBg: #ececec;
+  --mainBgRgb: 236, 236, 236;
+  --mainText: black;
+  --darkBorder: rgb(196 196 196 / 50%);
+  --darkShadow: #b1b1b1;
+  /*--accentBlue: #699ade;
+  --accentGrey: #9fa0a2;
+  --accentGreen: #54c416;
+  --accentRed: #ef5353;*/
+  --msgBg: #dbdbdb;
+  --lightBlueBg: #a9ceef;
+  --taskBg: #aeaeae82;
+  --gradientLight: #9aaafa;
+  --gradientDark: #625aaa;
+  --infoRectBg: #bebebe75;
+  --lightBorder: rgb(160 160 160 / 35%);
+  --popupBg: #c4c4c4;
+  --marker: #57b1ff;
+  }
+}
+
 body, .page, #settings, #popup {
   width: 100vw; height: 100vh;
   height: -webkit-fill-available;
   height: stretch;
   overflow: hidden;
-  background-color: black;
-  color: white;
+  background-color: var(--mainBg);
+  color: var(--mainText);
   margin: 0;
 }
 .page, #settings {
@@ -63,7 +105,7 @@ body, .page, #settings, #popup {
   transition: transform var(--fastAnim) cubic-bezier(0.4, 0, 1, 1);
 }
 .page {
-  --dark: #00000050;
+  --dark: rgba(var(--mainBgRgb), 0.3);
   --overlay: linear-gradient(var(--dark), var(--dark));
   transform: translateX(100vw);
   transition: transform var(--normalAnim);
@@ -145,7 +187,7 @@ button, .task, #message, input, select, #infoBackground,
 button, .task, #message, #infoBackground,
 .infoRect, #popup > div, .floatingMsg {
   border-radius: 2.5rem;
-  border: 0.9rem solid rgba(51, 51, 51, 0.5);
+  border: 0.9rem solid var(--darkBorder);
   margin: 2.5rem 1.5rem;
 }
 .content > button {
@@ -157,7 +199,7 @@ button {
   font-size: 4.3em;
   font-weight: 700;
   padding: 2rem 4rem;
-  color: #ffffff; --bgColor: #3877cd;
+  color: white; --bgColor: var(--accentBlue);
   background-color: var(--bgColor) !important;
   outline: none;
 }
@@ -170,13 +212,13 @@ button.emojiBtn {
   padding: 1rem;
 }
 button.secondary {
-  --bgColor: #5c5e60;
+  --bgColor: var(--accentGrey);
 }
 button.success {
-  --bgColor: #379b00;
+  --bgColor: var(--accentGreen);
 }
 button.danger {
-  --bgColor: #cb3a3a;
+  --bgColor: var(--accentRed);
 }
 
 #message {
@@ -185,8 +227,9 @@ button.danger {
   padding: 2rem; margin: 0;
   left: 50%; bottom: 4rem;
   transform: translateX(-50%);
-  background-image: linear-gradient(90deg, var(--color) 0%, #191a1a 75%);
+  background-image: linear-gradient(90deg, var(--color) 0%, var(--msgBg) 75%);
   border-color: var(--color);
+  color: white;
 }
 #message.animate {
   display: block;
@@ -201,12 +244,15 @@ button.danger {
 
 .floatingMsg {
   width: var(--fullWidth);
-  background-color: #6f879c;
-  margin: 0;
+  background-color: var(--lightBlueBg);
+  margin: 1rem 0;
   align-items: center;
   display: flex;
   position: fixed;
   bottom: var(--footerHeight);
+}
+.floatingMsg.notFixed {
+  position: static;
 }
 .floatingMsg h3 {
   margin: 3rem;
@@ -228,7 +274,7 @@ button.danger {
 .task {
   width: var(--fullWidth);
   /*background-color: #777777;*/
-  background-color: #46454582;
+  background-color: var(--taskBg);
   flex-direction: row;
   margin: 0 0 2.5rem;
 }
@@ -252,7 +298,7 @@ button.danger {
 
 #infoBackground {
   width: var(--fullWidth); min-height: 32rem;
-  background-image: linear-gradient(135deg, #5a73f2 -10%, #0f0b30 60%);
+  background-image: linear-gradient(135deg, var(--gradientLight) -10%, var(--gradientDark) 60%);
   display: flex;
   flex-direction: column-reverse;
   margin: 0 0 1rem;
@@ -277,9 +323,9 @@ button.danger {
 .infoRect {
   width: calc(var(--fullWidth) / 2 - 3rem);
   min-height: 24rem;
-  background-color: #22222275;
+  background-color: var(--infoRectBg);
   background-image: linear-gradient(150deg, var(--color) -40%, transparent 40%);
-  border-color: rgba(227, 227, 227, 0.5);
+  border-color: var(--lightBorder);
   margin: 1.5rem;
 }
 .infoRect > * {
@@ -295,7 +341,7 @@ input, select {
 }
 input:disabled, select:disabled {
   background-color: var(--darkShadow);
-  color: white;
+  color: var(--mainText);
 }
 progress {
   min-height: 4rem;
@@ -313,7 +359,7 @@ progress {
 #popup > div {
   width: calc(var(--fullWidth) - 5rem);
   height: 39rem;
-  background-color: #343434;
+  background-color: var(--popupBg);
   margin: 0;
 }
 
@@ -334,7 +380,7 @@ progress {
   user-select: none;
 }
 #history .historyMonth > h4:last-child {
-  background-color: aliceblue;
+  background-color: var(--marker);
 }
 .historyMonth > h4[data-used="false"] {
   display: none;

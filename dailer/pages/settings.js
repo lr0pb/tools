@@ -18,6 +18,9 @@ export const settings = {
       <h3>We store your data on your device and have no remote access to it</h3>
       <h3>Install app to the home screen to show your browser importance of the site's data to activate site's data protection</h3>-->
       <h2 data-section="import">Data management</h2>
+      <div class="floatingMsg notFixed">
+        <h3>${emjs.lockWKey} Your data is stored only on your device and have no remote access</h3>
+      </div>
       <h3>Backup your data to be safe and prevent accidental deletion or transfer it to other device or upload your existent backup to this device</h3>
       <button id="uploadData" class="beforeUpload">${emjs.crateDown} Upload existent backup</button>
       <h3 class="beforeUpload">Accepted .dailer files only</h3>

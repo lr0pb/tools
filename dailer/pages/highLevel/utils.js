@@ -45,6 +45,7 @@ export const emjs = {
   construction: '&#127959;',
   crateUp: '&#128228;',
   crateDown: '&#128229;',
+  lockWKey: '&#128272;',
 };
 
 export function safeDataInteractions(elems) {
