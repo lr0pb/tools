@@ -30,6 +30,7 @@ export function renderToggler({
     } else if (onBodyClick) onBodyClick();
   })
   if (value !== undefined) elem.dataset.value = value;
+  elem.activate = () => elem.querySelector('button').click();
   page.append(elem);
   return elem;
 }

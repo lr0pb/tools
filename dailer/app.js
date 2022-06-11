@@ -130,6 +130,8 @@ const globals = {
     const isPersisted = await navigator.storage.persisted();
     if (isPersisted) return isPersisted;
     const response = await navigator.storage.persist();
+    localStorage.persistAttempts = Number(localStorage.persistAttempts) + 1;
+    if (response) localStorage.persistGranted = Date.now().toString();
     return response;
   }
 }
@@ -252,7 +254,8 @@ qs('#popup').addEventListener('click', (e) => {
 if (!localStorage.periodsList) {
   localStorage.periodsList = JSON.stringify(['01', '03', '07', '09']);
 }
-
+if (!localStorage.lastPeriodId) localStorage.lastPeriodId = '50';
+if (!localStorage.persistAttempts) localStorage.persistAttempts = '0';
 if (
   window.matchMedia('(display-mode: standalone)').matches || navigator.standalone
 ) {

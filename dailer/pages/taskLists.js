@@ -54,16 +54,42 @@ export const tasksArchive = {
 
 async function onTasksArchive({globals, page}) {
   qs('#back').addEventListener('click', () => history.back());
-  await renderTasksList({ globals, page, isBadTask: bads.tasksArchive });
+  await renderTasksList({
+    globals, page, isBadTask: bads.tasksArchive, sort: (t1, t2) => {
+      if (t1.periodStart > t2.periodStart) return -1;
+      if (t1.periodStart === t2.periodStart) return 0;
+      return 1;
+    }
+  });
 }
 
-async function renderTasksList({globals, page, isBadTask}) {
+async function renderTasksList({globals, page, isBadTask, sort}) {
   const tasks = await globals.db.getAll('tasks');
   page.innerHTML = '';
+  let prevTask = null, prevTaskId = null;
+  const setPrev = (task, id) => {
+    prevTask = task; prevTaskId = id;
+  };
   if (!tasks.length) {
     showNoTasks(page);
-  } else for (let td of tasks) { // td stands for task's data
+  } else for (let i = 0; i < tasks.length; i++) {
+    // one loop with filtering, sorting and action with data instead of
+    // 3 loops for all this actions
+    let td = prevTask || tasks[i]; // td stands for task's data
     if (isBadTask(td)) continue;
+    if (sort) {
+      const resp = sort(td, tasks[i + 1]);
+      if (resp === -1) {
+        td = tasks[i + 1];
+        setPrev(tasks[i], i);
+      } else if (resp === 0) {
+        td = tasks[prevTaskId];
+        setPrev(tasks[i], i);
+      } else if (resp === 1) {
+        td = tasks[prevTaskId];
+        setPrev(null, null);
+      }
+    }
     renderTask({type: 'edit', globals, td, page});
   }
   if (!page.children.length) showNoTasks(page);

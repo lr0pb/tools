@@ -19,7 +19,8 @@ export const taskInfo = {
     const periods = await globals.getPeriods();
     qs('#infoBackground h4').innerHTML = td.name;
     qs('.itemsHolder').innerHTML = '';
-    renderItemHolder(td, periods);
+    const iha = isHistoryAvailable(td);
+    renderItemsHolder(td, periods, iha);
   }
 };
 
@@ -55,26 +56,18 @@ async function renderTaskInfo({globals, page}) {
       </div>
     `}
   `;
-  renderItemHolder(task, periods);
   const iha = isHistoryAvailable(task);
-  if (iha) {
-    await renderHistory(task);
-  } else if (iha === false) {
-    let emoji = emjs.cross, color = 'red';
-    if (task.history[0]) emoji = emjs.sign, color = 'green';
-    createInfoRect(emoji, `Task ${
-      task.history.length && task.disabled ? 'was' : 'is'
-    } ${task.history[0] ? '' : 'not '}completed`, color);
-  }
+  renderItemsHolder(task, periods, iha);
+  if (iha) await renderHistory(task);
 }
 
-function renderItemHolder(task, periods) {
+function renderItemsHolder(task, periods, iha) {
   const perTitle = periods[task.periodId].title;
   const periodText = !task.special && task.periodStart <= getToday()
     ? `${perTitle} from ${task.periodStart == getToday() ? 'today' : intlDate(task.periodStart)}${
       task.endDate ? ` to ${task.endDate == getToday() + oneDay ? 'tomorrow' : intlDate(task.endDate)}` : ''
     }`
-    : (task.endDate ? `${perTitle}. Ended ${intlDate(task.endDate)}` :
+    : (task.endDate ? `${perTitle}${task.disabled ? '. Ended' : ' to'} ${intlDate(task.endDate)}` :
       (task.periodStart < getToday() ? `${perTitle} from ${intlDate(task.periodStart)}` : task.periodTitle));
   createInfoRect(emjs.calendar, periodText, 'blue');
 
@@ -82,6 +75,13 @@ function renderItemHolder(task, periods) {
   if (!task.disabled) createInfoRect(emjs.clock, isActiveText, task.period[task.periodDay] ? 'green' : 'red');
 
   createInfoRect(emjs.fire, `Importance: ${priorities[task.priority].title}`, priorities[task.priority].color);
+
+  if (iha) return;
+  let emoji = emjs.cross, color = 'red';
+  if (task.history[0]) emoji = emjs.sign, color = 'green';
+  createInfoRect(emoji, `Task ${
+    task.history.length && task.disabled ? 'was' : 'is'
+  } ${task.history[0] ? '' : 'not '}completed`, color);
 }
 
 function createInfoRect(emoji, text, color) {

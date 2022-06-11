@@ -126,7 +126,7 @@ async function enterEditTaskMode(globals) {
     qs('#date').style.display = 'block';
   }
   if (td.endDate) {
-    qs('[data-id="noEndDate"]').children[1].click();
+    qs('[data-id="noEndDate"]').activate();
     qs('#endDate').value = convertDate(td.endDate);
   } else if (td.special == 'oneTime') {
     qs('[data-id="noEndDate"]').style.display = 'none';
@@ -204,7 +204,7 @@ async function onPeriodChange(e, globals) {
   }
   if (per.special == 'oneTime') {
     const toggler = qs('[data-id="noEndDate"]');
-    if (!toggler.dataset.value) toggler.children[1].click();
+    if (!Number(toggler.dataset.value)) toggler.activate();
     toggler.style.display = 'none';
   } else qs('[data-id="noEndDate"]').style.display = 'flex';
   onDateChange({ target: qs('#date') });

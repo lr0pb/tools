@@ -45,7 +45,8 @@ async function renderDay({globals, page}) {
   page.classList.remove('center');
   page.innerHTML = '';
   for (let i = day.tasks.length - 1; i > -1; i--) {
-    for (let id in day.tasks[i]) {
+    const tasks = day.tasks[i];
+    for (let id in tasks) {
       const td = await globals.db.getItem('tasks', id);
       renderTask({type: 'day', globals, td, page, onBodyClick: () => {
         globals.pageInfo = {taskId: td.id};
@@ -71,7 +72,7 @@ async function createDay(globals, periods, today = getToday()) {
     return isEmpty(day) ? 'error' : day;
   }
   let tasks = await globals.db.getAll('tasks');
-  tasks = tasks.filter( (elem) => !elem.disabled || !elem.deleted );
+  tasks = tasks.filter( (elem) => elem.disabled || elem.deleted ? false : true );
   for (let task of tasks) {
     if (task.periodStart <= today) {
       if (day.firstCreation || !task.history.length) {

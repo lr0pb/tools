@@ -96,7 +96,6 @@ function onDaysCountChange(e) {
 }
 
 function createPeriod() {
-  if (!localStorage.lastPeriodId) localStorage.lastPeriodId = 50;
   const period = {
     id: String(Number(localStorage.lastPeriodId) + 1),
     title: qs('#periodName').value,

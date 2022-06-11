@@ -20,38 +20,37 @@ async function renderPage({globals, page}) {
   const days = await globals.db.getAll('days');
   const tasks = await globals.db.getAll('tasks');
   const periods = await globals.db.getAll('periods');
-  page.innerHTML = `<div>
-    <h3>Is storage persisted:</h3>
-    <p>${isPersisted.toString()}</p>
-    <h3>Theoretical available memory:</h3>
-    <p>${convertBytes(memory.quota, 'Mb')}</p>
-    <h3>Used memory:</h3>
-    <p>${convertBytes(memory.usage, 'kb')}</p>
-    <h3>Used by Cache storage:</h3>
-    <p>${convertBytes(memory.usageDetails.caches, 'kb')}</p>
-    <h3>Used by IndexedDb:</h3>
-    <p>${convertBytes(memory.usageDetails.indexedDB, 'kb')}</p>
-    <h3>First day ever:</h3>
-    <p>${intlDate(Number(localStorage.firstDayEver))}</p>
-    <h3>Periods list:</h3>
-    <p>${localStorage.periodsList}</p>
-    <h3>Days amount:</h3>
-    <p>${days.length}</p>
-    <h3>Tasks amount:</h3>
-    <p>${tasks.length}</p>
-    <h3>Periods amount:</h3>
-    <p>${periods.length}</p>
-    <h3>Last period id:</h3>
-    <p>${localStorage.lastPeriodId || 50}</p>
-    <h3>Is app installed:</h3>
-    <p>${localStorage.installed}</p>
-    <h3>Network connection type:</h3>
-    <p>${navigator.connection.effectiveType}</p>
-    <h3>Is online:</h3>
-    <p>${navigator.onLine}</p>
-  </div>
-  <button id="clear" class="danger">Clear database</button>
+  page.innerHTML = `
+    <div id="dataContainer"></div>
+    <button id="clear" class="danger">Clear database</button>
+    <h3>It's actually delete all your tasks and other. Make sure you have backup</h3>
   `;
+  const data = {
+    'Is storage persisted': isPersisted.toString(),
+    'Persist attempts': localStorage.persistAttempts,
+    'Persist granted': localStorage.persistGranted
+      ? intlDate(Number(localStorage.persistGranted)) : 'no data',
+    'Theoretical available memory': convertBytes(memory.quota, 'Mb'),
+    'Used memory': convertBytes(memory.usage, 'kb'),
+    'Used by Cache storage': convertBytes(memory.usageDetails.caches, 'kb'),
+    'Used by IndexedDb': convertBytes(memory.usageDetails.indexedDB, 'kb'),
+    'First day ever': intlDate(Number(localStorage.firstDayEver)),
+    'Periods list': localStorage.periodsList,
+    'Days amount': days.length,
+    'Tasks amount': tasks.length,
+    'Periods amount': periods.length,
+    'Last period id': localStorage.lastPeriodId,
+    'Is app installed': localStorage.installed,
+    'Network connection type': navigator.connection.effectiveType,
+    'Is onLine': navigator.onLine,
+  };
+  const container = qs('#dataContainer');
+  for (let title in data) {
+    const elem = document.createElement('div');
+    elem.className = 'dataLine';
+    elem.innerHTML = `<h3>${title}:</h3><p>${data[title]}</p>`;
+    container.append(elem);
+  }
   qs('#clear').addEventListener('click', async () => {
     await clearDatabase(globals);
     globals.paintPage('main');
