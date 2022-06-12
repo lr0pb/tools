@@ -22,7 +22,6 @@
   --accentGrey: #5c5e60;
   --accentGreen: #379b00;
   --accentRed: #cb3a3a;
-  --msgBg: #191a1a;
   --lightBlueBg: #6f879c;
   --taskBg: #46454582;
   --gradientLight: #5a73f2;
@@ -55,24 +54,23 @@ html {
 
 @media (prefers-color-scheme: light) {
   :root {
-    --mainBg: #ececec;
-  --mainBgRgb: 236, 236, 236;
-  --mainText: black;
-  --darkBorder: rgb(196 196 196 / 50%);
-  --darkShadow: #b1b1b1;
-  /*--accentBlue: #699ade;
-  --accentGrey: #9fa0a2;
-  --accentGreen: #54c416;
-  --accentRed: #ef5353;*/
-  --msgBg: #dbdbdb;
-  --lightBlueBg: #a9ceef;
-  --taskBg: #aeaeae82;
-  --gradientLight: #9aaafa;
-  --gradientDark: #625aaa;
-  --infoRectBg: #bebebe75;
-  --lightBorder: rgb(160 160 160 / 35%);
-  --popupBg: #c4c4c4;
-  --marker: #57b1ff;
+    --mainBg: #f2f2f2;
+    --mainBgRgb: 236, 236, 236;
+    --mainText: black;
+    --darkBorder: rgba(232, 232, 232, 0.5);
+    --darkShadow: #b1b1b1;
+    /*--accentBlue: #699ade;*/
+    --accentGrey: #a7a7a8;
+    /*--accentGreen: #54c416;
+    --accentRed: #ef5353;*/
+    --lightBlueBg: #bdd9f2;
+    --taskBg: #dddddd82;
+    /*--gradientLight: #9aaafa;*/
+    --gradientDark: #463e8c;
+    --infoRectBg: #e9e9e975;
+    --lightBorder: rgb(174, 174, 174, 0.35);
+    --popupBg: var(--mainBg);
+    --marker: #7cc2ff;
   }
 }
 
@@ -227,7 +225,7 @@ button.danger {
   padding: 2rem; margin: 0;
   left: 50%; bottom: 4rem;
   transform: translateX(-50%);
-  background-image: linear-gradient(90deg, var(--color) 0%, var(--msgBg) 75%);
+  background-image: linear-gradient(90deg, var(--color) 0%, var(--mainBg) 75%);
   border-color: var(--color);
   color: white;
 }
@@ -305,6 +303,7 @@ button.danger {
 }
 #infoBackground > h4 {
   margin: 2rem 3rem;
+  color: white;
 }
 
 .task, .infoRect {
