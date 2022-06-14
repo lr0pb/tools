@@ -78,9 +78,13 @@ async function renderTasksList({globals, page, isBadTask, sort}) {
     let td = prevTask || tasks[i]; // td stands for task's data
     if (isBadTask(td)) continue;
     if (sort) {
-      const resp = sort(td, tasks[i + 1]);
+      while (isBadTask(tasks[i + 1] || td)) {
+        i++;
+      }
+      const nextTask = tasks[i + 1] || td;
+      const resp = sort(td, nextTask);
       if (resp === -1) {
-        td = tasks[i + 1];
+        td = nextTask;
         setPrev(tasks[i], i);
       } else if (resp === 0) {
         td = prevTaskId ? tasks[prevTaskId] : td;

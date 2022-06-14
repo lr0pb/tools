@@ -102,6 +102,7 @@ export async function editTask({globals, id, field, onConfirm}) {
     text: `Are you sure to ${field.replace(/\w$/, '')} this task?`,
     action: async () => {
       td[field] = true;
+      td.endDate = getToday();
       await globals.db.setItem('tasks', td);
       localStorage.lastTasksChange = Date.now().toString();
       globals.closePopup();

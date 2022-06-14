@@ -1,5 +1,4 @@
 :root {
-  --desctopWidth: 450px;
   --defaultFullWidth: 92vw;
   --fullWidth: var(--defaultFullWidth);
   --defaultGridContent: calc(100vw - 6rem);
@@ -38,11 +37,19 @@ html {
 
 @media (min-width: 450px) {
   :root {
-    --fullWidth: min(var(--defaultFullWidth), var(--desctopWidth));
-    --gridContent: min(var(--defaultGridContent), var(--desctopWidth));
+    --fullWidth: 450px;
+    --gridContent: var(--fullWidth);
   }
   html { font-size: 0.65vmin; }
 }
+
+@media (min-width: 450px) and (orientation: portrait) {
+  :root { --fullWidth: 75vw; }
+}
+/*
+@media (min-width: 910px) and (orientation: landscape) {
+  :root { --gridContent: calc(var(--fullWidth) * 2 + 4rem); }
+}*/
 
 @media (prefers-reduced-motion: reduce) {
   :root {
@@ -241,7 +248,7 @@ button.danger {
 }
 
 .floatingMsg {
-  width: var(--fullWidth);
+  width: var(--gridContent);
   background-color: var(--lightBlueBg);
   margin: 1rem 0;
   align-items: center;
