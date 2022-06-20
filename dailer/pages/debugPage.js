@@ -15,8 +15,8 @@ async function renderPage({globals, page}) {
   const isPersisted = navigator.storage && navigator.storage.persisted
   ? await navigator.storage.persisted() : 'null';
   const memory = navigator.storage && navigator.storage.estimate
-  ? await navigator.storage.estimate()
-  : { quota: 0, usage: 0, usageDetails: { caches: 0, indexedDB: 0 } };
+  ? await navigator.storage.estimate() : { quota: 0, usage: 0 };
+  if (!memory.usageDetails) memory.usageDetails = { caches: 0, indexedDB: 0 };
   const days = await globals.db.getAll('days');
   const tasks = await globals.db.getAll('tasks');
   const periods = await globals.db.getAll('periods');
