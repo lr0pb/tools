@@ -21,7 +21,7 @@ async function renderPage({globals, page}) {
   const tasks = await globals.db.getAll('tasks');
   const periods = await globals.db.getAll('periods');
   page.innerHTML = `
-    <div id="dataContainer"></div>
+    <div id="dataContainer" class="doubleColumns"></div>
     <button id="clear" class="danger">Clear database</button>
     <h3>It's actually delete all your tasks and other. Make sure you have backup</h3>
   `;

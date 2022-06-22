@@ -4,6 +4,7 @@ import { renderTask, showNoTasks } from './highLevel/taskThings.js'
 export const planCreator = {
   header: `${emjs.notes} Your tasks`,
   page: ``,
+  styleClasses: 'doubleColumns',
   footer: `
     <button id="back" class="secondary">${emjs.back} Back</button>
     <button id="addTask">${emjs.paperWPen} Add task</button>
@@ -47,6 +48,7 @@ async function onPlanCreator({globals, page}) {
 export const tasksArchive = {
   header: `${emjs.books} Archived tasks`,
   page: ``,
+  styleClasses: 'doubleColumns',
   footer: `<button id="back" class="secondary">${emjs.back} Back</button>`,
   script: onTasksArchive,
   onSettingsUpdate: onBackupUploaded
@@ -56,8 +58,11 @@ async function onTasksArchive({globals, page}) {
   qs('#back').addEventListener('click', () => history.back());
   await renderTasksList({
     globals, page, isBadTask: bads.tasksArchive, sort: (t1, t2) => {
-      if (t1.periodStart > t2.periodStart) return -1;
-      if (t1.periodStart === t2.periodStart) return 0;
+      const chooseDate = (t) => t.special == 'untilComplete' && t.endDate ? t.endDate : t.periodStart;
+      const t1date = chooseDate(t1);
+      const t2date = chooseDate(t2);
+      if (t1date > t2date) return -1;
+      if (t1date === t2date) return 0;
       return 1;
     }
   });

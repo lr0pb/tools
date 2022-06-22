@@ -116,17 +116,27 @@ export async function editTask({globals, id, field, onConfirm}) {
   });
 }
 
+export function getTextDate(date) {
+  let resp = intlDate(date);
+  if (date == getToday()) resp = 'today';
+  else if (date - oneDay == getToday()) resp = 'tomorrow';
+  else if (date + oneDay == getToday()) resp = 'yesterday';
+  return resp;
+}
+
 export function setPeriodTitle(task) {
-  const date = new Date(task.periodStart);
-  task.periodStart = date.setHours(0, 0, 0, 0);
-  let startTitle = intlDate(date);
-  if (task.periodStart == getToday()) startTitle = 'today';
-  if (task.periodStart - oneDay == getToday()) startTitle = 'tomorrow';
+  task.periodStart = new Date(task.periodStart).setHours(0, 0, 0, 0);
+  const startTitle = getTextDate(task.periodStart);
+  const endTitle = task.endDate ? getTextDate(task.endDate) : null;
 
   if (task.special == 'oneTime') {
     task.periodTitle = `Only ${startTitle}`;
+  } else if (task.special == 'untilComplete' && task.endDate) {
+    task.periodTitle = `Ended ${endTitle}`;
   } else if (task.periodStart > getToday()) {
     task.periodTitle += ` from ${startTitle}`;
+  } else if (task.endDate) {
+    task.periodTitle += ` to ${endTitle}`;
   }
 }
 

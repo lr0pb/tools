@@ -1,10 +1,11 @@
 import { getToday, convertDate, oneDay } from './highLevel/periods.js'
-import { priorities } from './highLevel/taskThings.js'
+import { priorities, getTextDate } from './highLevel/taskThings.js'
 import { qs, emjs, getLast, intlDate } from './highLevel/utils.js'
 
 export const taskInfo = {
   header: `${emjs.oldPaper} Task info`,
   page: ``,
+  styleClasses: 'doubleColumns',
   footer: `
     <button id="back" class="secondary">${emjs.back} Back</button>
     <button id="edit">${emjs.pen} Edit task</button>
@@ -44,34 +45,36 @@ async function renderTaskInfo({globals, page}) {
       globals.paintPage('taskCreator');
     });
   }
+  const iha = isHistoryAvailable(task);
   page.innerHTML = `
-    <div id="infoBackground">
-      <h4>${task.name}</h4>
+    <div>
+      <div id="infoBackground">
+        <h4>${task.name}</h4>
+      </div>
+      <div class="itemsHolder"></div>
     </div>
-    <div class="itemsHolder"></div>
-    ${!task.history.length || task.special ? '' : `
+    <div>${!iha ? '' : `
       <h2>History</h2>
       <div id="history" class="hiddenScroll">
         <div class="historyMonth"></div>
       </div>
-    `}
+    `}</div>
   `;
-  const iha = isHistoryAvailable(task);
   renderItemsHolder(task, periods, iha);
   if (iha) await renderHistory(task);
 }
 
 function renderItemsHolder(task, periods, iha) {
   const perTitle = periods[task.periodId].title;
-  const periodText = !task.special && task.periodStart <= getToday()
-    ? `${perTitle} from ${task.periodStart == getToday() ? 'today' : intlDate(task.periodStart)}${
-      task.endDate ? ` to ${task.endDate == getToday() + oneDay ? 'tomorrow' : intlDate(task.endDate)}` : ''
-    }`
-    : (task.endDate ? `${perTitle}${task.disabled ? '. Ended' : ' to'} ${intlDate(task.endDate)}` :
-      (task.periodStart < getToday() ? `${perTitle} from ${intlDate(task.periodStart)}` : task.periodTitle));
+  const startTitle = getTextDate(task.periodStart);
+  const endTitle = task.endDate ? getTextDate(task.endDate) : null;
+  const periodText = !task.special
+    ? `${perTitle} from ${startTitle}${task.endDate ? ` to ${endTitle}` : ''}`
+    : (task.endDate
+      ? `${perTitle}${task.disabled ? '. Ended' : ' to'} ${endTitle}` : task.periodTitle);
   createInfoRect(emjs.calendar, periodText, 'blue');
 
-  const isActiveText = `Today ${task.period[task.periodDay] ? 'you should do' : "you haven't"} this task`;
+  const isActiveText = `Today ${task.period[task.periodDay] ? 'you should do' : `you haven't`} this task`;
   if (!task.disabled) createInfoRect(emjs.clock, isActiveText, task.period[task.periodDay] ? 'green' : 'red');
 
   createInfoRect(emjs.fire, `Importance: ${priorities[task.priority].title}`, priorities[task.priority].color);

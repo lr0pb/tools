@@ -4,7 +4,7 @@ import { renderTask, setPeriodTitle } from './highLevel/taskThings.js'
 
 export const main = {
   header: `${emjs.sword} Today's tasks`,
-  centerContent: true,
+  styleClasses: 'center doubleColumns',
   page: ``,
   footer: `
     <!--<button id="toHistory" class="secondary">&#128198; History</button>-->
@@ -111,19 +111,20 @@ async function checkLastDay(globals, day) {
 function disable(task) {
   task.periodDay = -1;
   task.disabled = true;
+  setPeriodTitle(task);
 }
 
 function updateTask(task, periods) {
   if (task.special == 'oneTime') {
     if (task.history.length) {
-      disable(task); setPeriodTitle(task);
+      disable(task);
     } else if (getToday() == task.periodStart) {
       task.periodDay = 0; task.periodTitle = 'Only today';
     }
     return;
   } else if (task.special == 'untilComplete') {
     if (task.history[0] == 1) {
-      disable(task); task.endDate = getToday() - oneDay;
+      task.endDate = getToday() - oneDay; disable(task);
     } else {
       task.periodDay = 0; task.history.length = 0;
     }

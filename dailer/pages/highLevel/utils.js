@@ -22,31 +22,40 @@ export const copyObject = (obj) => {
 
 export const intlDate = (date) => new Date(date).toLocaleDateString(navigator.language);
 
-export const emjs = {
-  sign: '&#9989;',
-  blank: '&#11036;',
-  cross: '&#10060;',
-  back: '&#9194;',
-  stars: '&#128171;',
-  books: '&#128218;',
-  notes: '&#128209;',
-  paperWPen: '&#128221;',
-  pen: '&#128394;',
-  trashCan: '&#128465;',
-  sword: '&#128481;',
-  empty: '&#128173;',
-  save: '&#128190;',
-  magic: '&#128302;',
-  calendar: '&#128467;',
-  fire: '&#128293;',
-  clock: '&#128337;',
-  oldPaper: '&#128220;',
-  paperList: '&#128203;',
-  construction: '&#127959;',
-  crateUp: '&#128228;',
-  crateDown: '&#128229;',
-  lockWKey: '&#128272;',
+let emjs = {
+  sign: '2705',
+  blank: '2B1C',
+  cross: '274C',
+  back: '23EA',
+  stars: '1F4AB',
+  books: '1F4DA',
+  notes: '1F4D1',
+  paperWPen: '1F4DD',
+  pen: '1F58A',
+  trashCan: '1F5D1',
+  sword: '1F5E1',
+  empty: '1F4AD',
+  save: '1F4BE',
+  magic: '1F52E',
+  calendar: '1F5D3',
+  fire: '1F525',
+  clock: '1F551',
+  oldPaper: '1F4DC',
+  paperList: '1F4CB',
+  construction: '1F3D7',
+  crateUp: '1F4E4',
+  crateDown: '1F4E5',
+  lockWKey: '1F510',
+  settings: '2699',
 };
+emjs = new Proxy(emjs, {
+  get(target, prop) {
+    if (prop in target) {
+      return `&#x${target[prop]};`;
+    } else return '';
+  }
+});
+export emjs;
 
 export function safeDataInteractions(elems) {
   for (let elem of elems) {

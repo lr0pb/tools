@@ -1,6 +1,7 @@
 :root {
   --defaultFullWidth: 92vw;
   --fullWidth: var(--defaultFullWidth);
+  --fullHeight: calc(100vh - var(--footerHeight) * 2 - 4rem);
   --defaultGridContent: calc(100vw - 6rem);
   --gridContent: var(--defaultGridContent);
   --yellow: #cda61a;
@@ -46,10 +47,17 @@ html {
 @media (min-width: 450px) and (orientation: portrait) {
   :root { --fullWidth: 75vw; }
 }
-/*
+
 @media (min-width: 910px) and (orientation: landscape) {
-  :root { --gridContent: calc(var(--fullWidth) * 2 + 4rem); }
-}*/
+  :root { --gridContent: calc(var(--fullWidth) * 2 + 3rem); }
+  .doubleColumns {
+    display: flex; height: fit-content;
+    flex-direction: row !important;
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+  .doubleColumns > * { width: var(--fullWidth); }
+}
 
 @media (prefers-reduced-motion: reduce) {
   :root {
@@ -283,7 +291,7 @@ button.danger {
   flex-direction: row;
   margin: 0 0 2.5rem;
 }
-.task.first {
+.first {
   margin-top: 2.5rem;
 }
 .task > div {
@@ -370,7 +378,7 @@ progress {
 }
 
 #history {
-  width: var(--fullWidth); min-height: calc(100vh - var(--footerHeight) * 2 - 4rem);
+  width: var(--fullWidth); min-height: var(--fullHeight);
   flex-direction: column;
   overflow: auto hidden;
   scroll-snap-type: x mandatory;

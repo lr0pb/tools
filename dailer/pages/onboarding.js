@@ -6,7 +6,7 @@ export const onboarding = {
     <h2 class="emoji">${emjs.stars}</h2>
     <h2>Create your everyday plan for manage how you grow yourself over time</h2>
   `,
-  centerContent: true,
+  styleClasses: 'center',
   noSettings: true,
   footer: `<button id="create">${emjs.paperList} Create now</button>`,
   script: ({globals, page}) => {

@@ -1,6 +1,6 @@
 import { pages } from './pages.js'
 import {
-  qs as localQs, globQs as qs, globQsa as qsa, copyObject
+  emjs, qs as localQs, globQs as qs, globQsa as qsa, copyObject
 } from './pages/highLevel/utils.js'
 import { periods } from './pages/highLevel/periods.js'
 import { paintPeriods } from './pages/settings.js'
@@ -46,14 +46,14 @@ const globals = {
       <div class="header">
         <h1>${page.header}</h1>
         <button class="pageBtn emojiBtn"></button>
-        <button class="openSettings emojiBtn">&#128736;</button>
+        <button class="openSettings emojiBtn">${emjs.settings}</button>
       </div>
-      <div class="content ${page.centerContent ? 'center' : ''}">
-        ${page.page}
-      </div>
+      <div class="content">${page.page}</div>
       <div class="footer">${page.footer}</div>
     `;
     document.body.append(container);
+    const content = container.querySelector('.content');
+    content.className = `content ${page.styleClasses || ''}`;
     showPage(qs('.current'), container, noAnim);
     if (page.noSettings) {
       localQs('.openSettings').style.display = 'none';
@@ -63,7 +63,7 @@ const globals = {
     const link = getPageLink(name);
     if (replaceState) history.replaceState(history.state, '', link);
     else if (!back) history.pushState(globals.pageInfo || history.state || {}, '', link);
-    await page.script({globals, page: container.querySelector('.content')});
+    await page.script({ globals, page: content });
   },
   message: ({state, text}) => {
     const msg = qs('#message');

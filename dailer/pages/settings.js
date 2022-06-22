@@ -1,5 +1,6 @@
 import { renderToggler } from './highLevel/taskThings.js'
 import { emjs, globQs as qs } from './highLevel/utils.js'
+import { getToday } from './highLevel/periods.js'
 import { uploading } from './highLevel/uploadBackup.js'
 import { getData } from './highLevel/createBackup.js'
 
@@ -11,7 +12,7 @@ export const settings = {
     page.innerHTML = `
       <h2 data-section="periods">Periods</h2>
       <h3>Set up to ${periodsCount} periods that will be shown in Period choise drop down list of task</h3>
-      <div id="periodsContainer"></div>
+      <div id="periodsContainer" class="first doubleColumns"></div>
       <h3>Create your own period for specific task performance</h3>
       <button id="toPeriodCreator">${emjs.calendar} Create custom period</button>
       <!--<h2 data-section="storage">Protect your data</h2>
@@ -116,6 +117,13 @@ async function uploadData(globals) {
     reader.readAsText(file);
     reader.onload = async () => {
       const data = JSON.parse(reader.result);
+      if (typeof data !== 'object') return globals.message({
+        state: 'fail', text: 'Unknown file content'
+      });
+      const cr = data.dailer_created;
+      if ( !cr || (cr && new Date(cr).setHours(0, 0, 0, 0) !== getToday()) ) return globals.message({
+        state: 'fail', text: `You must upload today's created backup`
+      });
       await uploading(globals, data);
     };
   });
