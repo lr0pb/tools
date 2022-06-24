@@ -86,8 +86,11 @@ export default class IDB {
     });
     return getter.result;
   }
-  async getAll(store) {
-    if (typeof store != 'string') return this.wrongArguments('getAll');
+/**
+* @onData(item) - async function that calls every time when new store item is received
+*/
+  async getAll(store, onData) {
+    if (typeof store != 'string' || (onData && typeof onData != 'function')) return this.wrongArguments('getAll');
     await this.isComplete();
     const check = this.checkStore(store);
     if (!check) return;
@@ -97,9 +100,11 @@ export default class IDB {
       .openCursor();
     let complete = false;
     const result = [];
-    getter.addEventListener('success', () => {
+    getter.addEventListener('success', async () => {
       if (getter.result) {
-        result.push(getter.result.value);
+        const value = getter.result.value;
+        result.push(value);
+        if (onData) await onData(value);
         getter.result.continue();
       } else complete = true;
     });
@@ -108,22 +113,6 @@ export default class IDB {
       isComplete();
     });
     return result;
-  }
-  async *getAllGen(store) {
-    if (typeof store != 'string') return this.wrongArguments('getAllGen');
-    await this.isComplete();
-    const check = this.checkStore(store);
-    if (!check) return;
-    const getter = this.db
-      .transaction(store, 'readonly')
-      .objectStore(store)
-      .openCursor();
-    getter.addEventListener('success', () => {
-      if (getter.result) {
-        yield getter.result.value;
-        getter.result.continue();
-      }
-    });
   }
   async deleteItem(store, title) {
     if (typeof store != 'string' || !title) return this.wrongArguments('deleteItem');

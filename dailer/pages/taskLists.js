@@ -71,10 +71,10 @@ async function onTasksArchive({globals, page}) {
 async function renderProgressiveTasksList({globals, page, isBadTask}) {
   page.classList.remove('center');
   page.innerHTML = '';
-  for await (let td of globals.db.getAllGen('tasks')) {
-    if (isBadTask(td)) continue;
+  const tasks = await globals.db.getAll('tasks', (td) => {
+    if (isBadTask(td)) return;
     renderTask({type: 'edit', globals, td, page});
-  }
+  });
   if (!page.children.length) showNoTasks(page);
 }
 
