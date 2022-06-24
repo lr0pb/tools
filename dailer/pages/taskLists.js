@@ -42,7 +42,7 @@ async function onPlanCreator({globals, page}) {
   qs('#addTask').addEventListener(
     'click', () => globals.paintPage('taskCreator')
   );
-  await renderTasksList({ globals, page, isBadTask: bads.planCreator });
+  await renderProgressiveTasksList({ globals, page, isBadTask: bads.planCreator });
 }
 
 export const tasksArchive = {
@@ -56,7 +56,7 @@ export const tasksArchive = {
 
 async function onTasksArchive({globals, page}) {
   qs('#back').addEventListener('click', () => history.back());
-  await renderTasksList({
+  await renderSortedTasksList({
     globals, page, isBadTask: bads.tasksArchive, sort: (t1, t2) => {
       const chooseDate = (t) => t.special == 'untilComplete' && t.endDate ? t.endDate : t.periodStart;
       const t1date = chooseDate(t1);
@@ -68,7 +68,17 @@ async function onTasksArchive({globals, page}) {
   });
 }
 
-async function renderTasksList({globals, page, isBadTask, sort}) {
+async function renderProgressiveTasksList({globals, page, isBadTask}) {
+  page.classList.remove('center');
+  page.innerHTML = '';
+  for await (let td of globals.db.getAllGen('tasks')) {
+    if (isBadTask(td)) continue;
+    renderTask({type: 'edit', globals, td, page});
+  }
+  if (!page.children.length) showNoTasks(page);
+}
+
+async function renderSortedTasksList({globals, page, isBadTask, sort}) {
   const tasks = await globals.db.getAll('tasks');
   page.innerHTML = '';
   let prevTask = null, prevTaskId = null;

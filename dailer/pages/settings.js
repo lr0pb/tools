@@ -53,22 +53,17 @@ export const settings = {
 };
 
 export async function paintPeriods(globals) {
-  let first = true;
   const pc = qs('#periodsContainer');
   const periods = await globals.getPeriods();
   pc.innerHTML = '';
   for (let per in periods) {
     const period = periods[per];
-    const elem = renderToggler({
+    renderToggler({
       name: period.title, id: period.id,
       emoji: getPeriodUsed(per),
       func: updatePeriodsList,
       args: { globals, periodsCount }, page: pc
     });
-    if (first) {
-      elem.classList.add('first');
-      first = false;
-    }
   }
 }
 

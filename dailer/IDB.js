@@ -42,12 +42,21 @@ export default class IDB {
   static wrongArguments(functionName) {
     console.error('[IDB] Wrong arguments passed to db.' + functionName);
   }
+  checkStore(store) {
+    if (!this.db.objectStoreNames.contains(store)) {
+      console.error(`[IDB] Database haven't "${store}" store`);
+      return false;
+    }
+    return true;
+  }
 /**
 * @item - object e.g. {title: 'title', author: 'name', data: new ArrayBuffer(32)}
 */
   async setItem(store, item) {
     if (typeof store != 'string' || typeof item != 'object') return this.wrongArguments('setItem');
     await this.isComplete();
+    const check = this.checkStore(store);
+    if (!check) return;
     const setter = this.db
       .transaction(store, 'readwrite')
       .objectStore(store)
@@ -63,6 +72,8 @@ export default class IDB {
   async getItem(store, title) {
     if (typeof store != 'string' || !title) return this.wrongArguments('getItem');
     await this.isComplete();
+    const check = this.checkStore(store);
+    if (!check) return;
     const getter = this.db
       .transaction(store, 'readonly')
       .objectStore(store)
@@ -78,9 +89,8 @@ export default class IDB {
   async getAll(store) {
     if (typeof store != 'string') return this.wrongArguments('getAll');
     await this.isComplete();
-    if (!this.db.objectStoreNames.contains(store)) {
-      return console.error(`[IDB] Database haven't "${store}" store`);
-    }
+    const check = this.checkStore(store);
+    if (!check) return;
     const getter = this.db
       .transaction(store, 'readonly')
       .objectStore(store)
@@ -99,9 +109,27 @@ export default class IDB {
     });
     return result;
   }
+  async *getAllGen(store) {
+    if (typeof store != 'string') return this.wrongArguments('getAllGen');
+    await this.isComplete();
+    const check = this.checkStore(store);
+    if (!check) return;
+    const getter = this.db
+      .transaction(store, 'readonly')
+      .objectStore(store)
+      .openCursor();
+    getter.addEventListener('success', () => {
+      if (getter.result) {
+        yield getter.result.value;
+        getter.result.continue();
+      }
+    });
+  }
   async deleteItem(store, title) {
     if (typeof store != 'string' || !title) return this.wrongArguments('deleteItem');
     await this.isComplete();
+    const check = this.checkStore(store);
+    if (!check) return;
     const deleter = this.db
       .transaction(store, 'readwrite')
       .objectStore(store)

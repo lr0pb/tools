@@ -132,7 +132,7 @@ export function setPeriodTitle(task) {
   if (task.special == 'oneTime') {
     task.periodTitle = `Only ${startTitle}`;
   } else if (task.special == 'untilComplete' && task.endDate) {
-    task.periodTitle = `Ended ${endTitle}`;
+    task.periodTitle = `${task.disabled ? 'Ended' : 'Until'} ${endTitle}`;
   } else if (task.periodStart > getToday()) {
     task.periodTitle += ` from ${startTitle}`;
   } else if (task.endDate) {
