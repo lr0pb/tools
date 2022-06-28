@@ -28,7 +28,7 @@ export const emjs = {
   cross: '&#x274C;',
   back: '&#x23EA;',
   stars: '&#x1F4AB;',
-  books: '&#x1F4DA;',
+  book: '&#x1F4D2',
   notes: '&#x1F4D1;',
   paperWPen: '&#x1F4DD;',
   pen: '&#x1F58A;',
@@ -47,6 +47,11 @@ export const emjs = {
   crateDown: '&#x1F4E5;',
   lockWKey: '&#x1F510;',
   settings: '&#x2699;',
+  eyes: '&#x1F440;',
+  light: '&#x1F4A1',
+  fileBox: '&#x1F5C3;',
+  label: '&#x1F3F7;',
+  microscope: '&#x1F52C;',
 };
 
 export function safeDataInteractions(elems) {

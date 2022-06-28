@@ -91,8 +91,12 @@ export async function onTaskManageClick({ e, globals, task, page }) {
 
 export function showNoTasks(page) {
   page.classList.add('center');
+  const isArchive = page.parentElement.id == 'tasksArchive';
   page.innerHTML = `
-    <h2 class="emoji">${emjs.empty}</h2><h2>There is nothing yet!</h2>
+    <h2 class="emoji">${isArchive ? emjs.book : emjs.empty}</h2>
+    <h2>${isArchive
+    ? 'When tasks expired or you disable them, they will get here'
+    : 'There is no tasks right now!'}</h2>
   `;
 }
 
@@ -129,10 +133,10 @@ export function setPeriodTitle(task) {
   const startTitle = getTextDate(task.periodStart);
   const endTitle = task.endDate ? getTextDate(task.endDate) : null;
 
-  if (task.special == 'oneTime') {
+  if (task.special == 'oneTime' && task.period.length == 1) {
     task.periodTitle = `Only ${startTitle}`;
   } else if (task.special == 'untilComplete' && task.endDate) {
-    task.periodTitle = `${task.disabled ? 'Ended' : 'Until'} ${endTitle}`;
+    task.periodTitle = `${task.disabled ? 'Ended' : 'Complete until'} ${endTitle}`;
   } else if (task.periodStart > getToday()) {
     task.periodTitle += ` from ${startTitle}`;
   } else if (task.endDate) {

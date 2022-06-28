@@ -11,7 +11,7 @@ export const settings = {
   paint: async ({globals, page}) => {
     page.innerHTML = `
       <h2 data-section="periods">Periods</h2>
-      <h3>Set up to ${periodsCount} periods that will be shown in Period choise drop down list of task</h3>
+      <h3>Select up to ${periodsCount} periods that will be shown in Period choise drop down list of task</h3>
       <div id="periodsContainer" class="first doubleColumns"></div>
       <h3>Create your own period for specific task performance</h3>
       <button id="toPeriodCreator">${emjs.calendar} Create custom period</button>
@@ -33,6 +33,9 @@ export const settings = {
       <button id="getData" class="success">${emjs.crateUp} Backup your current data</button>
       <a id="downloadData" class="downloadLink"></a>
       <button id="toDebug" class="secondary">${emjs.construction} Open debug page</button>
+      <h2>About</h2>
+      <h3>${emjs.label} dailer app, version 1.0.0</h3>
+      <h3>${emjs.microscope} Created in 2022</h3>
     `;
     qs('#toPeriodCreator').addEventListener('click', () => {
       globals.closeSettings(true);

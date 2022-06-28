@@ -24,7 +24,6 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
-  console.log(navigator.onLine);
   if (
     e.request.url.includes('manifest.json') || e.request.url.includes('screenshots') ||
     !e.request.url.includes(location.origin)
@@ -43,6 +42,7 @@ self.addEventListener('fetch', (e) => {
 });
 
 async function addCache(request) {
+  if (!navigator.onLine) return null;
   let fetchResponse = null;
   const url = request.url;
   const params = url.match(/(?<=\/)[\w\&=\.\?]+$/);
@@ -50,7 +50,10 @@ async function addCache(request) {
     request = new Request(url.replace(params, ''));
   }
   try {
-    const response = await fetch(request);
+    const response = await Promise.race([
+      new Promise((res) => { setTimeout(res, 3000) }),
+      fetch(request)
+    ]);
     if (response.ok) {
       const cache = await caches.open(appCache);
       cache.put(request, response.clone());

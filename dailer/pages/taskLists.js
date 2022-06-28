@@ -35,7 +35,7 @@ const bads = {
 
 async function onPlanCreator({globals, page}) {
   globals.pageButton({
-    emoji: emjs.books,
+    emoji: emjs.book,
     onClick: () => globals.paintPage('tasksArchive')
   });
   qs('#back').addEventListener('click', () => history.back());
@@ -46,7 +46,7 @@ async function onPlanCreator({globals, page}) {
 }
 
 export const tasksArchive = {
-  header: `${emjs.books} Archived tasks`,
+  header: `${emjs.book} Archived tasks`,
   page: ``,
   styleClasses: 'doubleColumns',
   footer: `<button id="back" class="secondary">${emjs.back} Back</button>`,

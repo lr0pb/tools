@@ -46,7 +46,7 @@ async function getPeriods(globals) {
   }
   periodsList.push({
     id: '00',
-    title: 'Other period'
+    title: 'No right period? Click to check others'
   });
   return periodsList;
 }
@@ -82,26 +82,58 @@ async function onTaskCreator({globals}) {
   if (isEdit) {
     td = await enterEditTaskMode(globals);
     enableEditButtons(globals, td, safeBack);
+  } else {
+    const { tasksCount, periodsCount } = await asyncDataReceiving({globals, tasks: 3});
+    if (tasksCount >= 3 && periodsCount == 0) globals.floatingMsg({
+      text: `${emjs.light} Tip: you can create your own periods e.g. Every saturday`,
+      button: 'Check',
+      onClick: async () => {
+        globals.openSettings('periods');
+        globals.closeSettings(true);
+        await globals.paintPage('periodCreator');
+      },
+      pageName: 'taskCreator',
+      notFixed: true
+    });
   }
   qs('#saveTask').addEventListener('click', async () => {
-    const periods = await globals.getPeriods();
-    const task = createTask(periods, td);
-    if (task == 'error') return globals.message({
-      state: 'fail', text: 'Fill all fields'
-    });
-    localStorage.lastTasksChange = Date.now().toString();
-    globals.db.setItem('tasks', task);
-    globals.message({
-      state: 'success', text: isEdit ? 'Task saved' : 'Task added'
-    });
-    if (!globals.pageInfo) globals.pageInfo = {};
-    globals.pageInfo.dataChangedTaskId = task.id;
-    await globals.checkPersist();
-    if (!localStorage.firstDayEver) {
-      return globals.paintPage('main', true, true);
-    }
-    safeBack();
+    await onSaveTaskClick(globals, safeBack);
   });
+}
+
+async function asyncDataReceiving({globals, tasks = 1, periods = 1}) {
+  let tasksCount = 0, periodsCount = 0, tasksOver = false, periodsOver = false;
+  globals.db.getAll('tasks', () => tasksCount++)
+    .then(() => tasksOver = true);
+  globals.db.getAll('periods', () => periodsCount++)
+    .then(() => periodsOver = true);
+  while (
+    (tasksCount < tasks || !tasksOver) &&
+    (periodsCount < periods || !periodsOver)
+  ) {
+    await new Promise((res) => { setTimeout(res, 10) });
+  }
+  return { tasksCount, periodsCount };
+}
+
+async function onSaveTaskClick(globals, safeBack) {
+  const periods = await globals.getPeriods();
+  const task = createTask(periods, td);
+  if (task == 'error') return globals.message({
+    state: 'fail', text: 'Fill all fields'
+  });
+  localStorage.lastTasksChange = Date.now().toString();
+  globals.db.setItem('tasks', task);
+  globals.message({
+    state: 'success', text: isEdit ? 'Task saved' : 'Task added'
+  });
+  if (!globals.pageInfo) globals.pageInfo = {};
+  globals.pageInfo.dataChangedTaskId = task.id;
+  await globals.checkPersist();
+  if (!localStorage.firstDayEver) {
+    return globals.paintPage('main', true, true);
+  }
+  safeBack();
 }
 
 async function enterEditTaskMode(globals) {

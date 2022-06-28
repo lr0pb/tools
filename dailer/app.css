@@ -1,14 +1,13 @@
 :root {
   --defaultFullWidth: 92vw;
   --fullWidth: var(--defaultFullWidth);
-  --fullHeight: calc(100vh - var(--footerHeight) * 2 - 4rem);
   --defaultGridContent: calc(100vw - 6rem);
   --gridContent: var(--defaultGridContent);
   --yellow: #cda61a;
   --red: #a11818;
   --green: #3ea317;
   --blue: #1aa2cd;
-  --fastAnim: 0.2s;
+  --fastAnim: 0.15s;
   --normalAnim: 0.3s;
   --msgShowing: 2s;
 
@@ -50,7 +49,7 @@ html {
 
 @media (min-width: 910px) and (orientation: landscape) {
   :root { --gridContent: calc(var(--fullWidth) * 2 + 3rem); }
-  .doubleColumns {
+  .doubleColumns:not(.center) {
     display: flex; height: fit-content;
     flex-direction: row !important;
     flex-wrap: wrap;
@@ -103,6 +102,7 @@ body, .page, #settings, #popup {
   display: grid;
   top: 0; left: 0;
   --footerHeight: 18rem;
+  --fullHeight: calc(100vh - var(--footerHeight) * 2 - 4rem);
   grid-template-areas:
     "... header ..."
     "... content ..."
@@ -114,7 +114,7 @@ body, .page, #settings, #popup {
 #settings {
   z-index: 1;
   --footerHeight: 0;
-  transform: translateY(-100vh);
+  transform: translateX(100vw);
   transition: transform var(--fastAnim) cubic-bezier(0.4, 0, 1, 1);
 }
 .page {
@@ -163,12 +163,12 @@ body, .page, #settings, #popup {
   text-align: center;
 }
 .center h2 {
-  margin: 1rem 6rem;
+  margin: 3rem 6rem;
 }
 
 body, .content, h1, h2, h3, h4, p, button {
   margin: 0;
-  font-family: sans-serif;
+  font-family: Arial, "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
   user-select: none;
 }
 
@@ -211,7 +211,7 @@ button {
   min-height: 11.6rem;
   font-size: 4.3em;
   font-weight: 700;
-  padding: 2rem 4rem;
+  padding: 2rem 4rem 2rem 3rem;
   color: white; --bgColor: var(--accentBlue);
   background-color: var(--bgColor) !important;
   outline: none;
@@ -304,6 +304,9 @@ button.danger {
 .task > :last-child {
   margin-right: 2rem;
 }
+#main.customBg > .task {
+  backdrop-filter: blur(12px);
+}
 
 #infoBackground, .itemsHolder, #history, #history > .historyMonth {
   scroll-snap-align: start;
@@ -321,10 +324,6 @@ button.danger {
   color: white;
 }
 
-.task, .infoRect {
-  backdrop-filter: blur(12px);
-}
-
 .itemsHolder, #history, .historyMonth {
   display: flex; flex-wrap: wrap;
 }
@@ -335,7 +334,7 @@ button.danger {
 }
 
 .infoRect {
-  width: calc(var(--fullWidth) / 2 - 3rem);
+  width: calc(var(--fullWidth) * var(--coef) / 2 - 3rem);
   min-height: 24rem;
   background-color: var(--infoRectBg);
   background-image: linear-gradient(150deg, var(--color) -40%, transparent 40%);
@@ -362,7 +361,7 @@ progress {
   margin: 5rem 0;
 }
 .pageBtn, .hidedUI, #editButtons, #popup, input[type="file"],
-.uploadUI, .uploadSuccess, .downloadLink {
+.uploadUI, .uploadSuccess, .downloadLink, .dayTitle {
   display: none;
 }
 
@@ -383,7 +382,7 @@ progress {
   overflow: auto hidden;
   scroll-snap-type: x mandatory;
 }
-.historyMonth > h4 {
+.historyMonth > * {
   width: calc(var(--fullWidth) / 7);
   text-align: center;
   margin: 0.5rem 0;
@@ -393,10 +392,10 @@ progress {
   box-sizing: border-box;
   user-select: none;
 }
-#history .historyMonth > h4:last-child {
+#history .historyMonth > *:last-child {
   background-color: var(--marker);
 }
-.historyMonth > h4[data-used="false"] {
+.historyMonth > [data-used="false"] {
   display: none;
 }
 

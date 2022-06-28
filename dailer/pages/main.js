@@ -5,9 +5,12 @@ import { renderTask, setPeriodTitle } from './highLevel/taskThings.js'
 export const main = {
   header: `${emjs.sword} Today's tasks`,
   styleClasses: 'center doubleColumns',
-  page: ``,
+  page: `
+    <h2 class="emoji">${emjs.eyes}</h2>
+    <h2>Tasks loading...</h2>
+  `,
   footer: `
-    <!--<button id="toHistory" class="secondary">&#128198; History</button>-->
+    <!--<button id="toHistory" class="secondary">${emjs.fileBox} History</button>-->
     <button id="toPlan" class="secondary">${emjs.notes} Edit tasks</button>
   `,
   script: async ({globals, page}) => {
@@ -33,7 +36,7 @@ async function updatePage({globals, page}) {
 
 async function renderDay({globals, page}) {
   const periods = await globals.getPeriods();
-  const day = await createDay(globals, periods);
+  const { day } = await createDay(globals, periods);
   if (day == 'error') {
     page.innerHTML = `
       <h2 class="emoji">${emjs.magic}</h2>
@@ -62,8 +65,11 @@ async function createDay(globals, periods, today = getToday()) {
     localStorage.firstDayEver = today.toString();
   }
   const check = await checkLastDay(globals, today);
+  let tasks = null;
   if (!check.check) {
-    await createDay(globals, periods, check.dayBefore);
+    const resp = await createDay(globals, periods, check.dayBefore);
+    tasks = resp.tasks;
+    delete resp.day;
   }
   let day = await globals.db.getItem('days', today.toString());
   if (!day || day.lastTasksChange != localStorage.lastTasksChange) {
@@ -71,8 +77,12 @@ async function createDay(globals, periods, today = getToday()) {
   } else {
     return isEmpty(day) ? 'error' : day;
   }
-  let tasks = await globals.db.getAll('tasks');
-  tasks = tasks.filter( (elem) => elem.disabled || elem.deleted ? false : true );
+  if (!tasks) {
+    tasks = [];
+    await globals.db.getAll('tasks', (task) => {
+      if (task.disabled || task.deleted ? false : true) tasks.push(task);
+    });
+  }
   for (let task of tasks) {
     if (task.periodStart <= today) {
       if (day.firstCreation || !task.history.length) {
@@ -89,7 +99,7 @@ async function createDay(globals, periods, today = getToday()) {
   }
   await globals.db.setItem('days', day);
   if (isEmpty(day)) return 'error';
-  return day;
+  return { day, tasks };
 }
 
 export function getRawDay(date, firstCreation) {
@@ -114,12 +124,20 @@ function disable(task) {
   setPeriodTitle(task);
 }
 
+function setDefaultPeriodTitle(task, periods) {
+  task.periodTitle = (task.periodId && periods[task.periodId].title) || task.ogTitle || task.periodTitle;
+}
+
 function updateTask(task, periods) {
   if (task.special == 'oneTime') {
-    if (task.history.length) {
+    if (task.history.length == task.period.length) {
       disable(task);
     } else if (getToday() == task.periodStart) {
-      task.periodDay = 0; task.periodTitle = 'Only today';
+      task.periodDay = 0;
+      setDefaultPeriodTitle(task, periods);
+      setPeriodTitle(task);
+    } else {
+      task.periodDay++;
     }
     return;
   } else if (task.special == 'untilComplete') {
@@ -127,10 +145,11 @@ function updateTask(task, periods) {
       task.endDate = getToday() - oneDay; disable(task);
     } else {
       task.periodDay = 0; task.history.length = 0;
+      setPeriodTitle(task);
     }
     return;
   }
-  task.periodTitle = (task.periodId && periods[task.periodId].title) || task.ogTitle || task.periodTitle;
+  setDefaultPeriodTitle(task, periods);
   if (task.endDate && task.endDate == getToday()) {
     disable(task);
   }

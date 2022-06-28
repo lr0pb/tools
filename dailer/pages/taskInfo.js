@@ -8,7 +8,7 @@ export const taskInfo = {
   styleClasses: 'doubleColumns',
   footer: `
     <button id="back" class="secondary">${emjs.back} Back</button>
-    <button id="edit">${emjs.pen} Edit task</button>
+    <button id="edit" class="success">${emjs.pen} Edit task</button>
   `,
   script: renderTaskInfo,
   onPageShow: async ({globals, page}) => {
@@ -72,7 +72,7 @@ function renderItemsHolder(task, periods, iha) {
     ? `${perTitle} from ${startTitle}${task.endDate ? ` to ${endTitle}` : ''}`
     : (task.endDate
       ? `${perTitle}${task.disabled ? '. Ended' : ' to'} ${endTitle}` : task.periodTitle);
-  createInfoRect(emjs.calendar, periodText, 'blue');
+  createInfoRect(emjs.calendar, periodText, 'blue', coef: iha ? null : 2);
 
   const isActiveText = `Today ${task.period[task.periodDay] ? 'you should do' : `you haven't`} this task`;
   if (!task.disabled) createInfoRect(emjs.clock, isActiveText, task.period[task.periodDay] ? 'green' : 'red');
@@ -87,10 +87,11 @@ function renderItemsHolder(task, periods, iha) {
   } ${task.history[0] ? '' : 'not '}completed`, color);
 }
 
-function createInfoRect(emoji, text, color) {
+function createInfoRect(emoji, text, color, coef = 1) {
   const elem = document.createElement('div');
   elem.className = 'infoRect';
   elem.style.setProperty('--color', `var(--${color})`);
+  elem.style.setProperty('--coef', coef);
   elem.innerHTML = `
     <h4>${emoji}</h4>
     <h3>${text}</h3>
@@ -99,7 +100,7 @@ function createInfoRect(emoji, text, color) {
 }
 
 export function isHistoryAvailable(task) {
-  if (task.special && task.history.length) return false;
+  if (task.special && task.period.length == 1) return false;
   if (task.history.length) return true;
   return undefined;
 }

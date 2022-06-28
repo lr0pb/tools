@@ -22,7 +22,7 @@ async function renderPage({globals, page}) {
   const periods = await globals.db.getAll('periods');
   page.innerHTML = `
     <div id="dataContainer" class="doubleColumns"></div>
-    <button id="clear" class="danger">Clear database</button>
+    <button id="clear" class="danger">${emjs.trashCan} Clear database</button>
     <h3>It's actually delete all your tasks and other. Make sure you have backup</h3>
   `;
   const data = {
@@ -67,6 +67,9 @@ function convertBytes(value, unit) {
 export async function clearDatabase(globals) {
   const stores = globals.db.db.objectStoreNames;
   for (let store of stores) {
+    /*await globals.db.getAll(store, async (item) => {
+      await globals.db.deleteItem(store, item.id || item.date);
+    });*/
     const items = await globals.db.getAll(store);
     for (let item of items) {
       await globals.db.deleteItem(store, item.id || item.date);
