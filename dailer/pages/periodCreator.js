@@ -9,7 +9,7 @@ export const periodCreator = {
   header: `${emjs.calendar} Create period`,
   page: `
     <h3>Enter period title</h3>
-    <input type="text" id="periodName" placeHolder="Period title e.g. 'Every saturday'">
+    <input type="text" id="periodName" placeHolder="Period title e.g. Every saturday">
     <h3>You also can type period description</h3>
     <input type="text" id="periodDesc" placeHolder="Period description">
     <h3>How much days will be in period?</h3>
@@ -47,11 +47,13 @@ async function onPeriodCreator({globals, page}) {
     name: 'Start on Sundays', id: 'getWeekStart',
     emoji: emjs.blank, page, value: 0, func: ({e, elem}) => {
       const value = toggleFunc({e, elem});
-      const rects = qsa('.dayTitle');
-      for (let elem of rects) {
-        elem.style.display = value ? 'block' : 'none';
+      const hm = qs('.historyMonth:last-child');
+      for (let elem of hm.children) {
+        elem.children[0].style.transform = value
+        ? 'translateY(2rem)' : 'none';
+        elem.children[1].style.opacity = value;
       }
-    }
+    }, first: true
   });
   addText(page, 'Automatically set task start day to the previous Sunday');
   /*page.innerHTML += `
@@ -97,10 +99,13 @@ function appendDays() {
     `;
   }
   hm.addEventListener('click', (e) => {
-    if (!e.target.dataset.value) return;
-    const value = Number(e.target.dataset.value) == 1 ? 0 : 1;
-    e.target.dataset.value = value;
-    e.target.children[0].innerHTML = value ? emjs.sign : emjs.blank;
+    const elem = e.target.dataset.value
+    ? e.target : ['H4', 'H3'].includes(e.target.tagName)
+    ? e.target.parentElement : null;
+    if (!elem.dataset.value) return;
+    const value = Number(elem.dataset.value) == 1 ? 0 : 1;
+    elem.dataset.value = value;
+    elem.children[0].innerHTML = value ? emjs.sign : emjs.blank;
   });
 }
 
@@ -112,11 +117,11 @@ function onDaysCountChange(e) {
   }
 }
 
-function createPeriod() {
+export function createPeriod(per = {}) {
   const period = {
     id: String(Number(localStorage.lastPeriodId) + 1),
-    title: qs('#periodName').value,
-    days: [],
+    title: per.title || qs('#periodName').value,
+    days: per.days || [],
     selectTitle: 'Select day to start',
     periodDay: -1
   };
@@ -124,9 +129,15 @@ function createPeriod() {
   for (let elem of rects) {
     period.days.push(Number(elem.dataset.value));
   }
-  if (qs('#periodDesc').value !== '') period.description = qs('#periodDesc').value;
-  if (!getValue('[data-id="isRepeatable"]')) period.special = 'oneTime';
-  if (getValue('[data-id="getWeekStart"]')) period.getWeekStart = true;
+  if (per.title) {
+    for (let field of ['description', 'special', 'getWeekStart']) {
+      if (per[field]) period[field] = per[field];
+    }
+  } else {
+    if (qs('#periodDesc').value !== '') period.description = qs('#periodDesc').value;
+    if (!getValue('[data-id="isRepeatable"]')) period.special = 'oneTime';
+    if (getValue('[data-id="getWeekStart"]')) period.getWeekStart = true;
+  }
   console.log(period);
   if (period.title == '' || !period.days.includes(1)) return 'error'
   localStorage.lastPeriodId = period.id;

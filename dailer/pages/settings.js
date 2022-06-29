@@ -31,10 +31,11 @@ export const settings = {
       <h2 class="uploadSuccess emoji">${emjs.sign}</h2>
       <h3 class="uploadSuccess">Upload successfully completed, go back to check the tasks</h3>
       <button id="getData" class="success">${emjs.crateUp} Backup your current data</button>
+      <progress class="downloadUI"></progress>
       <a id="downloadData" class="downloadLink"></a>
       <button id="toDebug" class="secondary">${emjs.construction} Open debug page</button>
       <h2>About</h2>
-      <h3>${emjs.label} dailer app, version 1.0.0</h3>
+      <h3>${emjs.label} dailer app, version 1.0.1</h3>
       <h3>${emjs.microscope} Created in 2022</h3>
     `;
     qs('#toPeriodCreator').addEventListener('click', () => {

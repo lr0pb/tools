@@ -42,8 +42,9 @@ async function renderDay({globals, page}) {
       <h2 class="emoji">${emjs.magic}</h2>
       <h2>You have no tasks today!</h2>
     `;
+    page.classList.add('center');
     await checkInstall(globals);
-    return page.classList.add('center');
+    return;
   }
   page.classList.remove('center');
   page.innerHTML = '';
@@ -75,7 +76,7 @@ async function createDay(globals, periods, today = getToday()) {
   if (!day || day.lastTasksChange != localStorage.lastTasksChange) {
     day = getRawDay(today.toString(), !day);
   } else {
-    return isEmpty(day) ? 'error' : day;
+    return isEmpty(day) ? { day: 'error' } : { day };
   }
   if (!tasks) {
     tasks = [];
@@ -98,8 +99,7 @@ async function createDay(globals, periods, today = getToday()) {
     }
   }
   await globals.db.setItem('days', day);
-  if (isEmpty(day)) return 'error';
-  return { day, tasks };
+  return isEmpty(day) ? { day: 'error' } : { day, tasks };
 }
 
 export function getRawDay(date, firstCreation) {

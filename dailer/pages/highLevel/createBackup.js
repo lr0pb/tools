@@ -1,13 +1,17 @@
+import { globQs as qs } from './utils.js'
+
 export async function getData(globals) {
+  const prog = qs('.downloadUI');
+  prog.style.display = 'block';
   const data = {
     dailer_about: `User's data backup from dailer app`,
     dailer_link: location.origin + location.pathname,
     dailer_created: Date.now(),
-    dailer_tasks: []
+    dailer_tasks: [],
+    dailer_periods: []
   };
-  const tasks = await globals.db.getAll('tasks');
-  for (let td of tasks) { // td - task data
-    if (td.deleted) continue;
+  await globals.db.getAll('tasks', (td) => {
+    if (td.deleted) return;
     const task = {
       name: td.name,
       period: td.period,
@@ -22,6 +26,12 @@ export async function getData(globals) {
     if (td.special) task.special = td.special;
     if (td.disabled) task.disabled = true;
     data.dailer_tasks.push(task);
-  }
+  });
+  await globals.db.getAll('periods', (per) => {
+    delete per.selectTitle;
+    delete per.periodDay;
+    data.dailer_periods.push(per);
+  });
+  prog.style.display = 'none';
   return data;
 }

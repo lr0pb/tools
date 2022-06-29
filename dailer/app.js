@@ -102,7 +102,13 @@ const globals = {
       <h3>${text}</h3>
       ${button ? `<button>${button}</button>` : ''}
     `;
-    localQs('.content', pageName).append(elem);
+    const content = localQs('.content', pageName);
+    if (!content.classList.contains('center')) {
+      const div = document.createElement('div');
+      div.style.height = `${elem.getBoundingClientRect().height}px`;
+      content.append(div);
+    }
+    content.append(elem);
     if (button && onClick) {
       localQs('.floatingMsg button', pageName).addEventListener('click', onClick);
     }
@@ -193,8 +199,10 @@ function renderPage(e, back) {
     globals.settings = false;
     return globals.closeSettings(true);
   }
+  const onbrd = localStorage.onboarded == 'true';
   const page = (params.page && pages[params.page]) ? params.page : 'main';
-  const rndr = localStorage.onboarded == 'true' ? page : 'onboarding';
+  if (onbrd && page == 'onboarding') page = 'main';
+  const rndr = onbrd ? page : 'onboarding';
   globals.closePopup();
   if (back) hidePage(qs('.current'), rndr);
   else paintFirstPage(rndr);
@@ -255,7 +263,8 @@ qs('#popup').addEventListener('click', (e) => {
 if (!localStorage.periodsList) {
   localStorage.periodsList = JSON.stringify(['01', '03', '07', '09']);
 }
-if (!localStorage.lastPeriodId) localStorage.lastPeriodId = '50';
+if (!localStorage.defaultLastPeriodId) localStorage.defaultLastPeriodId = '50';
+if (!localStorage.lastPeriodId) localStorage.lastPeriodId = localStorage.defaultLastPeriodId;
 if (!localStorage.persistAttempts) localStorage.persistAttempts = '0';
 if (
   window.matchMedia('(display-mode: standalone)').matches || navigator.standalone

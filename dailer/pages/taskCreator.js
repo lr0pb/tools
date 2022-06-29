@@ -86,14 +86,13 @@ async function onTaskCreator({globals}) {
     const { tasksCount, periodsCount } = await asyncDataReceiving({globals, tasks: 3});
     if (tasksCount >= 3 && periodsCount == 0) globals.floatingMsg({
       text: `${emjs.light} Tip: you can create your own periods e.g. Every saturday`,
-      button: 'Check',
+      button: 'Try&nbsp;it',
       onClick: async () => {
         globals.openSettings('periods');
         globals.closeSettings(true);
         await globals.paintPage('periodCreator');
       },
-      pageName: 'taskCreator',
-      notFixed: true
+      pageName: 'taskCreator'
     });
   }
   qs('#saveTask').addEventListener('click', async () => {

@@ -35,6 +35,10 @@ html {
   font-size: 1.25vmin;
 }
 
+@media (orientation: portrait) {
+  .floatingMsg.notFixed { min-height: 17.5rem; }
+}
+
 @media (min-width: 450px) {
   :root {
     --fullWidth: 450px;
@@ -47,7 +51,7 @@ html {
   :root { --fullWidth: 75vw; }
 }
 
-@media (min-width: 910px) and (orientation: landscape) {
+@media (min-width: 935px) and (orientation: landscape) {
   :root { --gridContent: calc(var(--fullWidth) * 2 + 3rem); }
   .doubleColumns:not(.center) {
     display: flex; height: fit-content;
@@ -56,6 +60,7 @@ html {
     justify-content: space-between;
   }
   .doubleColumns > * { width: var(--fullWidth); }
+  .floatingMsg.notFixed { min-height: 13rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -117,6 +122,9 @@ body, .page, #settings, #popup {
   transform: translateX(100vw);
   transition: transform var(--fastAnim) cubic-bezier(0.4, 0, 1, 1);
 }
+#settings > .content > *:last-child {
+  margin-bottom: 4rem;
+}
 .page {
   --dark: rgba(var(--mainBgRgb), 0.3);
   --overlay: linear-gradient(var(--dark), var(--dark));
@@ -174,6 +182,7 @@ body, .content, h1, h2, h3, h4, p, button {
 
 h1, h4 {
   font-size: 6em;
+  transition: transform var(--fastAnim);
 }
 h2 {
   font-size: 4.9em;
@@ -346,7 +355,7 @@ button.danger {
 }
 
 input, select {
-  min-height: 8rem;
+  min-height: 8.5rem;
   padding: 1.5rem 2rem;
   border: 0.8rem solid var(--darkShadow);
   border-radius: 1.5rem;
@@ -361,7 +370,7 @@ progress {
   margin: 5rem 0;
 }
 .pageBtn, .hidedUI, #editButtons, #popup, input[type="file"],
-.uploadUI, .uploadSuccess, .downloadLink, .dayTitle {
+.uploadUI, .uploadSuccess, .downloadUI, .downloadLink {
   display: none;
 }
 
@@ -397,6 +406,10 @@ progress {
 }
 .historyMonth > [data-used="false"] {
   display: none;
+}
+.dayTitle {
+  opacity: 0;
+  transition: opacity var(--fastAnim);
 }
 
 .dataLine {
