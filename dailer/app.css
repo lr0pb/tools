@@ -9,7 +9,7 @@
   --blue: #1aa2cd;
   --fastAnim: 0.15s;
   --normalAnim: 0.3s;
-  --msgShowing: 2s;
+  --msgShowing: 3s;
 
   /* Color section */
   --mainBg: black;
@@ -29,6 +29,7 @@
   --lightBorder: rgba(227, 227, 227, 0.35);
   --popupBg: #343434;
   --marker: aliceblue;
+  --msgBg: var(--mainBg);
 }
 
 html {
@@ -96,6 +97,7 @@ html {
     --lightBorder: rgb(174, 174, 174, 0.35);
     --popupBg: var(--mainBg);
     --marker: #7cc2ff;
+    --msgBg: var(--color);
   }
 }
 
@@ -188,7 +190,7 @@ body, .content, h1, h2, h3, h4, p, button {
 
 h1, h4 {
   font-size: 6em;
-  transition: transform var(--fastAnim);
+  transition: transform var(--normalAnim);
 }
 h2 {
   font-size: 4.9em;
@@ -251,7 +253,7 @@ button.success {
 button.danger {
   --bgColor: var(--accentRed);
 }
-button:disabled {
+button:disabled, [disabled] {
   filter: grayscale(1);
   cursor: default;
 }
@@ -267,7 +269,7 @@ button:disabled {
   width: var(--fullWidth); min-height: 5rem;
   padding: 2rem; margin: 0;
   bottom: 4rem;
-  background-image: linear-gradient(90deg, var(--color) 0%, var(--mainBg) 75%);
+  background-image: linear-gradient(90deg, var(--color) 0%, var(--msgBg) 75%);
   border-color: var(--color);
   color: white;
 }
@@ -368,6 +370,7 @@ button:disabled {
   margin: 2rem 2.5rem;
 }
 
+input { cursor: text; }
 input, select {
   min-height: 8.5rem;
   padding: 1.5rem 2rem;
@@ -425,7 +428,7 @@ progress {
 }
 .dayTitle {
   opacity: 0;
-  transition: opacity var(--fastAnim);
+  transition: opacity var(--normalAnim);
 }
 
 .dataLine {

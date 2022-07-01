@@ -24,8 +24,8 @@ export const taskCreator = {
     <h3 id="endDateTitle" class="hidedUI">Select tasks end date</h3>
     <input type="date" id="endDate" class="hidedUI">
     <div id="editButtons">
-      <button id="disable" class="secondary">Disable task</button>
-      <button id="delete" class="danger">Delete task</button>
+      <button id="disable" class="secondary noEmoji">Disable task</button>
+      <button id="delete" class="danger noEmoji">Delete task</button>
     </div>
   `,
   footer: `
@@ -97,8 +97,8 @@ async function onTaskCreator({globals}) {
       onClick: async (e) => {
         globals.openSettings('periods');
         globals.closeSettings(true);
-        if (!globals.pageInfo) globals.pageInfo = {};
-        globals.pageInfo.periodPromo = e.target.parentElement;
+        /*if (!globals.pageInfo) globals.pageInfo = {};
+        globals.pageInfo.periodPromo = e.target.parentElement;*/
         globals.additionalBack = 1;
         await globals.paintPage('periodCreator');
       },

@@ -56,14 +56,14 @@ export const settings = {
       <button id="getData" class="success">${emjs.crateUp} Backup your current data</button>
       <progress class="downloadUI"></progress>
       <a id="downloadData" class="downloadLink"></a>
-      <h3>Set up an reminder to create backups periodically. You will able to download backup just from app's main screen</h3>
+      <h3>Set up a reminder to create backups periodically. You will able to download backup just from app's main screen</h3>
       <select id="reminderList"></select>
       <button id="reminder">${emjs.alarmClock} Remind me</button>
       <h3 id="nextRemind"></h3>
       <button id="removeReminder" class="secondary">${emjs.trashCan} Remove reminder</button>
       <button id="toDebug" class="secondary">${emjs.construction} Open debug page</button>
       <h2>About</h2>
-      <h3>${emjs.label} dailer app, version 1.1.1</h3>
+      <h3>${emjs.label} dailer app, version 1.1.2</h3>
       <h3>${emjs.microscope} Created in 2022</h3>
     `;
     qs('#toPeriodCreator').addEventListener('click', () => {
@@ -92,6 +92,7 @@ export const settings = {
       delete localStorage.nextRemind;
       qs('#reminderList').value = '0';
       e.target.style.display = 'none';
+      qs('#nextRemind').style.display = 'none';
       globals.message({ text: 'Reminder was removed', state: 'success' });
     })
     qs('#toDebug').addEventListener('click', () => {
@@ -133,6 +134,7 @@ export async function paintPeriods(globals) {
           if (!globals.pageInfo) globals.pageInfo = {};
           globals.pageInfo.periodId = period.id;
           globals.pageInfo.periodAction = 'edit';
+          globals.closeSettings(true);
           await globals.paintPage('periodCreator');
         },
         args: { globals }

@@ -68,15 +68,9 @@ const globals = {
   message: ({state, text}) => {
     const msg = qs('#message');
     msg.classList.add('animate');
-    msg.style.setProperty(
-      '--color', state == 'fail' ? '#a30000' : '#008000'
-    );
-    msg.innerHTML = `
-      ${state == 'fail' ? '&#10060;' : '&#9989;'} ${text}
-    `;
-    setTimeout( () => {
-      msg.classList.remove('animate');
-    }, 2000);
+    msg.style.setProperty('--color', state == 'fail' ? '#a30000' : '#008000');
+    msg.innerHTML = `${emjs[state == 'fail' ? 'cross' : 'sign']} ${text}`;
+    setTimeout( () => { msg.classList.remove('animate') }, 3000);
   },
   openPopup: ({text, action}) => {
     qs('#popup').style.display = 'flex';
@@ -175,10 +169,6 @@ window.addEventListener('load', async () => {
 
 window.addEventListener('popstate', (e) => {
   renderPage(e, true);
-  if (globals.additionalBack) for (let i = 0; i < globals.additionalBack; i++) {
-    history.back();
-  }
-  globals.additionalBack = 0;
 });
 
 window.addEventListener('appinstalled', () => {

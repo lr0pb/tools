@@ -4,7 +4,7 @@ import { qs, qsa, emjs, safeDataInteractions } from './highLevel/utils.js'
 import { paintPeriods } from './settings.js'
 
 const maxDays = 7;
-const transform = 'translateY(2rem)';
+const transform = 'translateY(3rem)';
 
 export const periodCreator = {
   header: `${emjs.calendar} <span id="periodAction">Create</span> period`,
@@ -25,7 +25,7 @@ export const periodCreator = {
     <div class="togglerContainer first"></div>
     <h3>Automatically set task start day to the previous Sunday</h3>
     <div class="togglerContainer first"></div>
-    <h3>In drop down list period will be shown as default if no other default periods created earlier are in the list</h3>
+    <h3>In drop down list this period will be shown as default if no other default periods created earlier are in the list</h3>
   `,
   footer: `
     <button id="back" class="secondary">${emjs.back} Back</button>
@@ -44,7 +44,13 @@ function toggleDays(value) {
 }
 
 async function onPeriodCreator({globals, page}) {
-  qs('#back').addEventListener('click', () => history.back());
+  qs('#back').addEventListener('click', () => {
+    history.back();
+    if (globals.additionalBack) for (let i = 0; i < globals.additionalBack; i++) {
+      history.back();
+    }
+    globals.additionalBack = 0;
+  });
   if (!globals.pageInfo) globals.pageInfo = history.state;
   const isEdit = globals.pageInfo && globals.pageInfo.periodAction == 'edit';
   let per;
@@ -54,9 +60,10 @@ async function onPeriodCreator({globals, page}) {
     qs('#periodName').value = per.title;
     if (per.description) qs('#periodDesc').value = per.description;
     qs('#daysCount').value = per.days.length;
-    toggleDays(per.getWeekStart ? 1 : 0);
+    qs('#daysCount').setAttribute('disabled', 'disabled');
   }
   appendDays(isEdit ? per.days : null);
+  if (isEdit) toggleDays(per.getWeekStart ? 1 : 0);
   qs('#daysCount').addEventListener('input', onDaysCountChange);
   const containers = qsa('.togglerContainer');
   renderToggler({
@@ -98,15 +105,15 @@ async function onPeriodCreator({globals, page}) {
     });
     globals.db.setItem('periods', period);
     globals.message({
-      state: 'success', text: 'Period created'
+      state: 'success', text: `Period ${isEdit ? 'edited' : 'created'}`
     });
     await globals.checkPersist();
     await paintPeriods(globals);
     globals.additionalBack = 0;
-    if (globals.pageInfo && globals.pageInfo.periodPromo) {
+    /*if (globals.pageInfo && globals.pageInfo.periodPromo) {
       globals.pageInfo.periodPromo.remove();
       delete globals.pageInfo.periodPromo;
-    }
+    }*/
     history.back();
   });
 }
@@ -114,16 +121,16 @@ async function onPeriodCreator({globals, page}) {
 function appendDays(days) {
   const hm = qs('.historyMonth:last-child');
   const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  const daysCount = days ? days.length : null;
-  for (let i = 0; i < daysCount || maxDays; i++) {
+  const daysCount = days ? days.length : maxDays;
+  for (let i = 0; i < daysCount; i++) {
     hm.innerHTML += `
-      <div data-used="true" data-value="0">
+      <div data-used="true" data-value="0" ${days ? 'disabled' : ''}>
         <h4 style="transform: ${transform};">${days ? emjs[days[i] ? 'sign' : 'blank'] : emjs.blank}</h4>
         <h3 class="dayTitle">${dayNames[i]}</h3>
       </div>
     `;
   }
-  hm.addEventListener('click', (e) => {
+  if (!days) hm.addEventListener('click', (e) => {
     const elem = e.target.dataset.value
     ? e.target : ['H4', 'H3'].includes(e.target.tagName)
     ? e.target.parentElement : null;
