@@ -35,6 +35,12 @@ html {
   font-size: 1.25vmin;
 }
 
+@media (pointer: fine) and (hover: hover) {
+  button, input, select, .task.clickable {
+    cursor: pointer;
+  }
+}
+
 @media (orientation: portrait) {
   .floatingMsg.notFixed { min-height: 17.5rem; }
 }
@@ -225,6 +231,9 @@ button {
   background-color: var(--bgColor) !important;
   outline: none;
 }
+button.noEmoji {
+  margin-right: 3rem;
+}
 button.emojiBtn {
   min-height: 0;
   font-size: 5em;
@@ -242,13 +251,22 @@ button.success {
 button.danger {
   --bgColor: var(--accentRed);
 }
+button:disabled {
+  filter: grayscale(1);
+  cursor: default;
+}
+
+#message, .floatingMsg:not(.notFixed) {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+}
 
 #message {
-  display: none; position: fixed; z-index: 999;
+  display: none; z-index: 999;
   width: var(--fullWidth); min-height: 5rem;
   padding: 2rem; margin: 0;
-  left: 50%; bottom: 4rem;
-  transform: translateX(-50%);
+  bottom: 4rem;
   background-image: linear-gradient(90deg, var(--color) 0%, var(--mainBg) 75%);
   border-color: var(--color);
   color: white;
@@ -270,11 +288,7 @@ button.danger {
   margin: 1rem 0;
   align-items: center;
   display: flex;
-  position: fixed;
   bottom: var(--footerHeight);
-}
-.floatingMsg.notFixed {
-  position: static;
 }
 .floatingMsg h3 {
   margin: 3rem;
@@ -364,13 +378,15 @@ input, select {
 input:disabled, select:disabled {
   background-color: var(--darkShadow);
   color: var(--mainText);
+  cursor: default;
 }
 progress {
   min-height: 4rem;
   margin: 5rem 0;
+  cursor: progress;
 }
 .pageBtn, .hidedUI, #editButtons, #popup, input[type="file"],
-.uploadUI, .uploadSuccess, .downloadUI, .downloadLink {
+.uploadUI, .uploadSuccess, .downloadUI, .downloadLink, #removeReminder {
   display: none;
 }
 

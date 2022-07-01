@@ -1,5 +1,5 @@
 import { globQs as qs, globQsa as qsa, intlDate } from './utils.js'
-import { getToday, oneDay } from './periods.js'
+import { getToday, oneDay, isCustomPeriod } from './periods.js'
 import { createPeriod } from '../periodCreator.js'
 import { createTask } from '../taskCreator.js'
 import { getRawDay } from '../main.js'
@@ -29,22 +29,20 @@ export async function uploading(globals, data) {
   for (let td of data.dailer_tasks) {
     if (td.periodStart < earliestDay) earliestDay = td.periodStart;
     td.id = Date.now().toString();
-    if (
-      Number(td.periodId) > Number(localStorage.defaultLastPeriodId)
-    ) td.periodId = periodsConvert[td.periodId];
+    if (isCustomPeriod(td.periodId)) td.periodId = periodsConvert[td.periodId];
     const task = createTask(periods, td);
     tasks.push(task);
     await globals.db.setItem('tasks', task);
   }
   const diff = (getToday() - earliestDay + oneDay) / oneDay;
   for (let i = 0; i < diff; i++) {
-    const date = String(earliestDay + oneDay * i);
+    const date = earliestDay + oneDay * i;
     if (days[date]) continue;
     days[date] = getRawDay(date, true);
   }
-  const prog = qs('progress.uploadUI');
+  /*const prog = qs('progress.uploadUI');
   prog.max = tasks.length;
-  prog.value = 0;
+  prog.value = 0;*/
   for (let i = 0; i < tasks.length; i++) {
     const task = tasks[i];
     const iha = isHistoryAvailable(task);
@@ -64,9 +62,9 @@ export async function uploading(globals, data) {
       }
       await onActiveDay(endDate, task.history[0]);
     }
-    prog.value = i + 1;
+    //prog.value = i + 1;
   }
-  prog.removeAttribute('value');
+  //prog.removeAttribute('value');
   for (let date in days) {
     await globals.db.setItem('days', days[date]);
   }

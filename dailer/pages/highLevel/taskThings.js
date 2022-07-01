@@ -1,5 +1,5 @@
 import { qs, emjs, getLast, intlDate } from './utils.js'
-import { getToday, oneDay } from './periods.js'
+import { getToday, oneDay, isCustomPeriod } from './periods.js'
 
 export const priorities = [{
   title: 'Can miss sometimes',
@@ -14,20 +14,33 @@ export const priorities = [{
 }];
 
 export function renderToggler({
-  name, id, emoji, func = toggleFunc, args = {}, page, onBodyClick, value, first
+  name, id, buttons = [], toggler, page, onBodyClick, value, first, disabled
 }) {
+  // toggler property represents emoji, that will arrive as first toggle value
+  // but either this prop gives understand to enable default toggle function
   const elem = document.createElement('div');
-  elem.className = `task ${first ? 'first' : ''}`;
+  elem.className = `task ${first ? 'first' : ''} ${onBodyClick ? 'clickable' : ''}`;
   elem.dataset.id = id;
+  let buttonsString = ``;
+  if (toggler) buttons.push({
+    emoji: toggler,
+    func: toggleFunc
+  });
+  buttons.forEach((btn, i) => {
+    buttonsString += `
+      <button data-action="${i}" class="emojiBtn" ${disabled ? 'disabled' : ''}>${btn.emoji}</button>
+    `;
+  });
   elem.innerHTML = `
     <div><h2>${name}</h2></div>
-    <button data-action="complete" class="emojiBtn">${emoji}</button>
+    ${buttonsString}
   `;
   elem.addEventListener('click', async (e) => {
-    args.e = e; args.elem = elem;
-    if (e.target.dataset.action == 'complete') {
-      await func(args);
-    } else if (onBodyClick) onBodyClick();
+    if (e.target.dataset.action) {
+      const btn = buttons[e.target.dataset.action];
+      if (!btn.args) btn.args = {};
+      await btn.func({...btn.args, e, elem});
+    } else if (onBodyClick) onBodyClick({e, elem});
   })
   if (value !== undefined) elem.dataset.value = value;
   elem.activate = () => elem.querySelector('button').click();
@@ -42,20 +55,23 @@ export function toggleFunc({e, elem}) {
   return value;
 }
 
-export function renderTask({type, globals, td, page, onBodyClick}) {
+export function renderTask({type, globals, td, page, onBodyClick, periods}) {
   if (type == 'day') return renderToggler({
-    name: td.name, id: td.id,
-    emoji: getTaskComplete(td),
-    func: onTaskCompleteClick,
-    args: { globals }, page, onBodyClick
+    name: td.name, id: td.id, buttons: [{
+      emoji: getTaskComplete(td),
+      func: onTaskCompleteClick,
+      args: { globals }
+    }], page, onBodyClick
   });
   const task = document.createElement('div');
-  task.className = 'task';
+  task.className = 'task clickable';
   task.dataset.id = td.id;
   task.innerHTML = `
     <div>
       <h3>${td.name}</h3>
-      <p>${td.periodTitle} | ${priorities[td.priority].title}</p>
+      <p>${isCustomPeriod(td.periodId)
+        ? periods[td.periodId].title + td.periodTitle : td.periodTitle
+      } | ${priorities[td.priority].title}</p>
     </div>
     ${td.disabled ? '' : `
       <button data-action="edit" class="emojiBtn">${emjs.pen}</button>
@@ -107,6 +123,7 @@ export async function editTask({globals, id, field, onConfirm}) {
     action: async () => {
       td[field] = true;
       td.endDate = getToday();
+      disable(td);
       await globals.db.setItem('tasks', td);
       localStorage.lastTasksChange = Date.now().toString();
       globals.closePopup();
@@ -118,6 +135,15 @@ export async function editTask({globals, id, field, onConfirm}) {
       onConfirm();
     }
   });
+}
+
+export function disable(task) {
+  task.periodDay = -1;
+  task.disabled = true;
+  const updateList = JSON.parse(localStorage.updateTasksList);
+  updateList.push(task.id);
+  localStorage.updateTasksList = JSON.stringify(updateList);
+  setPeriodTitle(task);
 }
 
 export function getTextDate(date) {
@@ -139,7 +165,7 @@ export function setPeriodTitle(task) {
     task.periodTitle = `${task.disabled ? 'Ended' : 'Complete until'} ${endTitle}`;
   } else if (task.periodStart > getToday()) {
     task.periodTitle += ` from ${startTitle}`;
-  } else if (task.endDate) {
+  } else if (task.endDate && !task.disabled) {
     task.periodTitle += ` to ${endTitle}`;
   }
 }
@@ -148,7 +174,7 @@ export async function onTaskCompleteClick({ e, globals, elem: task }) {
   const td = await globals.db.getItem('tasks', task.dataset.id);
   const day = await globals.db.getItem('days', getToday().toString());
   if (!day) return globals.floatingMsg({
-    text: 'Day is expired! So you need to reload tasks for today',
+    text: `${emjs.alarmClock} Day is expired! So you need to reload tasks for today`,
     button: 'Reload',
     onClick: () => location.reload(),
     pageName: 'main'

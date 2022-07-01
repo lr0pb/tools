@@ -20,7 +20,10 @@ export const copyObject = (obj) => {
   return response;
 };
 
-export const intlDate = (date) => new Date(date).toLocaleDateString(navigator.language);
+export const intlDate = (date) => {
+  return new Date(typeof date == 'string' ? Number(date) : date)
+    .toLocaleDateString(navigator.language);
+};
 
 export const emjs = {
   sign: '&#x2705;',
@@ -52,6 +55,8 @@ export const emjs = {
   fileBox: '&#x1F5C3;',
   label: '&#x1F3F7;',
   microscope: '&#x1F52C;',
+  alarmClock: '&#x23F0;',
+  bread: '&#x1F35E;',
 };
 
 export function safeDataInteractions(elems) {
@@ -65,4 +70,16 @@ function stateSave(e) {
   const state = copyObject(history.state);
   state[e.target.id] = e.target.value;
   history.replaceState(state, '', location.href);
+}
+
+export function createOptionsList(elem, options) {
+  elem.innerHTML = '';
+  for (let i = 0; i < options.length; i++) {
+    const opt = document.createElement('option');
+    opt.value = options[i].id || i;
+    opt.textContent = options[i].title;
+    if (options[i].selected) opt.selected = 'selected';
+    if (options[i].disabled) opt.disabled = 'disabled';
+    elem.append(opt);
+  }
 }

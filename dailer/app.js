@@ -29,11 +29,11 @@ const globals = {
   pageName: null,
   pageInfo: null,
   settings: false,
+  additionalBack: 0,
   getPeriods: async () => {
-    const customs = await globals.db.getAll('periods');
-    for (let per of customs) {
+    await globals.db.getAll('periods', (per) => {
       periods[per.id] = per;
-    }
+    });
     return periods;
   },
   paintPage: async (name, back, replaceState, noAnim) => {
@@ -100,7 +100,7 @@ const globals = {
     elem.className = `floatingMsg ${notFixed ? 'notFixed' : ''}`;
     elem.innerHTML = `
       <h3>${text}</h3>
-      ${button ? `<button>${button}</button>` : ''}
+      ${button ? `<button class="noEmoji">${button}</button>` : ''}
     `;
     const content = localQs('.content', pageName);
     if (!content.classList.contains('center')) {
@@ -125,8 +125,8 @@ const globals = {
   },
   closeSettings: async (back) => {
     qs('#settings').removeAttribute('style');
-    if (back !== true) history.back();
-    else return;
+    if (back === true) return;
+    history.back();
     if (!pages[globals.pageName].onSettingsUpdate) return;
     await pages[globals.pageName].onSettingsUpdate({
       globals, page: qs('.current .content')
@@ -173,7 +173,13 @@ window.addEventListener('load', async () => {
   await pages.settings.paint({globals, page: qs('#settings > .content')});
 });
 
-window.addEventListener('popstate', (e) => renderPage(e, true));
+window.addEventListener('popstate', (e) => {
+  renderPage(e, true);
+  if (globals.additionalBack) for (let i = 0; i < globals.additionalBack; i++) {
+    history.back();
+  }
+  globals.additionalBack = 0;
+});
 
 window.addEventListener('appinstalled', () => {
   localStorage.installed = 'true';
@@ -262,6 +268,9 @@ qs('#popup').addEventListener('click', (e) => {
 
 if (!localStorage.periodsList) {
   localStorage.periodsList = JSON.stringify(['01', '03', '07', '09']);
+}
+if (!localStorage.updateTasksList) {
+  localStorage.updateTasksList = JSON.stringify([]);
 }
 if (!localStorage.defaultLastPeriodId) localStorage.defaultLastPeriodId = '50';
 if (!localStorage.lastPeriodId) localStorage.lastPeriodId = localStorage.defaultLastPeriodId;

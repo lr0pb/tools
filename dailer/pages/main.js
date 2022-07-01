@@ -1,6 +1,7 @@
-import { getToday, oneDay } from './highLevel/periods.js'
+import { getToday, oneDay, isCustomPeriod } from './highLevel/periods.js'
 import { qs, emjs, getLast } from './highLevel/utils.js'
-import { renderTask, setPeriodTitle } from './highLevel/taskThings.js'
+import { renderTask, disable, setPeriodTitle } from './highLevel/taskThings.js'
+import { downloadData } from './settings.js'
 
 export const main = {
   header: `${emjs.sword} Today's tasks`,
@@ -52,13 +53,15 @@ async function renderDay({globals, page}) {
     const tasks = day.tasks[i];
     for (let id in tasks) {
       const td = await globals.db.getItem('tasks', id);
-      renderTask({type: 'day', globals, td, page, onBodyClick: () => {
-        globals.pageInfo = {taskId: td.id};
+      renderTask({type: 'day', globals, td, page, onBodyClick: ({elem}) => {
+        globals.pageInfo = { taskId: elem.dataset.id };
         globals.paintPage('taskInfo');
       }});
     }
   }
-  await checkInstall(globals);
+  const existInstallPrompt = await checkInstall(globals);
+  if (existInstallPrompt) return;
+  await checkBackupReminder(globals);
 }
 
 async function createDay(globals, periods, today = getToday()) {
@@ -73,6 +76,15 @@ async function createDay(globals, periods, today = getToday()) {
     delete resp.day;
   }
   let day = await globals.db.getItem('days', today.toString());
+  if (!day) {
+    const updateList = JSON.parse(localStorage.updateTasksList);
+    for (let taskId of updateList) {
+      const task = await globals.db.getItem('tasks', taskId);
+      setPeriodTitle(task);
+      await globals.db.setItem('tasks', task);
+    }
+    localStorage.updateTasksList = JSON.stringify([]);
+  }
   if (!day || day.lastTasksChange != localStorage.lastTasksChange) {
     day = getRawDay(today.toString(), !day);
   } else {
@@ -104,7 +116,7 @@ async function createDay(globals, periods, today = getToday()) {
 
 export function getRawDay(date, firstCreation) {
   return {
-    date, tasks: [{}, {}, {}], // 3 objects for 3 priorities
+    date: String(date), tasks: [{}, {}, {}], // 3 objects for 3 priorities
     completed: false, lastTasksChange: localStorage.lastTasksChange,
     firstCreation
   };
@@ -118,14 +130,10 @@ async function checkLastDay(globals, day) {
   return { check, dayBefore };
 }
 
-function disable(task) {
-  task.periodDay = -1;
-  task.disabled = true;
-  setPeriodTitle(task);
-}
-
 function setDefaultPeriodTitle(task, periods) {
-  task.periodTitle = (task.periodId && periods[task.periodId].title) || task.ogTitle || task.periodTitle;
+  task.periodTitle = isCustomPeriod(task.periodId)
+  ? ''
+  : (task.periodId && periods[task.periodId].title) || task.ogTitle || task.periodTitle;
 }
 
 function updateTask(task, periods) {
@@ -171,7 +179,7 @@ export async function checkInstall(globals) {
   const response = await globals.checkPersist();
   if (response === false || localStorage.installed !== 'true') {
     globals.floatingMsg({
-      text: `To protect your data, install dailer app on your home screen${
+      text: `${emjs.crateDown} To protect your data, install dailer app on your home screen${
         navigator.standalone === false ? ': click Share > Add to home screen' : ''
       }`,
       button: globals.installPrompt ? 'Install' : null,
@@ -182,6 +190,29 @@ export async function checkInstall(globals) {
         e.target.parentElement.remove();
       },
       pageName: 'main'
+    });
+    return true;
+  }
+}
+
+async function checkBackupReminder(globals) {
+  if (!localStorage.remindId) return;
+  if (localStorage.nextRemind == getToday() && localStorage.reminded == 'true') return;
+  if (localStorage.nextRemind == getToday() - oneDay) {
+    localStorage.reminded = 'false';
+    localStorage.nextRemind = getToday() - oneDay + Number(localStorage.remindValue);
+  }
+  if (localStorage.nextRemind == getToday()) {
+    const link = await downloadData(globals);
+    globals.floatingMsg({
+      text: `${emjs.bread} Your data has been backed up`,
+      button: 'Download',
+      pageName: 'main',
+      onClick: async (e) => {
+        localStorage.reminded = 'true';
+        e.target.parentElement.remove();
+        link.click();
+      }
     });
   }
 }

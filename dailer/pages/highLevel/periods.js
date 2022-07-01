@@ -81,6 +81,11 @@ export const periods = {
   }
 };
 
+export function isCustomPeriod(periodId) {
+  if (!periodId) return undefined;
+  return Number(periodId) > Number(localStorage.defaultLastPeriodId);
+}
+
 export function getWeekStart() { // date in milliseconds
   const day = new Date(getToday());
   return day.setDate(day.getDate() - day.getDay());

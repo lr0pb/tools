@@ -41,7 +41,8 @@ async function renderPage({globals, page}) {
     'Periods amount': periods.length,
     'Last period id': localStorage.lastPeriodId,
     'Is app installed': localStorage.installed,
-    'Network connection type': navigator.connection.effectiveType,
+    'Network connection type': navigator.connection
+    ? navigator.connection.effectiveType : 'no data',
     'Is online': navigator.onLine,
   };
   const container = qs('#dataContainer');

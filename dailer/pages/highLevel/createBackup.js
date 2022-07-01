@@ -1,8 +1,4 @@
-import { globQs as qs } from './utils.js'
-
 export async function getData(globals) {
-  const prog = qs('.downloadUI');
-  prog.style.display = 'block';
   const data = {
     dailer_about: `User's data backup from dailer app`,
     dailer_link: location.origin + location.pathname,
@@ -32,6 +28,5 @@ export async function getData(globals) {
     delete per.periodDay;
     data.dailer_periods.push(per);
   });
-  prog.style.display = 'none';
   return data;
 }

@@ -1,8 +1,12 @@
-import { getToday, convertDate, oneDay, getWeekStart } from './highLevel/periods.js'
+import {
+  getToday, convertDate, oneDay, getWeekStart, isCustomPeriod
+} from './highLevel/periods.js'
 import {
   priorities, editTask, setPeriodTitle, renderToggler, toggleFunc
 } from './highLevel/taskThings.js'
-import { qs, emjs, copyObject, safeDataInteractions } from './highLevel/utils.js'
+import {
+  qs, emjs, copyObject, safeDataInteractions, createOptionsList
+} from './highLevel/utils.js'
 
 export const taskCreator = {
   header: `${emjs.paperWPen} <span id="taskAction">Add</span> task`,
@@ -63,16 +67,19 @@ async function onTaskCreator({globals}) {
   if (!localStorage.firstDayEver) qs('#back').style.display = 'none';
   createOptionsList(qs('#priority'), priorities);
   renderToggler({
-    name: 'No limit to end date', id: 'noEndDate', emoji: emjs.sign,
+    name: 'No limit to end date', id: 'noEndDate',
     page: qs('#endDateToggler'), value: 1, first: true,
-    func: ({e, elem}) => {
-      const value = toggleFunc({e, elem});
-      qs('#endDateTitle').style.display = value ? 'none' : 'block';
-      qs('#endDate').style.display = value ? 'none' : 'block';
-    }
+    buttons: [{
+      emoji: emjs.sign,
+      func: ({e, elem}) => {
+        const value = toggleFunc({e, elem});
+        qs('#endDateTitle').style.display = value ? 'none' : 'block';
+        qs('#endDate').style.display = value ? 'none' : 'block';
+      }
+    }]
   });
-  safeDataInteractions(['name', 'priority', 'period', 'date', 'endDate']);
   await taskCreator.onSettingsUpdate({globals});
+  safeDataInteractions(['name', 'priority', 'period', 'date', 'endDate']);
   qs('#period').addEventListener('change', async (e) => await onPeriodChange(e, globals));
   qs('#date').min = convertDate(Date.now());
   qs('#date').addEventListener('change', onDateChange);
@@ -87,16 +94,19 @@ async function onTaskCreator({globals}) {
     if (tasksCount >= 3 && periodsCount == 0) globals.floatingMsg({
       text: `${emjs.light} Tip: you can create your own periods e.g. Every saturday`,
       button: 'Try&nbsp;it',
-      onClick: async () => {
+      onClick: async (e) => {
         globals.openSettings('periods');
         globals.closeSettings(true);
+        if (!globals.pageInfo) globals.pageInfo = {};
+        globals.pageInfo.periodPromo = e.target.parentElement;
+        globals.additionalBack = 1;
         await globals.paintPage('periodCreator');
       },
       pageName: 'taskCreator'
     });
   }
   qs('#saveTask').addEventListener('click', async () => {
-    await onSaveTaskClick(globals, safeBack);
+    await onSaveTaskClick(globals, safeBack, td, isEdit);
   });
 }
 
@@ -115,7 +125,7 @@ async function asyncDataReceiving({globals, tasks = 1, periods = 1}) {
   return { tasksCount, periodsCount };
 }
 
-async function onSaveTaskClick(globals, safeBack) {
+async function onSaveTaskClick(globals, safeBack, td, isEdit) {
   const periods = await globals.getPeriods();
   const task = createTask(periods, td);
   if (task == 'error') return globals.message({
@@ -191,17 +201,6 @@ function setPeriodId(task, periods) {
   }
 }
 
-function createOptionsList(elem, options) {
-  elem.innerHTML = '';
-  for (let i = 0; i < options.length; i++) {
-    const opt = document.createElement('option');
-    opt.value = options[i].id || i;
-    opt.textContent = options[i].title;
-    if (options[i].selected) opt.selected = 'selected';
-    elem.append(opt);
-  }
-}
-
 async function onPeriodChange(e, globals) {
   const periods = await globals.getPeriods();
   const value = e.target.value;
@@ -255,13 +254,14 @@ export function createTask(periods, td = {}) {
   const priority = qs('#priority') ? Number(qs('#priority').value) : td.priority;
   const per = periods[value];
   const tdPer = td.periodId ? periods[td.periodId] : {};
+  const perId = td.periodId || td.ogTitle || per.id;
   const task = {
     id: td.id || Date.now().toString(),
     name: qs('#name') ? qs('#name').value : td.name,
     priority,
     period: td.period || per.days,
-    periodId: td.periodId || td.ogTitle || per.id,
-    periodTitle: tdPer.title || per.title,
+    periodId: perId,
+    periodTitle: isCustomPeriod(perId) ? '' : tdPer.title || per.title,
     periodStart: td.periodStart && td.periodStart <= getToday()
     ? td.periodStart
     : tdPer.selectTitle || per.selectTitle || per.getWeekStart

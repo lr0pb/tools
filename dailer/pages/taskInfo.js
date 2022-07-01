@@ -72,7 +72,7 @@ function renderItemsHolder(task, periods, iha) {
     ? `${perTitle} from ${startTitle}${task.endDate ? ` to ${endTitle}` : ''}`
     : (task.endDate
       ? `${perTitle}${task.disabled ? '. Ended' : ' to'} ${endTitle}` : task.periodTitle);
-  createInfoRect(emjs.calendar, periodText, 'blue', iha ? 1 : 2);
+  createInfoRect(emjs.calendar, periodText, 'blue', !iha && !task.disabled ? 1 : 2);
 
   const isActiveText = `Today ${task.period[task.periodDay] ? 'you should do' : `you haven't`} this task`;
   if (!task.disabled) createInfoRect(emjs.clock, isActiveText, task.period[task.periodDay] ? 'green' : 'red');

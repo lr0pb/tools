@@ -4,9 +4,10 @@ import { qs, qsa, emjs, safeDataInteractions } from './highLevel/utils.js'
 import { paintPeriods } from './settings.js'
 
 const maxDays = 7;
+const transform = 'translateY(2rem)';
 
 export const periodCreator = {
-  header: `${emjs.calendar} Create period`,
+  header: `${emjs.calendar} <span id="periodAction">Create</span> period`,
   page: `
     <h3>Enter period title</h3>
     <input type="text" id="periodName" placeHolder="Period title e.g. Every saturday">
@@ -19,6 +20,12 @@ export const periodCreator = {
     <div>
       <div class="historyMonth"></div>
     </div>
+    <div class="togglerContainer first"></div>
+    <h3>When period is over, task will continue period from start</h3>
+    <div class="togglerContainer first"></div>
+    <h3>Automatically set task start day to the previous Sunday</h3>
+    <div class="togglerContainer first"></div>
+    <h3>In drop down list period will be shown as default if no other default periods created earlier are in the list</h3>
   `,
   footer: `
     <button id="back" class="secondary">${emjs.back} Back</button>
@@ -28,52 +35,63 @@ export const periodCreator = {
   script: onPeriodCreator
 };
 
-function addText(page, text) {
-  const elem = document.createElement('h3');
-  elem.innerHTML = text;
-  page.append(elem);
+function toggleDays(value) {
+  const hm = qs('.historyMonth:last-child');
+  for (let elem of hm.children) {
+    elem.children[0].style.transform = value ? 'none' : transform;
+    elem.children[1].style.opacity = value;
+  }
 }
 
 async function onPeriodCreator({globals, page}) {
   qs('#back').addEventListener('click', () => history.back());
-  appendDays();
+  const isEdit = globals.pageInfo && globals.pageInfo.periodAction == 'edit';
+  let per;
+  if (isEdit) {
+    per = await globals.db.getItem('periods', globals.pageInfo.periodId);
+    qs('#periodAction').innerHTML = 'Edit';
+    qs('#periodName').value = per.title;
+    if (per.description) qs('#periodDesc').value = per.description;
+    qs('#daysCount').value = per.days.length;
+    toggleDays(per.getWeekStart ? 1 : 0);
+  }
+  appendDays(isEdit ? per.days : null);
   qs('#daysCount').addEventListener('input', onDaysCountChange);
+  const containers = qsa('.togglerContainer');
   renderToggler({
     name: 'Task will be looped', id: 'isRepeatable',
-    emoji: emjs.sign, page, value: 1, first: true
+    toggler: isEdit ? emjs[per.special == 'oneTime' ? 'blank' : 'sign'] : emjs.sign,
+    page: containers[0], value: isEdit ? (per.special == 'oneTime' ? 0 : 1) : 1, disabled: isEdit
   });
-  addText(page, 'When period is over, task will continue period from start');
   renderToggler({
     name: 'Start on Sundays', id: 'getWeekStart',
-    emoji: emjs.blank, page, value: 0, func: ({e, elem}) => {
-      const value = toggleFunc({e, elem});
-      const hm = qs('.historyMonth:last-child');
-      for (let elem of hm.children) {
-        elem.children[0].style.transform = value
-        ? 'translateY(2rem)' : 'none';
-        elem.children[1].style.opacity = value;
-      }
-    }, first: true
+    page: containers[1], value: isEdit ? (per.getWeekStart ? 1 : 0) : 0,
+    buttons: [{
+      emoji: isEdit ? emjs[per.getWeekStart ? 'sign' : 'blank'] : emjs.blank,
+      func: ({e, elem}) => toggleDays(toggleFunc({e, elem}));
+    }], disabled: isEdit
   });
-  addText(page, 'Automatically set task start day to the previous Sunday');
+  renderToggler({
+    name: 'Period is selected by default', id: 'selected',
+    toggler: isEdit ? emjs[per.selected ? 'sign' : 'blank'] : emjs.blank,
+    page: containers[2], value: isEdit ? (per.selected ? 1 : 0) : 0
+  });
   /*page.innerHTML += `
     <!--<h3>Limit days to select task start day</h3>-->
   `;
-  elem = renderToggler({
-    name: 'No limit', id: 'noMaxDate',
-    emoji: emjs.sign, func: toggler, args: {}, page
+  renderToggler({
+    name: 'No limit', id: 'noMaxDate', page: containers[3],
+    toggler: emjs.sign, value: 1
   });
-  elem.classList.add('first');
-  elem.dataset.value = 1;
   page.innerHTML += `
     <div id="maxDateBlock">
       <input type="range" id="maxDate" min="1" max="13" value="13">
       <h3>In task creation process you able to select start day from today +<span id="maxDateTitle">13</span> days</h3>
     </div>
   `;*/
-  safeDataInteractions(['periodName', 'periodDesc', 'daysCount']);
+  safeDataInteractions(['periodName', 'periodDesc', /*'daysCount'*/]);
   qs('#savePeriod').addEventListener('click', async () => {
-    const period = createPeriod();
+    const period = createPeriod(per, isEdit);
     if (period == 'error') return globals.message({
       state: 'fail', text: 'Fill all fields'
     });
@@ -83,18 +101,24 @@ async function onPeriodCreator({globals, page}) {
     });
     await globals.checkPersist();
     await paintPeriods(globals);
+    globals.additionalBack = 0;
+    if (globals.pageInfo && globals.pageInfo.periodPromo) {
+      globals.pageInfo.periodPromo.remove();
+      delete globals.pageInfo.periodPromo;
+    }
     history.back();
   });
 }
 
-function appendDays() {
+function appendDays(days) {
   const hm = qs('.historyMonth:last-child');
-  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  for (let i = 0; i < maxDays; i++) {
+  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const daysCount = days ? days.length : null;
+  for (let i = 0; i < daysCount || maxDays; i++) {
     hm.innerHTML += `
       <div data-used="true" data-value="0">
-        <h4>${emjs.blank}</h4>
-        <h3 class="dayTitle">${days[i]}</h3>
+        <h4 style="transform: ${transform};">${days ? emjs[days[i] ? 'sign' : 'blank'] : emjs.blank}</h4>
+        <h3 class="dayTitle">${dayNames[i]}</h3>
       </div>
     `;
   }
@@ -117,33 +141,37 @@ function onDaysCountChange(e) {
   }
 }
 
-export function createPeriod(per = {}) {
+export function createPeriod(per = {}, isEdit) {
   const period = {
-    id: String(Number(localStorage.lastPeriodId) + 1),
-    title: per.title || qs('#periodName').value,
+    id: isEdit ? per.id : String(Number(localStorage.lastPeriodId) + 1),
+    title: qs('#periodName') ? qs('#periodName').value : per.title,
     days: per.days || [],
     selectTitle: 'Select day to start',
     periodDay: -1
   };
   const rects = qsa('.historyMonth:last-child > [data-used="true"]');
-  for (let elem of rects) {
+  if (!per.days) for (let elem of rects) {
     period.days.push(Number(elem.dataset.value));
   }
   if (per.title) {
-    for (let field of ['description', 'special', 'getWeekStart']) {
+    const fields = ['description', 'special', 'getWeekStart', 'selected'];
+    for (let field of fields) {
       if (per[field]) period[field] = per[field];
     }
   } else {
+    if (!getValue('isRepeatable')) period.special = 'oneTime';
+    if (getValue('getWeekStart')) period.getWeekStart = true;
+  }
+  if (isEdit || !per.title) {
     if (qs('#periodDesc').value !== '') period.description = qs('#periodDesc').value;
-    if (!getValue('[data-id="isRepeatable"]')) period.special = 'oneTime';
-    if (getValue('[data-id="getWeekStart"]')) period.getWeekStart = true;
+    if (getValue('selected')) period.selected = true;
   }
   console.log(period);
   if (period.title == '' || !period.days.includes(1)) return 'error'
-  localStorage.lastPeriodId = period.id;
+  if (!isEdit) localStorage.lastPeriodId = period.id;
   return period;
 }
 
 function getValue(elem) {
-  return Number(qs(elem).dataset.value);
+  return Number(qs(`[data-id="${elem}"]`).dataset.value);
 }

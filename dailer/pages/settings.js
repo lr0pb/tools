@@ -1,10 +1,33 @@
 import { renderToggler } from './highLevel/taskThings.js'
-import { emjs, globQs as qs } from './highLevel/utils.js'
-import { getToday } from './highLevel/periods.js'
+import { emjs, globQs as qs, createOptionsList } from './highLevel/utils.js'
+import { getToday, oneDay, isCustomPeriod } from './highLevel/periods.js'
 import { uploading } from './highLevel/uploadBackup.js'
 import { getData } from './highLevel/createBackup.js'
 
 const periodsCount = 5;
+const reminderList = [{
+  title: 'Select how often remind',
+  disabled: true,
+  selected: true
+}, {
+  title: 'Every day',
+  offset: 1
+}, {
+  title: 'Every week',
+  offset: 7
+}, {
+  title: 'Every month',
+  offset: 28
+}, {
+  title: 'Every quarter',
+  offset: 30 * 3
+}, {
+  title: 'Every half year',
+  offset: 30 * 6
+}, {
+  title: 'Every year',
+  offset: 365
+}];
 
 export const settings = {
   sections: ['periods', 'import'],
@@ -33,25 +56,65 @@ export const settings = {
       <button id="getData" class="success">${emjs.crateUp} Backup your current data</button>
       <progress class="downloadUI"></progress>
       <a id="downloadData" class="downloadLink"></a>
+      <h3>Set up an reminder to create backups periodically. You will able to download backup just from app's main screen</h3>
+      <select id="reminderList"></select>
+      <button id="reminder">${emjs.alarmClock} Remind me</button>
+      <h3 id="nextRemind"></h3>
+      <button id="removeReminder" class="secondary">${emjs.trashCan} Remove reminder</button>
       <button id="toDebug" class="secondary">${emjs.construction} Open debug page</button>
       <h2>About</h2>
-      <h3>${emjs.label} dailer app, version 1.0.1</h3>
+      <h3>${emjs.label} dailer app, version 1.1.0</h3>
       <h3>${emjs.microscope} Created in 2022</h3>
     `;
     qs('#toPeriodCreator').addEventListener('click', () => {
       globals.closeSettings(true);
       globals.paintPage('periodCreator');
     });
+    qs('#reminder').addEventListener('click', () => {
+      const value = Number(qs('#reminderList').value);
+      if (!value) return globals.message({
+        text: 'Select how often to remind you', state: 'fail'
+      });
+      localStorage.remindId = value;
+      localStorage.remindValue = reminderList[value].offset * oneDay;
+      localStorage.nextRemind = getToday() + Number(localStorage.remindValue);
+      localStorage.reminded = 'false';
+      qs('#nextRemind').innerHTML = getNextRemindText();
+      qs('#nextRemind').style.display = 'block';
+      qs('#removeReminder').style.display = 'block';
+      globals.message({
+        text: `Now you will get reminders ${reminderList[value].title}`, state: 'success'
+      });
+    });
+    qs('#removeReminder').addEventListener('click', (e) => {
+      delete localStorage.remindId;
+      delete localStorage.remindValue;
+      delete localStorage.nextRemind;
+      qs('#reminderList').value = '0';
+      e.target.style.display = 'none';
+      globals.message({ text: 'Reminder was removed', state: 'success' });
+    })
     qs('#toDebug').addEventListener('click', () => {
       globals.closeSettings(true);
       globals.paintPage('debugPage');
     });
     qs('#uploadData').addEventListener('click', async () => await uploadData(globals));
-    qs('#getData').addEventListener('click', async () => await downloadData(globals));
+    qs('#getData').addEventListener('click', async () => {
+      const link = await downloadData(globals);
+      link.click();
+    });
   },
   opening: async ({globals}) => {
     if (!qs('#periodsContainer').children.length) {
       await paintPeriods(globals);
+    }
+    if (!qs('#reminderList').children.length) {
+      createOptionsList(qs('#reminderList'), reminderList);
+      if (!localStorage.remindId) continue;
+      qs('#reminderList').value = localStorage.remindId;
+      qs('#nextRemind').innerHTML = getNextRemindText();
+      qs('#nextRemind').style.display = 'block';
+      qs('#removeReminder').style.display = 'block';
     }
   }
 };
@@ -62,12 +125,25 @@ export async function paintPeriods(globals) {
   pc.innerHTML = '';
   for (let per in periods) {
     const period = periods[per];
-    renderToggler({
-      name: period.title, id: period.id,
+    const buttons = [];
+    if (isCustomPeriod(period.id)) {
+      buttons.push({
+        emoji: emjs.pen,
+        func: async ({globals}) => {
+          if (!globals.pageInfo) globals.pageInfo = {};
+          globals.pageInfo.periodId = period.id;
+          globals.pageInfo.periodAction = 'edit';
+          await globals.paintPage('periodCreator');
+        },
+        args: { globals }
+      });
+    }
+    buttons.push({
       emoji: getPeriodUsed(per),
       func: updatePeriodsList,
-      args: { globals, periodsCount }, page: pc
+      args: { globals, periodsCount }
     });
+    renderToggler({ name: period.title, id: period.id, page: pc, buttons });
   }
 }
 
@@ -124,17 +200,29 @@ async function uploadData(globals) {
         state: 'fail', text: `You must upload today's created backup`
       });
       await uploading(globals, data);
+      await paintPeriods(globals);
+      qs(`[data-section="import"]`).scrollIntoView();
     };
   });
   chooser.click();
 }
 
-async function downloadData(globals) {
+export async function downloadData(globals) {
+  const prog = qs('.downloadUI');
+  prog.style.display = 'block';
   const data = await getData(globals);
   const blob = new Blob([JSON.stringify(data)], {type: 'application/vnd.dailer+json'});
   const link = qs('#downloadData');
   const name = String(data.dailer_created).match(/(?<=\d\d)\d{6}/)[0];
   link.download = `${name}.dailer`;
   link.href = URL.createObjectURL(blob);
-  link.click();
+  prog.style.display = 'none';
+  return link;
+}
+
+export function getNextRemindText() {
+  if (Number(localStorage.nextRemind) == getToday()) {
+    return `Today you got reminder`;
+  }
+  return `Next reminder will be ${getTextDate(localStorage.nextRemind)}`;
 }
