@@ -110,7 +110,7 @@ export const settings = {
     }
     if (!qs('#reminderList').children.length) {
       createOptionsList(qs('#reminderList'), reminderList);
-      if (!localStorage.remindId) continue;
+      if (!localStorage.remindId) return;
       qs('#reminderList').value = localStorage.remindId;
       qs('#nextRemind').innerHTML = getNextRemindText();
       qs('#nextRemind').style.display = 'block';
