@@ -68,7 +68,7 @@ async function onPeriodCreator({globals, page}) {
     page: containers[1], value: isEdit ? (per.getWeekStart ? 1 : 0) : 0,
     buttons: [{
       emoji: isEdit ? emjs[per.getWeekStart ? 'sign' : 'blank'] : emjs.blank,
-      func: ({e, elem}) => toggleDays(toggleFunc({e, elem}));
+      func: ({e, elem}) => toggleDays(toggleFunc({e, elem}))
     }], disabled: isEdit
   });
   renderToggler({
