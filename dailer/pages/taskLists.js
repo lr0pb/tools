@@ -48,8 +48,10 @@ const meta = {
 };
 
 async function onPlanCreator({globals, page}) {
-  delete globals.pageInfo.taskId;
-  delete globals.pageInfo.taskAction;
+  if (globals.pageInfo) {
+    delete globals.pageInfo.taskId;
+    delete globals.pageInfo.taskAction;
+  }
   globals.pageButton({
     emoji: emjs.book,
     onClick: () => globals.paintPage('tasksArchive')
