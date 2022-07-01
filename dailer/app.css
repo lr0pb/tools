@@ -232,7 +232,7 @@ button {
   outline: none;
 }
 button.noEmoji {
-  margin-right: 3rem;
+  padding-right: 3rem;
 }
 button.emojiBtn {
   min-height: 0;
@@ -386,7 +386,7 @@ progress {
   cursor: progress;
 }
 .pageBtn, .hidedUI, #editButtons, #popup, input[type="file"],
-.uploadUI, .uploadSuccess, .downloadUI, .downloadLink, #removeReminder {
+.uploadUI, .uploadSuccess, .downloadUI, .downloadLink, #nextRemind, #removeReminder {
   display: none;
 }
 

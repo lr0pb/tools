@@ -45,6 +45,7 @@ function toggleDays(value) {
 
 async function onPeriodCreator({globals, page}) {
   qs('#back').addEventListener('click', () => history.back());
+  if (!globals.pageInfo) globals.pageInfo = history.state;
   const isEdit = globals.pageInfo && globals.pageInfo.periodAction == 'edit';
   let per;
   if (isEdit) {
