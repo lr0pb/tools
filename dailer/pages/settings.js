@@ -1,4 +1,4 @@
-import { renderToggler, getTextDate } from './highLevel/taskThings.js'
+import { renderToggler, toggleFunc, getTextDate } from './highLevel/taskThings.js'
 import { emjs, globQs as qs, createOptionsList } from './highLevel/utils.js'
 import { getToday, oneDay, isCustomPeriod } from './highLevel/periods.js'
 import { uploading } from './highLevel/uploadBackup.js'
@@ -6,7 +6,7 @@ import { getData } from './highLevel/createBackup.js'
 
 const periodsCount = 5;
 const reminderList = [{
-  title: 'Select how often remind',
+  title: 'Select how often to remind',
   disabled: true,
   selected: true
 }, {
@@ -56,45 +56,19 @@ export const settings = {
       <button id="getData" class="success">${emjs.crateUp} Backup your current data</button>
       <progress class="downloadUI"></progress>
       <a id="downloadData" class="downloadLink"></a>
-      <h3>Set up a reminder to create backups periodically. You will able to download backup just from app's main screen</h3>
+      <h3>Set up a reminder to create backups periodically. You will able to download backups just from app's main screen</h3>
       <select id="reminderList"></select>
-      <button id="reminder">${emjs.alarmClock} Remind me</button>
       <h3 id="nextRemind"></h3>
-      <button id="removeReminder" class="secondary">${emjs.trashCan} Remove reminder</button>
+      <div id="reminder" class="first"></div>
       <button id="toDebug" class="secondary">${emjs.construction} Open debug page</button>
       <h2>About</h2>
-      <h3>${emjs.label} dailer app, version 1.1.2</h3>
+      <h3>${emjs.label} dailer app, version 1.1.3</h3>
       <h3>${emjs.microscope} Created in 2022</h3>
     `;
     qs('#toPeriodCreator').addEventListener('click', () => {
       globals.closeSettings(true);
       globals.paintPage('periodCreator');
     });
-    qs('#reminder').addEventListener('click', () => {
-      const value = Number(qs('#reminderList').value);
-      if (!value) return globals.message({
-        text: 'Select how often to remind you', state: 'fail'
-      });
-      localStorage.remindId = value;
-      localStorage.remindValue = reminderList[value].offset * oneDay;
-      localStorage.nextRemind = getToday() + Number(localStorage.remindValue);
-      localStorage.reminded = 'false';
-      qs('#nextRemind').innerHTML = getNextRemindText();
-      qs('#nextRemind').style.display = 'block';
-      qs('#removeReminder').style.display = 'block';
-      globals.message({
-        text: `Now you will get reminders ${reminderList[value].title}`, state: 'success'
-      });
-    });
-    qs('#removeReminder').addEventListener('click', (e) => {
-      delete localStorage.remindId;
-      delete localStorage.remindValue;
-      delete localStorage.nextRemind;
-      qs('#reminderList').value = '0';
-      e.target.style.display = 'none';
-      qs('#nextRemind').style.display = 'none';
-      globals.message({ text: 'Reminder was removed', state: 'success' });
-    })
     qs('#toDebug').addEventListener('click', () => {
       globals.closeSettings(true);
       globals.paintPage('debugPage');
@@ -104,6 +78,20 @@ export const settings = {
       const link = await downloadData(globals);
       link.click();
     });
+    const value = localStorage.remindValue ? 1 : 0;
+    renderToggler({
+      name: `${emjs.alarmClock} Remind me`, id: 'reminder', buttons: [{
+        emoji: emjs[value ? 'sign' : 'blank'],
+        func: onReminderClick, args: { globals }
+      }], page: qs('#reminder'), value
+    });
+    qs('#reminderList').addEventListener('change', (e) => {
+      const reminder = qs('[data-id="reminder"]');
+      reminder.dataset.value = 1;
+      reminder.children[1].innerHTML = emjs.sign;
+      localStorage.remindId = e.target.value;
+      onRemindIdChange(localStorage.remindId);
+    });
   },
   opening: async ({globals}) => {
     if (!qs('#periodsContainer').children.length) {
@@ -111,11 +99,10 @@ export const settings = {
     }
     if (!qs('#reminderList').children.length) {
       createOptionsList(qs('#reminderList'), reminderList);
-      if (!localStorage.remindId) return;
-      qs('#reminderList').value = localStorage.remindId;
+      if (localStorage.remindId) qs('#reminderList').value = localStorage.remindId;
+      if (!localStorage.remindValue) return;
       qs('#nextRemind').innerHTML = getNextRemindText();
       qs('#nextRemind').style.display = 'block';
-      qs('#removeReminder').style.display = 'block';
     }
   }
 };
@@ -220,6 +207,32 @@ export async function downloadData(globals) {
   link.href = URL.createObjectURL(blob);
   prog.style.display = 'none';
   return link;
+}
+
+function onReminderClick({e, elem, globals}) {
+  const value = toggleFunc({e, elem});
+  if (value) {
+    const remindId = qs('#reminderList').value;
+    if (remindId == '0') {
+      toggleFunc({e, elem});
+      globals.message({ state: 'fail', text: 'Select how often to remind you first' });
+    } else onRemindIdChange(remindId);
+  } else {
+    delete localStorage.remindValue;
+    qs('#nextRemind').style.display = 'none';
+    globals.message({ state: 'success', text: 'Reminder was removed' });
+  }
+}
+
+function onRemindIdChange(remindId) {
+  localStorage.remindValue = reminderList[remindId].offset * oneDay;
+  localStorage.nextRemind = getToday() + Number(localStorage.remindValue);
+  localStorage.reminded = 'false';
+  qs('#nextRemind').innerHTML = getNextRemindText();
+  qs('#nextRemind').style.display = 'block';
+  globals.message({
+    state: 'success', text: `Now you will get reminders ${reminderList[remindId].title}`
+  });
 }
 
 export function getNextRemindText() {

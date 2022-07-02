@@ -13,8 +13,6 @@ export const planCreator = {
   onPageShow: async ({globals, page}) => {
     await onBackupUploaded({globals, page});
     if (!globals.pageInfo) globals.pageInfo = history.state;
-    delete globals.pageInfo.taskId;
-    delete globals.pageInfo.taskAction;
     let id = globals.pageInfo.stateChangedTaskId;
     if (id) qs(`[data-id="${id}"]`).remove();
     if (!page.children.length) showNoTasks(page);
@@ -48,18 +46,12 @@ const meta = {
 };
 
 async function onPlanCreator({globals, page}) {
-  if (globals.pageInfo) {
-    delete globals.pageInfo.taskId;
-    delete globals.pageInfo.taskAction;
-  }
   globals.pageButton({
     emoji: emjs.book,
     onClick: () => globals.paintPage('tasksArchive')
   });
   qs('#back').addEventListener('click', () => history.back());
-  qs('#addTask').addEventListener(
-    'click', () => globals.paintPage('taskCreator')
-  );
+  qs('#addTask').addEventListener('click', () => globals.paintPage('taskCreator'));
   await renderProgressiveTasksList({ globals, page, isBadTask: meta.planCreator.bad });
 }
 
@@ -128,7 +120,7 @@ async function renderSortedTasksList({globals, page, isBadTask, sort}) {
 }
 
 async function onBackupUploaded({globals, page}) {
-  if (!globals.pageInfo || !globals.pageInfo.backupUploaded) return;
+  if (!globals.pageInfo && !globals.pageInfo.backupUploaded) return;
   const args = {
     globals, page,
     isBadTask: meta[globals.pageName].bad,

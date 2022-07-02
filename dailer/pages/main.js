@@ -196,13 +196,15 @@ export async function checkInstall(globals) {
 }
 
 async function checkBackupReminder(globals) {
-  if (!localStorage.remindId) return;
-  if (localStorage.nextRemind == getToday() && localStorage.reminded == 'true') return;
-  if (localStorage.nextRemind == getToday() - oneDay) {
+  if (!localStorage.remindValue) return;
+  let nextRemind = Number(localStorage.nextRemind);
+  if (nextRemind === getToday() && localStorage.reminded === 'true') return;
+  if (nextRemind === getToday() - oneDay) {
     localStorage.reminded = 'false';
-    localStorage.nextRemind = getToday() - oneDay + Number(localStorage.remindValue);
+    nextRemind = getToday() - oneDay + Number(localStorage.remindValue);
+    localStorage.nextRemind = nextRemind;
   }
-  if (localStorage.nextRemind == getToday()) {
+  if (nextRemind === getToday()) {
     const link = await downloadData(globals);
     globals.floatingMsg({
       text: `${emjs.bread} Your data has been backed up`,

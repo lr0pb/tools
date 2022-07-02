@@ -97,14 +97,14 @@ const globals = {
       ${button ? `<button class="noEmoji">${button}</button>` : ''}
     `;
     const content = localQs('.content', pageName);
+    content.append(elem);
+    if (button && onClick) {
+      localQs('.floatingMsg button', pageName).addEventListener('click', onClick);
+    }
     if (!content.classList.contains('center')) {
       const div = document.createElement('div');
       div.style.height = `${elem.getBoundingClientRect().height}px`;
       content.append(div);
-    }
-    content.append(elem);
-    if (button && onClick) {
-      localQs('.floatingMsg button', pageName).addEventListener('click', onClick);
     }
     return elem;
   },
@@ -168,7 +168,16 @@ window.addEventListener('load', async () => {
 });
 
 window.addEventListener('popstate', (e) => {
+  if (globals.onBack) {
+    globals.onBack();
+    globals.onBack = null;
+  }
   renderPage(e, true);
+  if (globals.additionalBack) {
+    const backs = globals.additionalBack;
+    globals.additionalBack = 0;
+    for (let i = 0; i < backs; i++) { history.back() }
+  }
 });
 
 window.addEventListener('appinstalled', () => {

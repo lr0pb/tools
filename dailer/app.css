@@ -37,9 +37,10 @@ html {
 }
 
 @media (pointer: fine) and (hover: hover) {
-  button, input, select, .task.clickable {
+  button, select, .task.clickable {
     cursor: pointer;
   }
+  input { cursor: text; }
 }
 
 @media (orientation: portrait) {
@@ -97,7 +98,7 @@ html {
     --lightBorder: rgb(174, 174, 174, 0.35);
     --popupBg: var(--mainBg);
     --marker: #7cc2ff;
-    --msgBg: var(--color);
+    --msgBg: #474747;
   }
 }
 
@@ -105,6 +106,7 @@ body, .page, #settings, #popup {
   width: 100vw; height: 100vh;
   height: -webkit-fill-available;
   height: stretch;
+  height: 100svh;
   overflow: hidden;
   background-color: var(--mainBg);
   color: var(--mainText);
@@ -128,7 +130,7 @@ body, .page, #settings, #popup {
   z-index: 1;
   --footerHeight: 0;
   transform: translateX(100vw);
-  transition: transform var(--fastAnim) cubic-bezier(0.4, 0, 1, 1);
+  transition: transform var(--fastAnim);
 }
 #settings > .content > *:last-child {
   margin-bottom: 4rem;
@@ -370,7 +372,6 @@ button:disabled, [disabled] {
   margin: 2rem 2.5rem;
 }
 
-input { cursor: text; }
 input, select {
   min-height: 8.5rem;
   padding: 1.5rem 2rem;

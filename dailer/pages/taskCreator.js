@@ -56,14 +56,7 @@ async function getPeriods(globals) {
 }
 
 async function onTaskCreator({globals}) {
-  const safeBack = () => {
-    if (globals.pageInfo) {
-      delete globals.pageInfo.taskId;
-      delete globals.pageInfo.taskAction;
-    }
-    history.back();
-  };
-  qs('#back').addEventListener('click', safeBack);
+  qs('#back').addEventListener('click', () => history.back());
   if (!localStorage.firstDayEver) qs('#back').style.display = 'none';
   createOptionsList(qs('#priority'), priorities);
   renderToggler({
@@ -89,6 +82,10 @@ async function onTaskCreator({globals}) {
   if (isEdit) {
     td = await enterEditTaskMode(globals);
     enableEditButtons(globals, td, safeBack);
+    globals.onBack = () => {
+      delete globals.pageInfo.taskId;
+      delete globals.pageInfo.taskAction;
+    };
   } else {
     const { tasksCount, periodsCount } = await asyncDataReceiving({globals, tasks: 3});
     if (tasksCount >= 3 && periodsCount == 0) globals.floatingMsg({
@@ -106,7 +103,7 @@ async function onTaskCreator({globals}) {
     });
   }
   qs('#saveTask').addEventListener('click', async () => {
-    await onSaveTaskClick(globals, safeBack, td, isEdit);
+    await onSaveTaskClick(globals, td, isEdit);
   });
 }
 
@@ -125,7 +122,7 @@ async function asyncDataReceiving({globals, tasks = 1, periods = 1}) {
   return { tasksCount, periodsCount };
 }
 
-async function onSaveTaskClick(globals, safeBack, td, isEdit) {
+async function onSaveTaskClick(globals, td, isEdit) {
   const periods = await globals.getPeriods();
   const task = createTask(periods, td);
   if (task == 'error') return globals.message({
@@ -142,7 +139,7 @@ async function onSaveTaskClick(globals, safeBack, td, isEdit) {
   if (!localStorage.firstDayEver) {
     return globals.paintPage('main', true, true);
   }
-  safeBack();
+  history.back();
 }
 
 async function enterEditTaskMode(globals) {

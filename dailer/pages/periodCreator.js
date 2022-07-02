@@ -25,7 +25,7 @@ export const periodCreator = {
     <div class="togglerContainer first"></div>
     <h3>Automatically set task start day to the previous Sunday</h3>
     <div class="togglerContainer first"></div>
-    <h3>In drop down list this period will be shown as default if no other default periods created earlier are in the list</h3>
+    <h3>This period will be selected by default in periods drop down list if no other default periods created later are in the list</h3>
   `,
   footer: `
     <button id="back" class="secondary">${emjs.back} Back</button>
@@ -44,13 +44,7 @@ function toggleDays(value) {
 }
 
 async function onPeriodCreator({globals, page}) {
-  qs('#back').addEventListener('click', () => {
-    history.back();
-    if (globals.additionalBack) for (let i = 0; i < globals.additionalBack; i++) {
-      history.back();
-    }
-    globals.additionalBack = 0;
-  });
+  qs('#back').addEventListener('click', () => history.back());
   if (!globals.pageInfo) globals.pageInfo = history.state;
   const isEdit = globals.pageInfo && globals.pageInfo.periodAction == 'edit';
   let per;
@@ -61,6 +55,10 @@ async function onPeriodCreator({globals, page}) {
     if (per.description) qs('#periodDesc').value = per.description;
     qs('#daysCount').value = per.days.length;
     qs('#daysCount').setAttribute('disabled', 'disabled');
+    globals.onBack = () => {
+      delete globals.pageInfo.periodAction;
+      delete globals.pageInfo.periodId;
+    };
   }
   appendDays(isEdit ? per.days : null);
   if (isEdit) toggleDays(per.getWeekStart ? 1 : 0);
@@ -173,6 +171,7 @@ export function createPeriod(per = {}, isEdit) {
   if (isEdit || !per.title) {
     if (qs('#periodDesc').value !== '') period.description = qs('#periodDesc').value;
     if (getValue('selected')) period.selected = true;
+    else if (period.selected) delete period.selected;
   }
   console.log(period);
   if (period.title == '' || !period.days.includes(1)) return 'error'

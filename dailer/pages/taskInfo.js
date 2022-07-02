@@ -26,13 +26,7 @@ export const taskInfo = {
 };
 
 async function renderTaskInfo({globals, page}) {
-  qs('#back').addEventListener('click', () => {
-    if (globals.pageInfo) {
-      delete globals.pageInfo.taskId;
-      delete globals.pageInfo.taskAction;
-    }
-    history.back();
-  });
+  qs('#back').addEventListener('click', () => history.back());
   if (!globals.pageInfo) globals.pageInfo = history.state;
   const task = await globals.db.getItem('tasks', globals.pageInfo.taskId);
   const periods = await globals.getPeriods();
@@ -45,6 +39,11 @@ async function renderTaskInfo({globals, page}) {
       globals.paintPage('taskCreator');
     });
   }
+  globals.onBack = () => {
+    if (!globals.pageInfo) return;
+    delete globals.pageInfo.taskId;
+    delete globals.pageInfo.taskAction;
+  };
   const iha = isHistoryAvailable(task);
   page.innerHTML = `
     <div>
