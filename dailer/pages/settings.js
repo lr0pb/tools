@@ -62,7 +62,7 @@ export const settings = {
       <div id="reminder" class="first"></div>
       <button id="toDebug" class="secondary">${emjs.construction} Open debug page</button>
       <h2>About</h2>
-      <h3>${emjs.label} dailer app, version 1.1.3</h3>
+      <h3>${emjs.label} dailer app, version 1.1.4</h3>
       <h3>${emjs.microscope} Created in 2022</h3>
     `;
     qs('#toPeriodCreator').addEventListener('click', () => {
@@ -90,7 +90,7 @@ export const settings = {
       reminder.dataset.value = 1;
       reminder.children[1].innerHTML = emjs.sign;
       localStorage.remindId = e.target.value;
-      onRemindIdChange(localStorage.remindId);
+      onRemindIdChange(globals, localStorage.remindId);
     });
   },
   opening: async ({globals}) => {
@@ -216,7 +216,7 @@ function onReminderClick({e, elem, globals}) {
     if (remindId == '0') {
       toggleFunc({e, elem});
       globals.message({ state: 'fail', text: 'Select how often to remind you first' });
-    } else onRemindIdChange(remindId);
+    } else onRemindIdChange(globals, remindId);
   } else {
     delete localStorage.remindValue;
     qs('#nextRemind').style.display = 'none';
@@ -224,7 +224,7 @@ function onReminderClick({e, elem, globals}) {
   }
 }
 
-function onRemindIdChange(remindId) {
+function onRemindIdChange(globals, remindId) {
   localStorage.remindValue = reminderList[remindId].offset * oneDay;
   localStorage.nextRemind = getToday() + Number(localStorage.remindValue);
   localStorage.reminded = 'false';
@@ -237,7 +237,7 @@ function onRemindIdChange(remindId) {
 
 export function getNextRemindText() {
   if (Number(localStorage.nextRemind) == getToday()) {
-    return `Today you got reminder`;
+    return `You got reminder today`;
   }
   return `Next reminder will be ${getTextDate(localStorage.nextRemind)}`;
 }

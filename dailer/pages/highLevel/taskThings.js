@@ -70,7 +70,9 @@ export function renderTask({type, globals, td, page, onBodyClick, periods}) {
     <div>
       <h3>${td.name}</h3>
       <p>${isCustomPeriod(td.periodId)
-        ? periods[td.periodId].title + td.periodTitle : td.periodTitle
+        ? `<span class="customTitle" data-period="${td.periodId}">${
+          periods[td.periodId].title
+        }</span>${td.periodTitle}` : td.periodTitle
       } | ${priorities[td.priority].title}</p>
     </div>
     ${td.disabled ? '' : `

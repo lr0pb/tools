@@ -120,7 +120,7 @@ async function renderSortedTasksList({globals, page, isBadTask, sort}) {
 }
 
 async function onBackupUploaded({globals, page}) {
-  if (!globals.pageInfo && !globals.pageInfo.backupUploaded) return;
+  if (!globals.pageInfo || (globals.pageInfo && !globals.pageInfo.backupUploaded)) return;
   const args = {
     globals, page,
     isBadTask: meta[globals.pageName].bad,

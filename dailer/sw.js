@@ -51,7 +51,7 @@ async function addCache(request) {
   }
   try {
     const response = await Promise.race([
-      new Promise((res) => { setTimeout(res, 3000) }),
+      new Promise((res) => { setTimeout(res, 600) }),
       fetch(request)
     ]);
     if (response.ok) {

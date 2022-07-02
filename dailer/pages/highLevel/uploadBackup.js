@@ -26,14 +26,17 @@ export async function uploading(globals, data) {
   });
   let earliestDay = getToday();
   const tasks = [];
+  const updateList = JSON.parse(localStorage.updateTasksList);
   for (let td of data.dailer_tasks) {
     if (td.periodStart < earliestDay) earliestDay = td.periodStart;
     td.id = Date.now().toString();
     if (isCustomPeriod(td.periodId)) td.periodId = periodsConvert[td.periodId];
     const task = createTask(periods, td);
     tasks.push(task);
+    if (task.endDate == getToday() - oneDay) updateList.push(task.id);
     await globals.db.setItem('tasks', task);
   }
+  localStorage.updateTasksList = JSON.stringify(updateList);
   const diff = (getToday() - earliestDay + oneDay) / oneDay;
   for (let i = 0; i < diff; i++) {
     const date = earliestDay + oneDay * i;

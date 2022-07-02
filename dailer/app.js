@@ -103,7 +103,8 @@ const globals = {
     }
     if (!content.classList.contains('center')) {
       const div = document.createElement('div');
-      div.style.height = `${elem.getBoundingClientRect().height}px`;
+      div.style.minHeight = `${elem.getBoundingClientRect().height}px`;
+      div.style.marginTop = '3rem';
       content.append(div);
     }
     return elem;

@@ -1,6 +1,8 @@
 import { periods } from './highLevel/periods.js'
 import { renderToggler, toggleFunc } from './highLevel/taskThings.js'
-import { qs, qsa, emjs, safeDataInteractions } from './highLevel/utils.js'
+import {
+  qs, qsa, globQs, globQsa, emjs, safeDataInteractions
+} from './highLevel/utils.js'
 import { paintPeriods } from './settings.js'
 
 const maxDays = 7;
@@ -107,11 +109,15 @@ async function onPeriodCreator({globals, page}) {
     });
     await globals.checkPersist();
     await paintPeriods(globals);
+    if (isEdit) {
+      const titles = globQsa(`.customTitle[data-period="${period.id}"]`);
+      for (let title of titles) { title.innerHTML = period.title; }
+    }
     globals.additionalBack = 0;
-    /*if (globals.pageInfo && globals.pageInfo.periodPromo) {
-      globals.pageInfo.periodPromo.remove();
+    if (globals.pageInfo && globals.pageInfo.periodPromo) {
+      globQs(globals.pageInfo.periodPromo).remove();
       delete globals.pageInfo.periodPromo;
-    }*/
+    }
     history.back();
   });
 }

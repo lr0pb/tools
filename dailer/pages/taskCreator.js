@@ -81,7 +81,7 @@ async function onTaskCreator({globals}) {
   let td;
   if (isEdit) {
     td = await enterEditTaskMode(globals);
-    enableEditButtons(globals, td, safeBack);
+    enableEditButtons(globals, td);
     globals.onBack = () => {
       delete globals.pageInfo.taskId;
       delete globals.pageInfo.taskAction;
@@ -94,8 +94,8 @@ async function onTaskCreator({globals}) {
       onClick: async (e) => {
         globals.openSettings('periods');
         globals.closeSettings(true);
-        /*if (!globals.pageInfo) globals.pageInfo = {};
-        globals.pageInfo.periodPromo = e.target.parentElement;*/
+        if (!globals.pageInfo) globals.pageInfo = {};
+        globals.pageInfo.periodPromo = '#taskCreator .floatingMsg';
         globals.additionalBack = 1;
         await globals.paintPage('periodCreator');
       },
@@ -173,16 +173,16 @@ async function enterEditTaskMode(globals) {
   return td;
 }
 
-function enableEditButtons(globals, td, safeBack) {
+function enableEditButtons(globals, td) {
   qs('#editButtons').style.display = 'block';
   qs('#disable').addEventListener('click', async () => {
     await editTask({
-      globals, id: td.id, field: 'disabled', onConfirm: safeBack
+      globals, id: td.id, field: 'disabled', onConfirm: () => history.back()
     });
   });
   qs('#delete').addEventListener('click', async () => {
     await editTask({
-      globals, id: td.id, field: 'deleted', onConfirm: safeBack
+      globals, id: td.id, field: 'deleted', onConfirm: () => history.back()
     });
   });
 }
