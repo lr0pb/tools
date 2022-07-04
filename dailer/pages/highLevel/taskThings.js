@@ -69,7 +69,7 @@ export function renderTask({type, globals, td, page, onBodyClick, periods}) {
   });
   const task = document.createElement('div');
   task.className = 'task';
-  elem.role = 'button'; elem.tabIndex = 0;
+  task.role = 'button'; task.tabIndex = 0;
   task.dataset.id = td.id;
   task.innerHTML = `
     <div>
