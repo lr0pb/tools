@@ -35,6 +35,7 @@ async function renderPage({globals, page}) {
     'Used by Cache storage': convertBytes(memory.usageDetails.caches, 'kb'),
     'Used by IndexedDb': convertBytes(memory.usageDetails.indexedDB, 'kb'),
     'First day ever': intlDate(Number(localStorage.firstDayEver)),
+    'Is reminded': localStorage.reminded,
     'Periods list': localStorage.periodsList,
     'Tasks to additional update': JSON.parse(localStorage.updateTasksList).length,
     'Days amount': days.length,

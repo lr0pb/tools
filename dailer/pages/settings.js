@@ -62,15 +62,15 @@ export const settings = {
       <div id="reminder" class="first"></div>
       <button id="toDebug" class="secondary">${emjs.construction} Open debug page</button>
       <h2>About</h2>
-      <h3>${emjs.label} dailer app, version 1.1.4</h3>
+      <h3>${emjs.label} dailer app, version 1.1.5</h3>
       <h3>${emjs.microscope} Created in 2022</h3>
     `;
     qs('#toPeriodCreator').addEventListener('click', () => {
-      globals.closeSettings(true);
+      globals.closeSettings();
       globals.paintPage('periodCreator');
     });
     qs('#toDebug').addEventListener('click', () => {
-      globals.closeSettings(true);
+      globals.closeSettings();
       globals.paintPage('debugPage');
     });
     qs('#uploadData').addEventListener('click', async () => await uploadData(globals));
@@ -117,11 +117,12 @@ export async function paintPeriods(globals) {
     if (isCustomPeriod(period.id)) {
       buttons.push({
         emoji: emjs.pen,
+        title: 'View or edit period',
         func: async ({globals}) => {
           if (!globals.pageInfo) globals.pageInfo = {};
           globals.pageInfo.periodId = period.id;
           globals.pageInfo.periodAction = 'edit';
-          globals.closeSettings(true);
+          globals.closeSettings();
           await globals.paintPage('periodCreator');
         },
         args: { globals }
@@ -129,6 +130,7 @@ export async function paintPeriods(globals) {
     }
     buttons.push({
       emoji: getPeriodUsed(per),
+      title: 'Add period to drop down list',
       func: updatePeriodsList,
       args: { globals, periodsCount }
     });

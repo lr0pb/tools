@@ -30,6 +30,8 @@
   --popupBg: #343434;
   --marker: aliceblue;
   --msgBg: var(--mainBg);
+  --focusBorder: #d1d1d1;
+  --focusBg: #4b4b4b;
 }
 
 html {
@@ -37,10 +39,19 @@ html {
 }
 
 @media (pointer: fine) and (hover: hover) {
-  button, select, .task.clickable {
+  button, input, select, [role="button"]:not([disabled]) {
     cursor: pointer;
   }
-  input { cursor: text; }
+  input[type="text"] { cursor: text; }
+  input[type="range"] { cursor: grab; }
+  input[type="range"]:focus { outline: auto; }
+  input:hover, select:hover { --border: var(--focusBorder); }
+  input:focus, select:focus { --border: var(--accentBlue); }
+  button:hover, button:focus { filter: brightness(0.8); }
+  button:focus { transform: scale(0.95); }
+  [role="button"]:hover, [role="button"]:focus {
+    background-color: var(--focusBg);
+  }
 }
 
 @media (orientation: portrait) {
@@ -77,6 +88,7 @@ html {
     --normalAnim: 0;
     --msgShowing: 0;
   }
+  .hidePrevPage { opacity: 0; }
 }
 
 @media (prefers-color-scheme: light) {
@@ -99,6 +111,8 @@ html {
     --popupBg: var(--mainBg);
     --marker: #7cc2ff;
     --msgBg: #232323;
+    --focusBorder: #626262;
+    --focusBg: #d2d2d2;
   }
 }
 
@@ -158,6 +172,7 @@ body, .page, #settings, #popup {
 }
 .header > h1, .header > h4 {
   margin-right: auto;
+  line-height: 1.2;
 }
 .content {
   flex-direction: column;
@@ -197,14 +212,17 @@ h1, h4 {
 h2 {
   font-size: 4.9em;
   margin: 1rem;
+  line-height: 1.2;
 }
 h3, #message {
   font-size: 3.8em;
   margin: 1rem;
+  line-height: 1.17;
 }
 p {
   font-size: 2.5em;
   margin: 0 1rem;
+  line-height: 1.12;
 }
 .emoji {
   font-size: 9em;
@@ -226,6 +244,8 @@ button, .task, #message, #infoBackground,
   margin: 2rem 0;
 }
 
+button, [role="button"] { outline: none; }
+[role="button"] { transition: background-color var(--fastAnim); }
 button {
   min-height: 11.6rem;
   font-size: 4.3em;
@@ -233,7 +253,8 @@ button {
   padding: 2rem 4rem 2rem 3rem;
   color: white; --bgColor: var(--accentBlue);
   background-color: var(--bgColor) !important;
-  outline: none;
+  line-height: 1.3;
+  transition: filter var(--fastAnim), transform var(--normalAnim);
 }
 button.noEmoji {
   padding-right: 3rem;
@@ -245,6 +266,7 @@ button.emojiBtn {
   border-color: transparent;
   margin: 0;
   padding: 1rem;
+  line-height: 1.2;
 }
 button.secondary {
   --bgColor: var(--accentGrey);
@@ -375,14 +397,15 @@ button:disabled, [disabled] {
 input, select {
   min-height: 8.5rem;
   padding: 1.5rem 2rem;
-  border: 0.8rem solid var(--darkShadow);
+  border: 0.8rem solid var(--border);
+  --border: var(--darkShadow);
   border-radius: 1.5rem;
   outline: none;
+  transition: border-color var(--fastAnim);
 }
 input:disabled, select:disabled {
   background-color: var(--darkShadow);
   color: var(--mainText);
-  cursor: default;
 }
 progress {
   min-height: 4rem;

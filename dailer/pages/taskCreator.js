@@ -36,8 +36,15 @@ export const taskCreator = {
   onSettingsUpdate: async ({globals}) => {
     if (globals.pageInfo && globals.pageInfo.taskAction == 'edit') return;
     const periodsList = await getPeriods(globals);
-    createOptionsList(qs('#period'), periodsList);
-    await onPeriodChange({target: qs('#period')}, globals);
+    const period = qs('#period');
+    createOptionsList(period, periodsList);
+    for (let per of periodsList) {
+      if (per.id == history.state.lastPeriodValue) {
+        period.value = per.id;
+        break;
+      }
+    }
+    await onPeriodChange({target: period}, globals);
   }
 };
 
@@ -93,7 +100,7 @@ async function onTaskCreator({globals}) {
       button: 'Try&nbsp;it',
       onClick: async (e) => {
         globals.openSettings('periods');
-        globals.closeSettings(true);
+        globals.closeSettings();
         if (!globals.pageInfo) globals.pageInfo = {};
         globals.pageInfo.periodPromo = '#taskCreator .floatingMsg';
         globals.additionalBack = 1;
@@ -204,6 +211,7 @@ async function onPeriodChange(e, globals) {
   if (value == '00') {
     return globals.openSettings('periods');
   }
+  history.state.lastPeriodValue = value;
   const date = qs('#date');
   date.value = '';
   date.removeAttribute('max');

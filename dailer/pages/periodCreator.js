@@ -128,7 +128,7 @@ function appendDays(days) {
   const daysCount = days ? days.length : maxDays;
   for (let i = 0; i < daysCount; i++) {
     hm.innerHTML += `
-      <div data-used="true" data-value="0" ${days ? 'disabled' : ''}>
+      <div data-used="true" data-value="0" ${days ? 'disabled' : 'role="button" tabIndex="0"'}>
         <h4 style="transform: ${transform};">${days ? emjs[days[i] ? 'sign' : 'blank'] : emjs.blank}</h4>
         <h3 class="dayTitle">${dayNames[i]}</h3>
       </div>
@@ -176,6 +176,7 @@ export function createPeriod(per = {}, isEdit) {
   }
   if (isEdit || !per.title) {
     if (qs('#periodDesc').value !== '') period.description = qs('#periodDesc').value;
+    else if (period.description) delete period.description;
     if (getValue('selected')) period.selected = true;
     else if (period.selected) delete period.selected;
   }

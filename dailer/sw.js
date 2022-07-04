@@ -1,10 +1,12 @@
-const appCache = '01.06-13:32';
+const APP_CACHE = '01.06-13:32';
+const HTML_TIMEOUT = 600;
+const FILE_TIMEOUT = 250;
 
 self.addEventListener('install', (e) => {
   skipWaiting();
   e.waitUntil(
     (async () => {
-      const cache = await caches.open(appCache);
+      const cache = await caches.open(APP_CACHE);
       const response = await fetch('./files.json');
       const offlineFiles = await response.json();
       offlineFiles.forEach( (file) => cache.add(file));
@@ -17,7 +19,7 @@ self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys().then( (keys) => {
       Promise.all(
-        keys.map( (key) => key == appCache || caches.delete(key) )
+        keys.map( (key) => key == APP_CACHE || caches.delete(key) )
       );
     })
   );
@@ -46,16 +48,20 @@ async function addCache(request) {
   let fetchResponse = null;
   const url = request.url;
   const params = url.match(/(?<=\/)[\w\&=\.\?]+$/);
+  let isHTML = false;
   if (params && (!params[0].includes('.') || params[0].includes('.html')) ) {
     request = new Request(url.replace(params, ''));
+    isHTML = true;
   }
   try {
     const response = await Promise.race([
-      new Promise((res) => { setTimeout(res, 600) }),
+      new Promise((res) => {
+        setTimeout(res, isHTML ? HTML_TIMEOUT : FILE_TIMEOUT);
+      }),
       fetch(request)
     ]);
     if (response.ok) {
-      const cache = await caches.open(appCache);
+      const cache = await caches.open(APP_CACHE);
       cache.put(request, response.clone());
       fetchResponse = response;
     };

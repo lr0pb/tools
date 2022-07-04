@@ -12,16 +12,22 @@ export const planCreator = {
   script: onPlanCreator,
   onPageShow: async ({globals, page}) => {
     await onBackupUploaded({globals, page});
+    const periods = await globals.getPeriods();
     if (!globals.pageInfo) globals.pageInfo = history.state;
     let id = globals.pageInfo.stateChangedTaskId;
-    if (id) qs(`[data-id="${id}"]`).remove();
+    if (id) {
+      const elem = qs(`[data-id="${id}"]`);
+      if (elem) elem.remove();
+    }
     if (!page.children.length) showNoTasks(page);
     delete globals.pageInfo.stateChangedTaskId;
     id = globals.pageInfo.dataChangedTaskId;
     if (!id) return;
     const td = await globals.db.getItem('tasks', id);
     const elem = qs(`[data-id="${id}"]`);
-    const task = renderTask({type: 'edit', globals, td, page: elem ? null : page});
+    const task = renderTask({
+      type: 'edit', globals, td, page: elem ? null : page, periods
+    });
     if (elem && task) elem.replaceWith(task);
     delete globals.pageInfo.dataChangedTaskId;
   },
@@ -48,6 +54,7 @@ const meta = {
 async function onPlanCreator({globals, page}) {
   globals.pageButton({
     emoji: emjs.book,
+    title: 'Open tasks archive',
     onClick: () => globals.paintPage('tasksArchive')
   });
   qs('#back').addEventListener('click', () => history.back());

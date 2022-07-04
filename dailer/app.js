@@ -46,7 +46,7 @@ const globals = {
       <div class="header">
         <h1>${page.header}</h1>
         <button class="pageBtn emojiBtn"></button>
-        <button class="openSettings emojiBtn">${emjs.settings}</button>
+        <button class="openSettings emojiBtn" title="Open settings">${emjs.settings}</button>
       </div>
       <div class="content">${page.page}</div>
       <div class="footer">${page.footer}</div>
@@ -81,9 +81,10 @@ const globals = {
     qs('#popup').style.display = 'none';
     qs('[data-action="confirm"]').onclick = null;
   },
-  pageButton: ({emoji, onClick}) => {
+  pageButton: ({emoji, title, onClick}) => {
     const pageBtn = localQs('.pageBtn');
     pageBtn.innerHTML = emoji;
+    pageBtn.title = title;
     pageBtn.onclick = onClick;
     pageBtn.style.display = 'block';
   },
@@ -120,7 +121,7 @@ const globals = {
   },
   closeSettings: async (back) => {
     qs('#settings').removeAttribute('style');
-    if (back === true) return;
+    if (!back) return;
     history.back();
     if (!pages[globals.pageName].onSettingsUpdate) return;
     await pages[globals.pageName].onSettingsUpdate({
@@ -260,7 +261,7 @@ function hidePage(current, prevName) {
   }
 }
 
-qs('#closeSettings').addEventListener('click', () => globals.closeSettings());
+qs('#closeSettings').addEventListener('click', () => globals.closeSettings(true));
 
 qs('#popup').addEventListener('click', (e) => {
   if (e.target.dataset.action == 'cancel') globals.closePopup();

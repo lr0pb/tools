@@ -33,7 +33,9 @@ export async function uploading(globals, data) {
     if (isCustomPeriod(td.periodId)) td.periodId = periodsConvert[td.periodId];
     const task = createTask(periods, td);
     tasks.push(task);
-    if (task.endDate == getToday() - oneDay) updateList.push(task.id);
+    if (
+      (task.special == 'oneTime' ? task.periodStart : task.endDate) == getToday() - oneDay
+    ) updateList.push(task.id);
     await globals.db.setItem('tasks', task);
   }
   localStorage.updateTasksList = JSON.stringify(updateList);

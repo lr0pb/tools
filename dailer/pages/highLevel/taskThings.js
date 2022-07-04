@@ -19,16 +19,19 @@ export function renderToggler({
   // toggler property represents emoji, that will arrive as first toggle value
   // but either this prop gives understand to enable default toggle function
   const elem = document.createElement('div');
-  elem.className = `task ${first ? 'first' : ''} ${onBodyClick ? 'clickable' : ''}`;
+  elem.className = `task ${first ? 'first' : ''}`;
+  if (onBodyClick) {
+    elem.role = 'button'; elem.tabIndex = 0;
+  }
   elem.dataset.id = id;
   let buttonsString = ``;
-  if (toggler) buttons.push({
-    emoji: toggler,
-    func: toggleFunc
-  });
+  if (toggler) buttons.push({ emoji: toggler, func: toggleFunc });
   buttons.forEach((btn, i) => {
     buttonsString += `
-      <button data-action="${i}" class="emojiBtn" ${disabled ? 'disabled' : ''}>${btn.emoji}</button>
+      <button
+        data-action="${i}" class="emojiBtn"
+        ${disabled ? 'disabled' : ''} title="${btn.title || 'Toggle value'}"
+      >${btn.emoji}</button>
     `;
   });
   elem.innerHTML = `
@@ -59,12 +62,14 @@ export function renderTask({type, globals, td, page, onBodyClick, periods}) {
   if (type == 'day') return renderToggler({
     name: td.name, id: td.id, buttons: [{
       emoji: getTaskComplete(td),
+      title: 'Mark task as completed',
       func: onTaskCompleteClick,
       args: { globals }
     }], page, onBodyClick
   });
   const task = document.createElement('div');
-  task.className = 'task clickable';
+  task.className = 'task';
+  elem.role = 'button'; elem.tabIndex = 0;
   task.dataset.id = td.id;
   task.innerHTML = `
     <div>
@@ -76,8 +81,8 @@ export function renderTask({type, globals, td, page, onBodyClick, periods}) {
       } | ${priorities[td.priority].title}</p>
     </div>
     ${td.disabled ? '' : `
-      <button data-action="edit" class="emojiBtn">${emjs.pen}</button>
-      <button data-action="delete" class="emojiBtn">${emjs.trashCan}</button>
+      <button data-action="edit" class="emojiBtn" title="Edit task">${emjs.pen}</button>
+      <button data-action="delete" class="emojiBtn" title="Delete task">${emjs.trashCan}</button>
     `}
    `;
   task.addEventListener('click', async (e) => {

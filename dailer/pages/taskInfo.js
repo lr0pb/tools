@@ -1,4 +1,6 @@
-import { getToday, convertDate, oneDay } from './highLevel/periods.js'
+import {
+  getToday, convertDate, oneDay, isCustomPeriod
+} from './highLevel/periods.js'
 import { priorities, getTextDate } from './highLevel/taskThings.js'
 import { qs, emjs, getLast, intlDate } from './highLevel/utils.js'
 
@@ -64,7 +66,10 @@ async function renderTaskInfo({globals, page}) {
 }
 
 function renderItemsHolder(task, periods, iha) {
-  const perTitle = periods[task.periodId].title;
+  const rawTitle = periods[task.periodId].title;
+  const perTitle = isCustomPeriod(task.periodId)
+  ? `<span class="customTitle" data-period="${task.periodId}">${rawTitle}</span>`
+  : rawTitle;
   const startTitle = getTextDate(task.periodStart);
   const endTitle = task.endDate ? getTextDate(task.endDate) : null;
   const periodText = !task.special
