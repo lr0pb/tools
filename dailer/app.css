@@ -39,19 +39,45 @@ html {
 }
 
 @media (pointer: fine) and (hover: hover) {
-  button, input, select, [role="button"]:not([disabled]) {
+  button, input, select, [role="button"] {
     cursor: pointer;
   }
-  input[type="text"] { cursor: text; }
-  input[type="range"] { cursor: grab; }
-  input[type="range"]:focus { outline: auto; }
-  input:hover, select:hover { --border: var(--focusBorder); }
-  input:focus, select:focus { --border: var(--accentBlue); }
-  button:hover, button:focus { filter: brightness(0.8); }
-  button:focus { transform: scale(0.95); }
-  [role="button"]:hover, [role="button"]:focus {
+  input[type="text"]:not(:disabled) { cursor: text; }
+  input[type="range"]:not(:disabled) { cursor: grab; }
+  input[type="range"]:focus-visible {
+    outline: var(--accentBlue) solid medium;
+    outline-offset: -0.7rem;
+  }
+  input:hover:not(:disabled), select:hover:not(:disabled) {
+    --border: var(--focusBorder);
+  }
+  input:focus, select:focus {
+    --border: var(--accentBlue);
+    outline: white solid thin;
+  }
+  button:hover { filter: brightness(0.8); }
+  button:focus-visible, [role="button"]:focus-visible {
+    border-color: var(--mainText) !important;
+  }
+  [role="button"]:hover:not(:disabled), [role="button"]:focus,
+  [role="button"]:not(:focus):focus-within {
     background-color: var(--focusBg);
   }
+  button:active, [role="button"]:active { transform: scale(0.97); }
+  button.emojiBtn:active { transform: scale(0.93); }
+
+  @media (prefers-reduced-motion: no-preference) {
+    button:hover { transform: scale(0.97); }
+    button:active, button.emojiBtn:hover { transform: scale(0.93); }
+    button.emojiBtn:active { transform: scale(0.78); }
+    button:disabled:hover { transform: none; }
+  }
+}
+
+@media (pointer: coarse) and (hover: none) and (prefers-reduced-motion: no-preference) {
+  button:active, [role="button"]:active {transform: scale(0.95); }
+  button.emojiBtn:active { transform: scale(0.89); }
+  button:disabled:active { transform: none; }
 }
 
 @media (orientation: portrait) {
@@ -112,7 +138,7 @@ html {
     --marker: #7cc2ff;
     --msgBg: #232323;
     --focusBorder: #626262;
-    --focusBg: #d2d2d2;
+    --focusBg: #dbdbdb;
   }
 }
 
@@ -245,7 +271,10 @@ button, .task, #message, #infoBackground,
 }
 
 button, [role="button"] { outline: none; }
-[role="button"] { transition: background-color var(--fastAnim); }
+[role="button"] {
+  transition: background-color var(--fastAnim),
+    transform var(--normalAnim), border-color var(--normalAnim);
+}
 button {
   min-height: 11.6rem;
   font-size: 4.3em;
@@ -254,7 +283,8 @@ button {
   color: white; --bgColor: var(--accentBlue);
   background-color: var(--bgColor) !important;
   line-height: 1.3;
-  transition: filter var(--fastAnim), transform var(--normalAnim);
+  transition: filter var(--fastAnim),
+    transform var(--normalAnim), border-color var(--normalAnim);
 }
 button.noEmoji {
   padding-right: 3rem;

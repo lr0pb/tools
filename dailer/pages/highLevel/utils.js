@@ -83,3 +83,20 @@ export function createOptionsList(elem, options) {
     elem.append(opt);
   }
 }
+
+const inertElem = document.createElement('div');
+if ('inert' in inertElem) window.dailerData.inert = true;
+inertElem.remove();
+
+export const inert = {
+  set(elem) {
+    if (!elem) return;
+    elem.inert = true;
+    if (dailerData.inert) return;
+  },
+  remove(elem) {
+    if (!elem) return;
+    elem.inert = false;
+    if (dailerData.inert) return;
+  }
+};

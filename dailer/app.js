@@ -1,6 +1,6 @@
 import { pages } from './pages.js'
 import {
-  emjs, qs as localQs, globQs as qs, globQsa as qsa, copyObject
+  emjs, qs as localQs, globQs as qs, globQsa as qsa, copyObject, inert
 } from './pages/highLevel/utils.js'
 import { periods } from './pages/highLevel/periods.js'
 import { paintPeriods } from './pages/settings.js'
@@ -10,6 +10,8 @@ import IDB from './IDB.js'
 if ('serviceWorker' in navigator && caches) {
   navigator.serviceWorker.register('./sw.js');
 }
+
+window.dailerData = {};
 
 const getUrl = () => location.href.toString();
 
@@ -110,19 +112,23 @@ const globals = {
     }
     return elem;
   },
-  openSettings: async (section, back) => {
+  openSettings: async (section, dontPushHistory) => {
     qs('#settings').style.transform = 'none';
+    inert.set(qs('.current'));
+    inert.remove(qs('#settings'));
     globals.settings = true;
-    if (back !== true) history.pushState({settings: true}, '', getUrl() + '&settings=open');
+    if (!dontPushHistory) history.pushState({settings: true}, '', getUrl() + '&settings=open');
     await pages.settings.opening({globals});
     if (section && pages.settings.sections.includes(section)) {
       qs(`[data-section="${section}"]`).scrollIntoView();
     }
   },
-  closeSettings: async (back) => {
+  closeSettings: async (callSettingsUpdate, backInHistory) => {
     qs('#settings').removeAttribute('style');
-    if (!back) return;
-    history.back();
+    inert.remove(qs('.current'));
+    inert.set(qs('#settings'));
+    if (backInHistory) history.back();
+    if (!callSettingsUpdate) return;
     if (!pages[globals.pageName].onSettingsUpdate) return;
     await pages[globals.pageName].onSettingsUpdate({
       globals, page: qs('.current .content')
@@ -167,6 +173,8 @@ window.addEventListener('pageshow', (e) => {
 
 window.addEventListener('load', async () => {
   await pages.settings.paint({globals, page: qs('#settings > .content')});
+  const params = getParams();
+  if (!params.settings) inert.set(qs('#settings'));
 });
 
 window.addEventListener('popstate', (e) => {
@@ -204,7 +212,7 @@ function renderPage(e, back) {
   }
   if (globals.settings) {
     globals.settings = false;
-    return globals.closeSettings(true);
+    return globals.closeSettings(back, false);
   }
   const onbrd = localStorage.onboarded == 'true';
   const page = (params.page && pages[params.page]) ? params.page : 'main';
@@ -238,6 +246,7 @@ function paintFirstPage(rndr) {
 function showPage(prev, current, noAnim) {
   prev.classList.remove('showing', 'current');
   prev.classList.add('hidePrevPage');
+  inert.set(prev);
   setTimeout(() => {
     current.classList.add('showing');
   }, noAnim ? 0 : 10);
@@ -247,6 +256,7 @@ function showPage(prev, current, noAnim) {
 }
 
 function hidePage(current, prevName) {
+  inert.set(current);
   const prev = qs(`#${prevName}`);
   if (!prev) {
     if (!qs('#main')) globals.paintPage('main', false, true);
@@ -254,6 +264,7 @@ function hidePage(current, prevName) {
   }
   prev.classList.remove('hidePrevPage', 'hided');
   prev.classList.add('showing', 'current');
+  inert.remove(prev);
   current.classList.remove('showing', 'current');
   current.classList.add('hided');
   if (pages[prev.id].onPageShow) {
@@ -261,7 +272,7 @@ function hidePage(current, prevName) {
   }
 }
 
-qs('#closeSettings').addEventListener('click', () => globals.closeSettings(true));
+qs('#closeSettings').addEventListener('click', () => globals.closeSettings(true, true));
 
 qs('#popup').addEventListener('click', (e) => {
   if (e.target.dataset.action == 'cancel') globals.closePopup();

@@ -56,7 +56,7 @@ async function renderPage({globals, page}) {
   }
   qs('#clear').addEventListener('click', async () => {
     await clearDatabase(globals);
-    globals.paintPage('main');
+    globals.paintPage('main', false, false, true);
     location.reload();
   });
 }
