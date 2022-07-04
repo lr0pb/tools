@@ -11,7 +11,7 @@ if ('serviceWorker' in navigator && caches) {
   navigator.serviceWorker.register('./sw.js');
 }
 
-window.dailerData = {};
+if (!window.dailerData) window.dailerData = {};
 
 const getUrl = () => location.href.toString();
 

@@ -85,6 +85,7 @@ export function createOptionsList(elem, options) {
 }
 
 const inertElem = document.createElement('div');
+if (!window.dailerData) window.dailerData = {};
 if ('inert' in inertElem) window.dailerData.inert = true;
 inertElem.remove();
 
