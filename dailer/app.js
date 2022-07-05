@@ -86,7 +86,7 @@ const globals = {
   closePopup: () => {
     inert.remove(qs(globals.settings ? '#settings' : '.current'));
     inert.set(qs('#popup'));
-    globals.popupReleaseElem.focus();
+    if (globals.popupReleaseElem) globals.popupReleaseElem.focus();
     globals.popupReleaseElem = null;
     qs('#popup').style.display = 'none';
     qs('[data-action="confirm"]').onclick = null;
