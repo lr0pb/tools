@@ -125,7 +125,7 @@ export const inert = {
       }
     }
     const elemToFocus = elem.querySelector(focusables);
-    elemToFocus.focus();
+    if (elemToFocus) elemToFocus.focus();
   },
   _cache: new Map(),
   clearCache(elem) {
