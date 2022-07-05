@@ -1,7 +1,7 @@
 import { periods } from './highLevel/periods.js'
 import { renderToggler, toggleFunc } from './highLevel/taskThings.js'
 import {
-  qs, qsa, globQs, globQsa, emjs, safeDataInteractions
+  qs, qsa, globQs, globQsa, emjs, safeDataInteractions, handleKeyboard
 } from './highLevel/utils.js'
 import { paintPeriods } from './settings.js'
 
@@ -127,22 +127,31 @@ function appendDays(days) {
   const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const daysCount = days ? days.length : maxDays;
   for (let i = 0; i < daysCount; i++) {
-    hm.innerHTML += `
-      <div data-used="true" data-value="0" ${days ? 'disabled' : 'role="button" tabIndex="0"'}>
-        <h4 style="transform: ${transform};">${days ? emjs[days[i] ? 'sign' : 'blank'] : emjs.blank}</h4>
-        <h3 class="dayTitle">${dayNames[i]}</h3>
-      </div>
+    const elem = document.createElement('div');
+    elem.dataset.used = 'true';
+    elem.dataset.value = days ? days[i] : '0';
+    elem.disabled = Boolean(days);
+    if (!days) {
+      elem.role = 'button';
+      elem.tabIndex = ${dailerData.focusgroup ? (i == 0 ? 0 : -1) : 0};
+    }
+    elem.innerHTML += `
+      <h4 style="transform: ${transform};">${days ? emjs[days[i] ? 'sign' : 'blank'] : emjs.blank}</h4>
+      <h3 class="dayTitle">${dayNames[i]}</h3>
     `;
+    hm.append(elem);
   }
-  if (!days) hm.addEventListener('click', (e) => {
+  if (days) return;
+  hm.addEventListener('click', (e) => {
     const elem = e.target.dataset.value
     ? e.target : ['H4', 'H3'].includes(e.target.tagName)
     ? e.target.parentElement : null;
-    if (!elem.dataset.value) return;
+    if (!(elem.dataset && elem.dataset.value)) return;
     const value = Number(elem.dataset.value) == 1 ? 0 : 1;
     elem.dataset.value = value;
     elem.children[0].innerHTML = value ? emjs.sign : emjs.blank;
   });
+  handleKeyboard(hm);
 }
 
 function onDaysCountChange(e) {

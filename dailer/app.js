@@ -1,6 +1,7 @@
 import { pages } from './pages.js'
 import {
-  emjs, qs as localQs, globQs as qs, globQsa as qsa, copyObject, inert
+  emjs, qs as localQs, globQs as qs, globQsa as qsa, copyObject, checkForFeatures,
+  isDesctop, inert
 } from './pages/highLevel/utils.js'
 import { periods } from './pages/highLevel/periods.js'
 import { paintPeriods } from './pages/settings.js'
@@ -12,6 +13,8 @@ if ('serviceWorker' in navigator && caches) {
 }
 
 if (!window.dailerData) window.dailerData = {};
+checkForFeatures(['inert', 'focusgroup']);
+dailerData.isDesctop = isDesctop();
 
 const getUrl = () => location.href.toString();
 
@@ -57,6 +60,9 @@ const globals = {
     document.body.append(container);
     const content = container.querySelector('.content');
     content.className = `content ${page.styleClasses || ''}`;
+    if (page.styleClasses && page.styleClasses.includes('doubleColumns')) {
+      content.focusgroup = 'auto vertical';
+    }
     showPage(qs('.current'), container, noAnim);
     if (page.noSettings) {
       localQs('.openSettings').style.display = 'none';
@@ -77,8 +83,8 @@ const globals = {
   },
   openPopup: ({text, action, elem}) => {
     globals.popupReleaseElem = elem;
-    inert.set(qs(globals.settings ? '#settings' : '.current'));
     inert.remove(qs('#popup'));
+    inert.set(qs(globals.settings ? '#settings' : '.current'));
     qs('#popup').style.display = 'flex';
     qs('#popup h2').innerHTML = text;
     qs('[data-action="confirm"]').onclick = action;
@@ -296,6 +302,9 @@ qs('#closeSettings').addEventListener('click', () => history.back());
 
 qs('#popup').addEventListener('click', (e) => {
   if (e.target.dataset.action == 'cancel') globals.closePopup();
+});
+qs('#popup').addEventListener('keydown', (e) => {
+  if (e.code == 'Escape') globals.closePopup();
 });
 
 if (!localStorage.periodsList) {

@@ -85,11 +85,31 @@ export function createOptionsList(elem, options) {
   }
 }
 
-let inertElem = document.createElement('div');
-if (!window.dailerData) window.dailerData = {};
-if ('inert' in inertElem) window.dailerData.inert = true;
-inertElem.remove();
-inertElem = null;
+export function handleKeyboard(elem, noBubbeling) {
+  if (!dailerData.isDesctop) return;
+  elem.addEventListener('keydown', (e) => {
+    if (['Enter', 'Space'].includes(e.code)) {
+      (noBubbeling ? elem : e.target).click();
+    }
+  });
+}
+
+export function checkForFeatures(features) {
+  let elem = document.createElement('div');
+  for (let feat of features) {
+    window.dailerData[feat] = feat in elem;
+  }
+  elem.remove();
+  elem = null;
+}
+
+export function isDesctop() {
+  if (navigator.userAgentData) {
+    return !navigator.userAgentData.mobile;
+  }
+  if ('standalone' in navigator) return false;
+  return window.matchMedia('(pointer: fine) and (hover: hover)').matches;
+}
 
 const focusables = [
   'button:not(:disabled)', 'input:not(:disabled)', '[role="button"]:not([disabled])'

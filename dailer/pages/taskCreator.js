@@ -116,14 +116,16 @@ async function onTaskCreator({globals}) {
 }
 
 async function asyncDataReceiving({globals, tasks = 1, periods = 1}) {
-  let tasksCount = 0, periodsCount = 0, tasksNotOver = true, periodsNotOver = true;
+  let tasksCount = 0, periodsCount = 0, tasksOver = false, periodsOver = false;
   globals.db.getAll('tasks', () => tasksCount++)
-    .then(() => tasksNotOver = false);
+    .then(() => tasksOver = true);
   globals.db.getAll('periods', () => periodsCount++)
-    .then(() => periodsNotOver = false);
+    .then(() => periodsOver = true);
   while (
-    (tasks > tasksCount || tasksNotOver) &&
-    (periods > periodsCount || periodsNotOver)
+    tasksOver && periodsOver ? false : (
+      (tasksCount < tasks || !tasksOver) &&
+      (periodsCount < periods || !periodsOver)
+    )
   ) {
     await new Promise((res) => { setTimeout(res, 10) });
   }

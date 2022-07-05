@@ -147,8 +147,6 @@ html { font-size: 1.25vmin; }
     flex-direction: row !important;
     flex-wrap: wrap;
     justify-content: space-between;
-    focus-group-name: auto;
-    focus-group-direction: vertical;
   }
   .doubleColumns > * { width: var(--fullWidth); }
   .floatingMsg.notFixed { min-height: 13rem; }
@@ -238,8 +236,8 @@ body, .page, #settings, #popup {
 body, .content, h1, h2, h3, h4, p, button {
   margin: 0;
   font-family: Arial, "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
-  user-select: none;
   -webkit-user-select: none;
+  user-select: none;
 }
 
 h1, h4 {
@@ -378,8 +376,6 @@ button:disabled, [disabled] {
   background-color: var(--taskBg);
   flex-direction: row;
   margin: 0 0 2.5rem;
-  focus-group-name: extend;
-  focus-group-direction: horizontal;
 }
 .first {
   margin-top: 2.5rem;
@@ -396,8 +392,8 @@ button:disabled, [disabled] {
 }
 .customBgContainer .task {
   --blur: 12px;
-  backdrop-filter: blur(var(--blur));
   -webkit-backdrop-filter: blur(var(--blur));
+  backdrop-filter: blur(var(--blur));
 }
 
 #infoBackground, .itemsHolder, #history, #history > .historyMonth {

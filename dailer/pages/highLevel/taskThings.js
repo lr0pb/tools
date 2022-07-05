@@ -1,4 +1,4 @@
-import { qs, emjs, getLast, intlDate } from './utils.js'
+import { qs, emjs, getLast, intlDate, handleKeyboard } from './utils.js'
 import { getToday, oneDay, isCustomPeriod } from './periods.js'
 
 export const priorities = [{
@@ -21,7 +21,10 @@ export function renderToggler({
   const elem = document.createElement('div');
   elem.className = `task ${first ? 'first' : ''}`;
   if (onBodyClick) {
-    elem.role = 'button'; elem.tabIndex = 0;
+    elem.role = 'button';
+    elem.tabIndex = dailerData.focusgroup ? (page.children.length == 0 ? 0 : -1) : 0;
+    task.focusgroup = 'extend horizontal';
+    handleKeyboard(elem, true);
   }
   elem.dataset.id = id;
   let buttonsString = ``;
@@ -31,6 +34,7 @@ export function renderToggler({
       <button
         data-action="${i}" class="emojiBtn"
         ${disabled ? 'disabled' : ''} title="${btn.title || 'Toggle value'}"
+        tabIndex="${dailerData.focusgroup ? -1 : 0}"
       >${btn.emoji}</button>
     `;
   });
@@ -44,7 +48,7 @@ export function renderToggler({
       if (!btn.args) btn.args = {};
       await btn.func({...btn.args, e, elem});
     } else if (onBodyClick) onBodyClick({e, elem});
-  })
+  });
   if (value !== undefined) elem.dataset.value = value;
   elem.activate = () => elem.querySelector('button').click();
   page.append(elem);
@@ -69,7 +73,9 @@ export function renderTask({type, globals, td, page, onBodyClick, periods}) {
   });
   const task = document.createElement('div');
   task.className = 'task';
-  task.role = 'button'; task.tabIndex = 0;
+  task.role = 'button';
+  task.tabIndex = dailerData.focusgroup ? (page.children.length == 0 ? 0 : -1) : 0;
+  task.focusgroup = 'extend horizontal';
   task.dataset.id = td.id;
   task.innerHTML = `
     <div>
@@ -87,7 +93,8 @@ export function renderTask({type, globals, td, page, onBodyClick, periods}) {
    `;
   task.addEventListener('click', async (e) => {
     await onTaskManageClick({e, globals, task, page});
-  })
+  });
+  handleKeyboard(task, true);
   if (page) page.append(task);
   return task;
 }
