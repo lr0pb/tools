@@ -32,6 +32,7 @@ const globals = {
   pageInfo: null,
   settings: false,
   additionalBack: 0,
+  popupReleaseElem: null,
   getPeriods: async () => {
     await globals.db.getAll('periods', (per) => {
       periods[per.id] = per;
@@ -47,7 +48,7 @@ const globals = {
     container.innerHTML = `
       <div class="header">
         <h1>${page.header}</h1>
-        <button class="pageBtn emojiBtn"></button>
+        <button class="pageBtn emojiBtn" disabled aria-hidden></button>
         <button class="openSettings emojiBtn" title="Open settings">${emjs.settings}</button>
       </div>
       <div class="content">${page.page}</div>
@@ -74,12 +75,19 @@ const globals = {
     msg.innerHTML = `${emjs[state == 'fail' ? 'cross' : 'sign']} ${text}`;
     setTimeout( () => { msg.classList.remove('animate') }, 3000);
   },
-  openPopup: ({text, action}) => {
+  openPopup: ({text, action, elem}) => {
+    globals.popupReleaseElem = elem;
+    inert.set(qs(globals.settings ? '#settings' : '.current'));
+    inert.remove(qs('#popup'));
     qs('#popup').style.display = 'flex';
     qs('#popup h2').innerHTML = text;
     qs('[data-action="confirm"]').onclick = action;
   },
   closePopup: () => {
+    inert.remove(qs(globals.settings ? '#settings' : '.current'));
+    inert.set(qs('#popup'));
+    globals.popupReleaseElem.focus();
+    globals.popupReleaseElem = null;
     qs('#popup').style.display = 'none';
     qs('[data-action="confirm"]').onclick = null;
   },
@@ -88,6 +96,8 @@ const globals = {
     pageBtn.innerHTML = emoji;
     pageBtn.title = title;
     pageBtn.onclick = onClick;
+    pageBtn.disabled = false;
+    pageBtn.ariaHidden = false;
     pageBtn.style.display = 'block';
   },
   floatingMsg: ({text, button, onClick, pageName, notFixed}) => {
@@ -106,8 +116,11 @@ const globals = {
     }
     if (!content.classList.contains('center')) {
       const div = document.createElement('div');
-      div.style.minHeight = `${elem.getBoundingClientRect().height}px`;
-      div.style.marginTop = '3rem';
+      div.style.cssText = `
+        min-height: ${elem.getBoundingClientRect().height}px;
+        min-width: 1px;
+        margin-top: 2.5rem;
+      `;
       content.append(div);
     }
     return elem;
@@ -172,9 +185,11 @@ window.addEventListener('pageshow', (e) => {
 });
 
 window.addEventListener('load', async () => {
+  document.documentElement.lang = navigator.language;
   await pages.settings.paint({globals, page: qs('#settings > .content')});
   const params = getParams();
   if (!params.settings) inert.set(qs('#settings'));
+  inert.set(qs('#popup'));
 });
 
 window.addEventListener('popstate', (e) => {
@@ -207,7 +222,10 @@ function renderPage(e, back) {
   const params = getParams();
   if (params.settings == 'open') {
     globals.openSettings(null, true);
-    if (globals.pageName !== params.page) hidePage(qs('.current'), params.page);
+    if (globals.pageName !== params.page) {
+      hidePage(qs('.current'), params.page);
+      globals.pageName = params.page;
+    }
     return;
   }
   if (globals.settings) {
@@ -215,7 +233,7 @@ function renderPage(e, back) {
     return globals.closeSettings(back, false);
   }
   const onbrd = localStorage.onboarded == 'true';
-  const page = (params.page && pages[params.page]) ? params.page : 'main';
+  let page = (params.page && pages[params.page]) ? params.page : 'main';
   if (onbrd && page == 'onboarding') page = 'main';
   const rndr = onbrd ? page : 'onboarding';
   globals.closePopup();
@@ -247,11 +265,13 @@ function showPage(prev, current, noAnim) {
   prev.classList.remove('showing', 'current');
   prev.classList.add('hidePrevPage');
   inert.set(prev);
+  inert.remove(current);
   setTimeout(() => {
     current.classList.add('showing');
   }, noAnim ? 0 : 10);
   for (let elem of qsa('.hided')) {
     elem.remove();
+    inert.clearCache(elem);
   }
 }
 
@@ -272,7 +292,7 @@ function hidePage(current, prevName) {
   }
 }
 
-qs('#closeSettings').addEventListener('click', () => globals.closeSettings(true, true));
+qs('#closeSettings').addEventListener('click', () => history.back());
 
 qs('#popup').addEventListener('click', (e) => {
   if (e.target.dataset.action == 'cancel') globals.closePopup();

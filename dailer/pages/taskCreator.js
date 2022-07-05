@@ -13,10 +13,10 @@ export const taskCreator = {
   page: `
     <h3 id="nameTitle">Enter task you will control</h3>
     <input type="text" id="name" placeHolder="Task name">
-    <h3>How important this task?</h3>
-    <select id="priority"></select>
-    <h3>How often you will do this task?</h3>
-    <select id="period"></select>
+    <h3>How important is this task?</h3>
+    <select id="priority" title="Select how important is this task"></select>
+    <h3>How often will you perform this task?</h3>
+    <select id="period" title="Select period for this task - how often or when will you perform this task"></select>
     <h3 id="description" class="hidedUI"></h3>
     <h3 id="dateTitle" class="hidedUI"></h3>
     <input type="date" id="date" class="hidedUI">
@@ -34,7 +34,8 @@ export const taskCreator = {
   `,
   script: onTaskCreator,
   onSettingsUpdate: async ({globals}) => {
-    if (globals.pageInfo && globals.pageInfo.taskAction == 'edit') return;
+    if (!globals.pageInfo) globals.pageInfo = history.state;
+    if (globals.pageInfo.taskAction == 'edit') return;
     const periodsList = await getPeriods(globals);
     const period = qs('#period');
     createOptionsList(period, periodsList);
@@ -115,14 +116,14 @@ async function onTaskCreator({globals}) {
 }
 
 async function asyncDataReceiving({globals, tasks = 1, periods = 1}) {
-  let tasksCount = 0, periodsCount = 0, tasksOver = false, periodsOver = false;
+  let tasksCount = 0, periodsCount = 0, tasksNotOver = true, periodsNotOver = true;
   globals.db.getAll('tasks', () => tasksCount++)
-    .then(() => tasksOver = true);
+    .then(() => tasksNotOver = false);
   globals.db.getAll('periods', () => periodsCount++)
-    .then(() => periodsOver = true);
+    .then(() => periodsNotOver = false);
   while (
-    (tasksCount < tasks || !tasksOver) &&
-    (periodsCount < periods || !periodsOver)
+    (tasksCount < tasks || tasksNotOver) &&
+    (periodsCount < periods || periodsNotOver)
   ) {
     await new Promise((res) => { setTimeout(res, 10) });
   }
@@ -184,12 +185,14 @@ function enableEditButtons(globals, td) {
   qs('#editButtons').style.display = 'block';
   qs('#disable').addEventListener('click', async () => {
     await editTask({
-      globals, id: td.id, field: 'disabled', onConfirm: () => history.back()
+      globals, id: td.id, field: 'disabled', onConfirm: () => history.back(),
+      elem: qs('#disable')
     });
   });
   qs('#delete').addEventListener('click', async () => {
     await editTask({
-      globals, id: td.id, field: 'deleted', onConfirm: () => history.back()
+      globals, id: td.id, field: 'deleted', onConfirm: () => history.back(),
+      elem: qs('#delete')
     });
   });
 }

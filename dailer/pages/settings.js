@@ -48,21 +48,21 @@ export const settings = {
       <h3>Backup your data to be safe and prevent accidental deletion or transfer it to other device or upload your existent backup to this device</h3>
       <button id="uploadData" class="beforeUpload">${emjs.crateDown} Upload existent backup</button>
       <h3 class="beforeUpload">Accepted .dailer files only</h3>
-      <input type="file" accept=".dailer" id="chooseFile">
+      <input type="file" accept=".dailer" id="chooseFile" disabled aria-hidden>
       <progress class="uploadUI"></progress>
       <h3 class="uploadUI">Be patient and don't quit the app before uploading done</h3>
       <h2 class="uploadSuccess emoji">${emjs.sign}</h2>
       <h3 class="uploadSuccess">Upload successfully completed, go back to check the tasks</h3>
       <button id="getData" class="success">${emjs.crateUp} Backup your current data</button>
       <progress class="downloadUI"></progress>
-      <a id="downloadData" class="downloadLink"></a>
+      <a id="downloadData" class="downloadLink" aria-hidden></a>
       <h3>Set up a reminder to create backups periodically. You will able to download backups just from app's main screen</h3>
-      <select id="reminderList"></select>
+      <select id="reminderList" title="Select how often to remind you about creating backups"></select>
       <h3 id="nextRemind"></h3>
       <div id="reminder" class="first"></div>
       <button id="toDebug" class="secondary">${emjs.construction} Open debug page</button>
       <h2>About</h2>
-      <h3>${emjs.label} dailer app, version 1.1.6</h3>
+      <h3>${emjs.label} dailer app, version 1.1.7</h3>
       <h3>${emjs.microscope} Created in 2022</h3>
     `;
     qs('#toPeriodCreator').addEventListener('click', () => {

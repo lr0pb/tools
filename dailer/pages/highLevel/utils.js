@@ -73,6 +73,7 @@ function stateSave(e) {
 }
 
 export function createOptionsList(elem, options) {
+  if (!elem) return;
   elem.innerHTML = '';
   for (let i = 0; i < options.length; i++) {
     const opt = document.createElement('option');
@@ -84,20 +85,51 @@ export function createOptionsList(elem, options) {
   }
 }
 
-const inertElem = document.createElement('div');
+let inertElem = document.createElement('div');
 if (!window.dailerData) window.dailerData = {};
 if ('inert' in inertElem) window.dailerData.inert = true;
 inertElem.remove();
+inertElem = null;
+
+const focusables = [
+  'button:not(:disabled)', 'input:not(:disabled)', '[role="button"]:not([disabled])'
+].join(', ');
 
 export const inert = {
   set(elem) {
     if (!elem) return;
     elem.inert = true;
     if (dailerData.inert) return;
+    elem.ariaHidden = true;
+    let focusableElems = elem.querySelectorAll(focusables);
+    const page = { existentAttributes: new Map() };
+    for (let el of focusableElems) {
+      page.existentAttributes.set(el, {
+        disabled: el.disabled,
+        tabIndex: el.tabIndex
+      });
+      el.disabled = true;
+      el.tabIndex = -1;
+    }
+    inert._cache.set(elem, page);
   },
   remove(elem) {
     if (!elem) return;
     elem.inert = false;
+    if (!dailerData.inert) {
+      elem.ariaHidden = false;
+      const page = inert._cache.get(elem);
+      if (page) for (let [el, saved] of page.existentAttributes) {
+        el.disabled = saved.disabled;
+        el.tabIndex = saved.tabIndex;
+      }
+    }
+    const elemToFocus = elem.querySelector(focusables);
+    elemToFocus.focus();
+  },
+  _cache: new Map(),
+  clearCache(elem) {
     if (dailerData.inert) return;
+    inert._cache.delete(elem);
   }
 };
