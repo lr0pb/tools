@@ -20,7 +20,7 @@ export const periodCreator = {
     <h3>Select the days you need to perform the task</h3>
     <h3>At least one day is required</h3>
     <div>
-      <div class="historyMonth"></div>
+      <div class="historyMonth" focusgroup="horizontal"></div>
     </div>
     <div class="togglerContainer first"></div>
     <h3>When period is over, task will continue period from start</h3>

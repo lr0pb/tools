@@ -48,7 +48,7 @@ const globals = {
     container.innerHTML = `
       <div class="header">
         <h1>${page.header}</h1>
-        <button class="pageBtn emojiBtn" disabled aria-hidden></button>
+        <button class="pageBtn emojiBtn" title="Page button" disabled aria-hidden="true"></button>
         <button class="openSettings emojiBtn" title="Open settings">${emjs.settings}</button>
       </div>
       <div class="content">${page.page}</div>
@@ -64,7 +64,7 @@ const globals = {
       localQs('.openSettings').addEventListener('click', () => globals.openSettings());
     }
     const link = getPageLink(name);
-    if (replaceState) history.replaceState(history.state, '', link);
+    if (replaceState) history.replaceState(history.state || {}, '', link);
     else if (!back) history.pushState(globals.pageInfo || history.state || {}, '', link);
     await page.script({ globals, page: content });
   },

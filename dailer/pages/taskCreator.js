@@ -16,7 +16,7 @@ export const taskCreator = {
     <h3>How important is this task?</h3>
     <select id="priority" title="Select how important is this task"></select>
     <h3>How often will you perform this task?</h3>
-    <select id="period" title="Select period for this task - how often or when will you perform this task"></select>
+    <select id="period" title="Select how often or when will you perform this task"></select>
     <h3 id="description" class="hidedUI"></h3>
     <h3 id="dateTitle" class="hidedUI"></h3>
     <input type="date" id="date" class="hidedUI">
@@ -122,8 +122,8 @@ async function asyncDataReceiving({globals, tasks = 1, periods = 1}) {
   globals.db.getAll('periods', () => periodsCount++)
     .then(() => periodsNotOver = false);
   while (
-    (tasksCount < tasks || tasksNotOver) &&
-    (periodsCount < periods || periodsNotOver)
+    (tasks > tasksCount || tasksNotOver) &&
+    (periods > periodsCount || periodsNotOver)
   ) {
     await new Promise((res) => { setTimeout(res, 10) });
   }

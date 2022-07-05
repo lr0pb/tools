@@ -48,14 +48,14 @@ export const settings = {
       <h3>Backup your data to be safe and prevent accidental deletion or transfer it to other device or upload your existent backup to this device</h3>
       <button id="uploadData" class="beforeUpload">${emjs.crateDown} Upload existent backup</button>
       <h3 class="beforeUpload">Accepted .dailer files only</h3>
-      <input type="file" accept=".dailer" id="chooseFile" disabled aria-hidden>
+      <input type="file" accept=".dailer" id="chooseFile" disabled aria-hidden="true">
       <progress class="uploadUI"></progress>
       <h3 class="uploadUI">Be patient and don't quit the app before uploading done</h3>
       <h2 class="uploadSuccess emoji">${emjs.sign}</h2>
       <h3 class="uploadSuccess">Upload successfully completed, go back to check the tasks</h3>
       <button id="getData" class="success">${emjs.crateUp} Backup your current data</button>
       <progress class="downloadUI"></progress>
-      <a id="downloadData" class="downloadLink" aria-hidden></a>
+      <a id="downloadData" class="downloadLink" aria-hidden="true"></a>
       <h3>Set up a reminder to create backups periodically. You will able to download backups just from app's main screen</h3>
       <select id="reminderList" title="Select how often to remind you about creating backups"></select>
       <h3 id="nextRemind"></h3>
@@ -174,7 +174,9 @@ function getPeriodUsed(id) {
 
 async function uploadData(globals) {
   const chooser = qs('#chooseFile');
+  chooser.disabled = false;
   chooser.addEventListener('change', () => {
+    chooser.disabled = true;
     const file = chooser.files[0];
     if (!file.name.includes('.dailer')) return globals.message({
       state: 'fail', text: 'Wrong file choosed'
