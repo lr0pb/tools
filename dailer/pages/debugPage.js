@@ -1,4 +1,5 @@
 import { qs, emjs, intlDate } from './highLevel/utils.js'
+import { isCustomPeriod } from './highLevel/periods.js'
 
 export const debugPage = {
   header: `${emjs.construction} Debug page`,
@@ -83,7 +84,7 @@ export async function clearDatabase(globals) {
   const list = JSON.parse(localStorage.periodsList);
   const toDelete = []
   for (let item of list) {
-    if (item.startsWith('5')) toDelete.push(item);
+    if (isCustomPeriod(item)) toDelete.push(item);
   }
   for (let item of toDelete) {
     const idx = list.indexOf(item);

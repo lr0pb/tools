@@ -1,7 +1,7 @@
 import { pages } from './pages.js'
 import {
   emjs, qs as localQs, globQs as qs, globQsa as qsa, copyObject, checkForFeatures,
-  isDesctop, inert
+  isDesktop, inert
 } from './pages/highLevel/utils.js'
 import { periods } from './pages/highLevel/periods.js'
 import { paintPeriods } from './pages/settings.js'
@@ -14,7 +14,7 @@ if ('serviceWorker' in navigator && caches) {
 
 if (!window.dailerData) window.dailerData = {};
 checkForFeatures(['inert', 'focusgroup']);
-dailerData.isDesctop = isDesctop();
+dailerData.isDesktop = isDesktop();
 
 const getUrl = () => location.href.toString();
 
@@ -35,7 +35,6 @@ const globals = {
   pageInfo: null,
   settings: false,
   additionalBack: 0,
-  popupReleaseElem: null,
   getPeriods: async () => {
     await globals.db.getAll('periods', (per) => {
       periods[per.id] = per;
@@ -81,20 +80,16 @@ const globals = {
     msg.innerHTML = `${emjs[state == 'fail' ? 'cross' : 'sign']} ${text}`;
     setTimeout( () => { msg.classList.remove('animate') }, 3000);
   },
-  openPopup: ({text, action, elem}) => {
-    globals.popupReleaseElem = elem;
-    elem.blur();
-    inert.remove(qs('#popup'));
-    inert.set(qs(globals.settings ? '#settings' : '.current'));
+  openPopup: ({text, action}) => {
     qs('#popup').style.display = 'flex';
+    inert.set(qs(globals.settings ? '#settings' : '.current'));
+    inert.remove(qs('#popup'));
     qs('#popup h2').innerHTML = text;
     qs('[data-action="confirm"]').onclick = action;
   },
   closePopup: () => {
     inert.remove(qs(globals.settings ? '#settings' : '.current'));
     inert.set(qs('#popup'));
-    if (globals.popupReleaseElem) globals.popupReleaseElem.focus();
-    globals.popupReleaseElem = null;
     qs('#popup').style.display = 'none';
     qs('[data-action="confirm"]').onclick = null;
   },
@@ -166,16 +161,12 @@ const globals = {
 }
 
 function createDb() {
-  if (!globals.db) globals.db = new IDB('dailer', 3, [
-    {
-      name: 'tasks', index: {keyPath: 'id'}
-    }, {
-      name: 'days', index: {keyPath: 'date'}
-    }, {
-      name: 'periods', index: {keyPath: 'id'}
-    }, {
-      name: 'labels', index: {keyPath: 'id'}
-    }
+  if (!globals.db) globals.db = new IDB('dailer', 4, [
+    { name: 'tasks', index: {keyPath: 'id'} },
+    { name: 'days', index: {keyPath: 'date'} },
+    { name: 'periods', index: {keyPath: 'id'} },
+    { name: 'labels', index: {keyPath: 'id'} },
+    { name: 'themes', index: {keyPath: 'id'} },
   ]);
 }
 
@@ -195,8 +186,8 @@ window.addEventListener('load', async () => {
   document.documentElement.lang = navigator.language;
   await pages.settings.paint({globals, page: qs('#settings > .content')});
   const params = getParams();
-  if (!params.settings) inert.set(qs('#settings'));
-  inert.set(qs('#popup'));
+  if (!params.settings) inert.set(qs('#settings'), true);
+  inert.set(qs('#popup'), true);
 });
 
 window.addEventListener('popstate', (e) => {
@@ -287,7 +278,8 @@ function hidePage(current, prevName) {
   const prev = qs(`#${prevName}`);
   if (!prev) {
     if (!qs('#main')) globals.paintPage('main', false, true);
-    return globals.paintPage(prevName, true, false);
+    if (prevName !== 'main') globals.paintPage(prevName, true, false);
+    return;
   }
   prev.classList.remove('hidePrevPage', 'hided');
   prev.classList.add('showing', 'current');

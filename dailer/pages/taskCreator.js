@@ -40,7 +40,7 @@ export const taskCreator = {
       const task = await globals.db.getItem('tasks', id);
       if (!isCustomPeriod(task.periodId)) return;
       const period = await globals.db.getItem('periods', task.periodId);
-      return qs('#period').value = period.title;
+      return qs('#period').children[0].innerHTML = period.title;
     }
     const periodsList = await getPeriods(globals);
     const period = qs('#period');
@@ -193,14 +193,12 @@ function enableEditButtons(globals, td) {
   qs('#editButtons').style.display = 'block';
   qs('#disable').addEventListener('click', async () => {
     await editTask({
-      globals, id: td.id, field: 'disabled', onConfirm: () => history.back(),
-      elem: qs('#disable')
+      globals, id: td.id, field: 'disabled', onConfirm: () => history.back()
     });
   });
   qs('#delete').addEventListener('click', async () => {
     await editTask({
-      globals, id: td.id, field: 'deleted', onConfirm: () => history.back(),
-      elem: qs('#delete')
+      globals, id: td.id, field: 'deleted', onConfirm: () => history.back()
     });
   });
 }

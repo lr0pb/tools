@@ -178,7 +178,7 @@ export async function checkInstall(globals) {
   if (navigator.standalone === undefined && !globals.installPrompt) return;
   const response = await globals.checkPersist();
   if (response === false || localStorage.installed !== 'true') {
-    if (response && dailerData.isDesctop) return;
+    if (response && dailerData.isDesktop) return;
     globals.floatingMsg({
       text: `${emjs.crateDown} To protect your data, install dailer app on your home screen${
         navigator.standalone === false ? ': click Share > Add to home screen' : ''

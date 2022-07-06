@@ -114,7 +114,7 @@ export async function onTaskManageClick({ e, globals, task, page }) {
       globals, id: task.dataset.id, field: 'deleted', onConfirm: () => {
         task.remove();
         if (!page.children.length) showNoTasks(page);
-      }, elem: e.target
+      }
     });
   } else {
     globals.pageInfo = { taskId: task.dataset.id };
@@ -133,7 +133,7 @@ export function showNoTasks(page) {
   `;
 }
 
-export async function editTask({globals, id, field, onConfirm, elem}) {
+export async function editTask({globals, id, field, onConfirm}) {
   const td = await globals.db.getItem('tasks', id);
   globals.openPopup({
     text: `Are you sure to ${field.replace(/\w$/, '')} this task?`,
@@ -150,7 +150,7 @@ export async function editTask({globals, id, field, onConfirm, elem}) {
       if (!globals.pageInfo) globals.pageInfo = {};
       globals.pageInfo.stateChangedTaskId = id;
       onConfirm();
-    }, elem
+    }
   });
 }
 

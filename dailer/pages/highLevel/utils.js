@@ -86,7 +86,7 @@ export function createOptionsList(elem, options) {
 }
 
 export function handleKeyboard(elem, noBubbeling) {
-  if (!dailerData.isDesctop) return;
+  if (!dailerData.isDesktop) return;
   elem.addEventListener('keydown', (e) => {
     if (['Enter', 'Space'].includes(e.code)) {
       if (noBubbeling && e.target !== elem) return;
@@ -125,7 +125,7 @@ export function checkForFeatures(features) {
   elem = null;
 }
 
-export function isDesctop() {
+export function isDesktop() {
   if (navigator.userAgentData) {
     return !navigator.userAgentData.mobile;
   }
@@ -138,40 +138,41 @@ const focusables = [
 ].join(', ');
 
 export const inert = {
-  set(elem) {
+  set(elem, dontSaveFocus) {
     if (!elem) return;
+    const page = {};
+    if (!dontSaveFocus) page.focused = document.activeElement;
     elem.inert = true;
-    if (dailerData.inert) return;
-    elem.ariaHidden = true;
-    let focusableElems = elem.querySelectorAll(focusables);
-    const page = { existentAttributes: new Map() };
-    for (let el of focusableElems) {
-      page.existentAttributes.set(el, {
-        disabled: el.disabled,
-        tabIndex: el.tabIndex
-      });
-      el.disabled = true;
-      el.tabIndex = -1;
+    if (!dailerData.inert) {
+      elem.ariaHidden = true;
+      let focusableElems = elem.querySelectorAll(focusables);
+      page.existentAttributes = new Map();
+      for (let el of focusableElems) {
+        page.existentAttributes.set(el, {
+          disabled: el.disabled,
+          tabIndex: el.tabIndex
+        });
+        el.disabled = true;
+        el.tabIndex = -1;
+      }
     }
     inert._cache.set(elem, page);
   },
   remove(elem) {
     if (!elem) return;
     elem.inert = false;
+    const page = inert._cache.get(elem);
     if (!dailerData.inert) {
       elem.ariaHidden = false;
-      const page = inert._cache.get(elem);
       if (page) for (let [el, saved] of page.existentAttributes) {
         el.disabled = saved.disabled;
         el.tabIndex = saved.tabIndex;
       }
     }
-    const elemToFocus = elem.querySelector(focusables);
+    const elemToFocus = page && page.focused
+    ? page.focused : elem.querySelector(focusables);
     if (elemToFocus) elemToFocus.focus();
   },
   _cache: new Map(),
-  clearCache(elem) {
-    if (dailerData.inert) return;
-    inert._cache.delete(elem);
-  }
+  clearCache(elem) { inert._cache.delete(elem); }
 };
