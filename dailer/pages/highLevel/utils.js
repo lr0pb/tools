@@ -90,9 +90,8 @@ export function handleKeyboard(elem, noBubbeling) {
   elem.addEventListener('keydown', (e) => {
     if (['Enter', 'Space'].includes(e.code)) {
       e.preventDefault();
-      const actionElem = noBubbeling ? elem : e.target;
-      if (['INPUT', 'BUTTON'].includes(actionElem.tagName)) return;
-      actionElem.click();
+      if (noBubbeling && e.target !== elem) return;
+      e.target.click();
     }
   });
 }

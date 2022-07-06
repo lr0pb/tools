@@ -35,7 +35,7 @@ async function renderPage({globals, page}) {
     'Used by Cache storage': convertBytes(memory.usageDetails.caches, 'kb'),
     'Used by IndexedDb': convertBytes(memory.usageDetails.indexedDB, 'kb'),
     'First day ever': intlDate(Number(localStorage.firstDayEver)),
-    'Is reminded': localStorage.reminded,
+    'Was reminder used': localStorage.reminded,
     'Periods list': localStorage.periodsList,
     'Tasks to additional update': JSON.parse(localStorage.updateTasksList).length,
     'Days amount': days.length,
@@ -46,6 +46,7 @@ async function renderPage({globals, page}) {
     'Network connection type': navigator.connection
     ? navigator.connection.effectiveType : 'no data',
     'Is online': navigator.onLine,
+    'dailerData': JSON.stringify(dailerData)
   };
   const container = qs('#dataContainer');
   for (let title in data) {
