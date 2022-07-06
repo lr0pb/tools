@@ -1,5 +1,5 @@
 import { renderToggler, toggleFunc, getTextDate } from './highLevel/taskThings.js'
-import { emjs, globQs as qs, createOptionsList } from './highLevel/utils.js'
+import { emjs, globQs as qs, createOptionsList, togglableElement } from './highLevel/utils.js'
 import { getToday, oneDay, isCustomPeriod } from './highLevel/periods.js'
 import { uploading } from './highLevel/uploadBackup.js'
 import { getData } from './highLevel/createBackup.js'
@@ -57,12 +57,14 @@ export const settings = {
       <progress class="downloadUI"></progress>
       <a id="downloadData" class="downloadLink" aria-hidden="true"></a>
       <h3>Set up a reminder to create backups periodically. You will able to download backups just from app's main screen</h3>
-      <select id="reminderList" title="Select how often to remind you about creating backups"></select>
-      <h3 id="nextRemind"></h3>
+      <div id="reminderInfo">
+        <select id="reminderList" title="Select how often to remind you about creating backups"></select>
+        <h3 id="nextRemind">Next remind</h3>
+      </div>
       <div id="reminder" class="first"></div>
       <button id="toDebug" class="secondary">${emjs.construction} Open debug page</button>
       <h2>About</h2>
-      <h3>${emjs.label} dailer app, version 1.1.8</h3>
+      <h3>${emjs.label} dailer app, version 1.1.9</h3>
       <h3>${emjs.microscope} Created in 2022</h3>
     `;
     qs('#toPeriodCreator').addEventListener('click', () => {
@@ -79,6 +81,7 @@ export const settings = {
       link.click();
     });
     const value = localStorage.remindValue ? 1 : 0;
+    togglableElement(qs('#reminderInfo'), value ? 'showing' : 'hided');
     renderToggler({
       name: `${emjs.alarmClock} Remind me`, id: 'reminder', buttons: [{
         emoji: emjs[value ? 'sign' : 'blank'],
@@ -223,7 +226,7 @@ function onReminderClick({e, elem, globals}) {
     } else onRemindIdChange(globals, remindId);
   } else {
     delete localStorage.remindValue;
-    qs('#nextRemind').style.display = 'none';
+    qs('#reminderInfo').setStyle('hided');
     globals.message({ state: 'success', text: 'Reminder was removed' });
   }
 }
@@ -233,7 +236,7 @@ function onRemindIdChange(globals, remindId) {
   localStorage.nextRemind = getToday() + Number(localStorage.remindValue);
   localStorage.reminded = 'false';
   qs('#nextRemind').innerHTML = getNextRemindText();
-  qs('#nextRemind').style.display = 'block';
+  qs('#reminderInfo').setStyle('showing');
   globals.message({
     state: 'success', text: `Now you will get reminders ${reminderList[remindId].title}`
   });

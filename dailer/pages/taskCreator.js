@@ -35,7 +35,13 @@ export const taskCreator = {
   script: onTaskCreator,
   onSettingsUpdate: async ({globals}) => {
     if (!globals.pageInfo) globals.pageInfo = history.state;
-    if (globals.pageInfo.taskAction == 'edit') return;
+    if (globals.pageInfo.taskAction == 'edit') {
+      const id = globals.pageInfo.taskId;
+      const task = await globals.db.getItem('tasks', id);
+      if (!isCustomPeriod(task.periodId)) return;
+      const period = await globals.db.getItem('periods', task.periodId);
+      return qs('#period').value = period.title;
+    }
     const periodsList = await getPeriods(globals);
     const period = qs('#period');
     createOptionsList(period, periodsList);

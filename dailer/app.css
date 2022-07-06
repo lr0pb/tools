@@ -242,7 +242,6 @@ body, .content, h1, h2, h3, h4, p, button {
 
 h1, h4 {
   font-size: 6em;
-  transition: transform var(--normalAnim);
 }
 h2 {
   font-size: 4.9em;
@@ -377,19 +376,14 @@ button:disabled, [disabled] {
   flex-direction: row;
   margin: 0 0 2.5rem;
 }
-.first {
-  margin-top: 2.5rem;
-}
 .task > div {
   margin: 1rem auto 2rem 2rem;
   text-align: left;
 }
-.task h2 {
-  margin: 1.5rem auto 0 1rem;
-}
-.task > :last-child {
-  margin-right: 2rem;
-}
+.task h2 { margin: 1.5rem auto 0 1rem; }
+.task > :last-child { margin-right: 2rem; }
+.first { margin-top: 2.5rem; }
+
 .customBgContainer .task {
   --blur: 12px;
   -webkit-backdrop-filter: blur(var(--blur));
@@ -451,7 +445,7 @@ progress {
   cursor: progress;
 }
 .pageBtn, .hidedUI, #editButtons, #popup, input[type="file"],
-.uploadUI, .uploadSuccess, .downloadUI, .downloadLink, #nextRemind,
+.uploadUI, .uploadSuccess, .downloadUI, .downloadLink,
 .historyMonth > [data-used="false"] {
   display: none;
 }
@@ -484,8 +478,10 @@ progress {
 #history .historyMonth > *:last-child {
   background-color: var(--marker);
 }
-.dayTitle {
-  opacity: 0;
+.togglableElement > *:first-child {
+  transition: transform var(--normalAnim);
+}
+.togglableElement > *:last-child {
   transition: opacity var(--normalAnim);
 }
 

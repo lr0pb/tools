@@ -1,12 +1,11 @@
 import { periods } from './highLevel/periods.js'
 import { renderToggler, toggleFunc } from './highLevel/taskThings.js'
 import {
-  qs, qsa, globQs, globQsa, emjs, safeDataInteractions, handleKeyboard
+  qs, qsa, globQs, globQsa, emjs, safeDataInteractions, handleKeyboard, togglableElement
 } from './highLevel/utils.js'
 import { paintPeriods } from './settings.js'
 
 const maxDays = 7;
-const transform = 'translateY(3rem)';
 
 export const periodCreator = {
   header: `${emjs.calendar} <span id="periodAction">Create</span> period`,
@@ -39,10 +38,7 @@ export const periodCreator = {
 
 function toggleDays(value) {
   const hm = qs('.historyMonth:last-child');
-  for (let elem of hm.children) {
-    elem.children[0].style.transform = value ? 'none' : transform;
-    elem.children[1].style.opacity = value;
-  }
+  for (let elem of hm.children) { elem.toggleStyle(); }
 }
 
 async function onPeriodCreator({globals, page}) {
@@ -130,15 +126,16 @@ function appendDays(days) {
     const elem = document.createElement('div');
     elem.dataset.used = 'true';
     elem.dataset.value = days ? days[i] : '0';
-    elem.disabled = Boolean(days);
+    elem.disabled = days ? true : false;
     if (!days) {
       elem.role = 'button';
       elem.tabIndex = dailerData.focusgroup ? (i == 0 ? 0 : -1) : 0;
     }
     elem.innerHTML += `
-      <h4 style="transform: ${transform};">${days ? emjs[days[i] ? 'sign' : 'blank'] : emjs.blank}</h4>
-      <h3 class="dayTitle">${dayNames[i]}</h3>
+      <h4>${days ? emjs[days[i] ? 'sign' : 'blank'] : emjs.blank}</h4>
+      <h3>${dayNames[i]}</h3>
     `;
+    togglableElement(elem, 'hided');
     hm.append(elem);
   }
   if (days) return;
