@@ -35,7 +35,7 @@ export function renderToggler({
       <button
         data-action="${i}" class="emojiBtn"
         ${disabled ? 'disabled' : ''} title="${btn.title || 'Toggle value'}"
-        tabIndex="${dailerData.focusgroup ? (noChilds && !onBodyClick ? 0 : -1) : 0}"
+        tabIndex="${dailerData.focusgroup ? (noChilds && !onBodyClick && i == 0 ? 0 : -1) : 0}"
       >${btn.emoji}</button>
     `;
   });
@@ -88,8 +88,10 @@ export function renderTask({type, globals, td, page, onBodyClick, periods}) {
       } | ${priorities[td.priority].title}</p>
     </div>
     ${td.disabled ? '' : `
-      <button data-action="edit" class="emojiBtn" title="Edit task">${emjs.pen}</button>
-      <button data-action="delete" class="emojiBtn" title="Delete task">${emjs.trashCan}</button>
+      <button data-action="edit" class="emojiBtn" title="Edit task"
+        tabIndex="${dailerData.focusgroup ? -1 : 0}">${emjs.pen}</button>
+      <button data-action="delete" class="emojiBtn" title="Delete task"
+        tabIndex="${dailerData.focusgroup ? -1 : 0}">${emjs.trashCan}</button>
     `}
    `;
   task.addEventListener('click', async (e) => {

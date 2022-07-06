@@ -35,7 +35,7 @@ export const settings = {
     page.innerHTML = `
       <h2 data-section="periods">Periods</h2>
       <h3>Select up to ${periodsCount} periods that will be shown in Period choise drop down list of task</h3>
-      <div id="periodsContainer" class="first doubleColumns" focusgroup="auto vertical"></div>
+      <div id="periodsContainer" class="first doubleColumns" focusgroup></div>
       <h3>Create your own period for specific task performance</h3>
       <button id="toPeriodCreator">${emjs.calendar} Create custom period</button>
       <!--<h2 data-section="storage">Protect your data</h2>

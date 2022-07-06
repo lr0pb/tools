@@ -61,7 +61,7 @@ const globals = {
     const content = container.querySelector('.content');
     content.className = `content ${page.styleClasses || ''}`;
     if (page.styleClasses && page.styleClasses.includes('doubleColumns')) {
-      content.focusgroup = 'auto vertical';
+      content.focusgroup = 'horizontal';
     }
     showPage(qs('.current'), container, noAnim);
     if (page.noSettings) {
@@ -83,6 +83,7 @@ const globals = {
   },
   openPopup: ({text, action, elem}) => {
     globals.popupReleaseElem = elem;
+    elem.blur();
     inert.remove(qs('#popup'));
     inert.set(qs(globals.settings ? '#settings' : '.current'));
     qs('#popup').style.display = 'flex';
@@ -227,11 +228,11 @@ window.addEventListener('beforeinstallprompt', async (e) => {
 function renderPage(e, back) {
   const params = getParams();
   if (params.settings == 'open') {
-    globals.openSettings(null, true);
     if (globals.pageName !== params.page) {
       hidePage(qs('.current'), params.page);
       globals.pageName = params.page;
     }
+    globals.openSettings(null, true);
     return;
   }
   if (globals.settings) {

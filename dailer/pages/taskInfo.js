@@ -24,6 +24,10 @@ export const taskInfo = {
     qs('.itemsHolder').innerHTML = '';
     const iha = isHistoryAvailable(td);
     renderItemsHolder(td, periods, iha);
+  },
+  onSettingsUpdate: ({globals}) => {
+    if (!globals.pageInfo) globals.pageInfo = history.state;
+    else Object.assign(globals.pageInfo, history.state);
   }
 };
 

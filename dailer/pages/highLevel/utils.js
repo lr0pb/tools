@@ -89,7 +89,10 @@ export function handleKeyboard(elem, noBubbeling) {
   if (!dailerData.isDesctop) return;
   elem.addEventListener('keydown', (e) => {
     if (['Enter', 'Space'].includes(e.code)) {
-      (noBubbeling ? elem : e.target).click();
+      e.preventDefault();
+      const actionElem = noBubbeling ? elem : e.target;
+      if (['INPUT', 'BUTTON'].includes(actionElem.tagName)) return;
+      actionElem.click();
     }
   });
 }
