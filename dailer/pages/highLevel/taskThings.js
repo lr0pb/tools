@@ -20,13 +20,14 @@ export function renderToggler({
   // but either this prop gives understand to enable default toggle function
   const elem = document.createElement('div');
   elem.className = `task ${first ? 'first' : ''}`;
+  elem.dataset.id = id;
+  const noChilds = page.children.length == 0;
   if (onBodyClick) {
     elem.role = 'button';
-    elem.tabIndex = dailerData.focusgroup ? (page.children.length == 0 ? 0 : -1) : 0;
-    task.focusgroup = 'extend horizontal';
+    elem.tabIndex = dailerData.focusgroup ? (noChilds ? 0 : -1) : 0;
     handleKeyboard(elem, true);
   }
-  elem.dataset.id = id;
+  elem.focusgroup = 'extend horizontal';
   let buttonsString = ``;
   if (toggler) buttons.push({ emoji: toggler, func: toggleFunc });
   buttons.forEach((btn, i) => {
@@ -34,7 +35,7 @@ export function renderToggler({
       <button
         data-action="${i}" class="emojiBtn"
         ${disabled ? 'disabled' : ''} title="${btn.title || 'Toggle value'}"
-        tabIndex="${dailerData.focusgroup ? -1 : 0}"
+        tabIndex="${dailerData.focusgroup ? (noChilds && !onBodyClick ? 0 : -1) : 0}"
       >${btn.emoji}</button>
     `;
   });
