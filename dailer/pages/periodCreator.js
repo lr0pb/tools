@@ -133,7 +133,7 @@ function appendDays(days) {
     elem.disabled = Boolean(days);
     if (!days) {
       elem.role = 'button';
-      elem.tabIndex = ${dailerData.focusgroup ? (i == 0 ? 0 : -1) : 0};
+      elem.tabIndex = dailerData.focusgroup ? (i == 0 ? 0 : -1) : 0;
     }
     elem.innerHTML += `
       <h4 style="transform: ${transform};">${days ? emjs[days[i] ? 'sign' : 'blank'] : emjs.blank}</h4>
