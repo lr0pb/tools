@@ -316,9 +316,7 @@ async function renderPage(e, back) {
   }
   const rndr = getRenderPage(params);
   globals.closePopup();
-  back
-  ? hidePage(qs('.current'), rndr);
-  : await paintFirstPage(rndr);
+  back ? hidePage(qs('.current'), rndr) : await paintFirstPage(rndr);
 }
 
 function getParams(url) {
