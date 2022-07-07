@@ -41,7 +41,7 @@ const globals = {
     });
     return periods;
   },
-  paintPage: async (name, back, replaceState, noAnim) => {
+  paintPage: async (name, dontPushHistory, replaceState, noAnim) => {
     globals.pageName = name;
     const page = pages[name];
     const container = document.createElement('div');
@@ -70,15 +70,17 @@ const globals = {
     }
     const link = getPageLink(name);
     if (navigation) {
-      if (!replaceState || back) return;
+      let historyAction = null;
+      if (!dontPushHistory) historyAction = 'push';
+      if (replaceState) historyAction = 'replace';
+      if (!historyAction) return;
       navigation.navigate(link, {
         state: globals.pageInfo || navigation.currentEntry.getState() || {},
-        history: replaceState ? 'push' : 'replace',
-        info: 'paintPage call'
+        history: historyAction, info: {call: 'paintPage'}
       });
     } else {
       if (replaceState) history.replaceState(history.state || {}, '', link);
-      else if (!back) history.pushState(globals.pageInfo || history.state || {}, '', link);
+      else if (!dontPushHistory) history.pushState(globals.pageInfo || history.state || {}, '', link);
     }
     await page.script({ globals, page: content });
   },
@@ -145,7 +147,7 @@ const globals = {
     if (!dontPushHistory) {
       navigation
       ? navigation.navigate(getUrl() + '&settings=open', {
-          state: {settings: true}, history: 'push'
+          state: {settings: true}, history: 'push', info: {call: 'settings'}
         })
       : history.pushState({settings: true}, '', getUrl() + '&settings=open');
     }
@@ -223,7 +225,10 @@ window.addEventListener('popstate', async (e) => {
 });
 
 navigation.addEventListener('navigate', (e) => {
-  if (e.navigationType !== 'traverse' || e.info === 'paintPage call') return;
+  const info = e.info || {};
+  if (
+    e.navigationType !== 'traverse' || ['paintPage', 'settings'].includes(info.call)
+  ) return;
   const idx = navigation.currentEntry.index;
   const rawDiff = idx - e.destination.index;
   let diff = Math.abs(rawDiff);
@@ -264,7 +269,7 @@ window.addEventListener('beforeinstallprompt', async (e) => {
 
 async function startApp() {
   const appHistory = navigation.entries();
-  if (appHistory.length == 1) {
+  if (appHistory.length <= 1) {
     const params = getParams();
     const rndr = getRenderPage(params);
     await paintFirstPage(rndr);
