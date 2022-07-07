@@ -1,4 +1,4 @@
-import { qs, emjs } from './highLevel/utils.js'
+import { qs, emjs, syncGlobals } from './highLevel/utils.js'
 import { renderTask, showNoTasks } from './highLevel/taskThings.js'
 
 export const planCreator = {
@@ -13,7 +13,7 @@ export const planCreator = {
   onPageShow: async ({globals, page}) => {
     await onBackupUploaded({globals, page});
     const periods = await globals.getPeriods();
-    if (!globals.pageInfo) globals.pageInfo = history.state;
+    if (!globals.pageInfo) syncGlobals(globals);
     let id = globals.pageInfo.stateChangedTaskId;
     if (id) {
       const elem = qs(`[data-id="${id}"]`);
@@ -127,7 +127,8 @@ async function renderSortedTasksList({globals, page, isBadTask, sort}) {
 }
 
 async function onBackupUploaded({globals, page}) {
-  if (!globals.pageInfo || (globals.pageInfo && !globals.pageInfo.backupUploaded)) return;
+  if (!globals.pageInfo) syncGlobals(globals);
+  if (!globals.pageInfo.backupUploaded) return;
   const args = {
     globals, page,
     isBadTask: meta[globals.pageName].bad,

@@ -1,7 +1,8 @@
 import { periods } from './highLevel/periods.js'
 import { renderToggler, toggleFunc } from './highLevel/taskThings.js'
 import {
-  qs, qsa, globQs, globQsa, emjs, safeDataInteractions, handleKeyboard, togglableElement
+  qs, qsa, globQs, globQsa, emjs, safeDataInteractions, handleKeyboard,
+  togglableElement, syncGlobals
 } from './highLevel/utils.js'
 import { paintPeriods } from './settings.js'
 
@@ -43,7 +44,7 @@ function toggleDays(value) {
 
 async function onPeriodCreator({globals, page}) {
   qs('#back').addEventListener('click', () => history.back());
-  if (!globals.pageInfo) globals.pageInfo = history.state;
+  if (!globals.pageInfo) syncGlobals(globals);
   const isEdit = globals.pageInfo && globals.pageInfo.periodAction == 'edit';
   let per;
   if (isEdit) {
@@ -126,7 +127,7 @@ function appendDays(days) {
     const elem = document.createElement('div');
     elem.dataset.used = 'true';
     elem.dataset.value = days ? days[i] : '0';
-    elem.disabled = days ? true : false;
+    if (days) elem.setAttribute('disabled', '');
     if (!days) {
       elem.role = 'button';
       elem.tabIndex = dailerData.focusgroup ? (i == 0 ? 0 : -1) : 0;

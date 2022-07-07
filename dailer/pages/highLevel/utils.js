@@ -60,16 +60,23 @@ export const emjs = {
 };
 
 export function safeDataInteractions(elems) {
+  const state = navigation
+  ? navigation.currentEntry.getState()
+  : history.state || {};
   for (let elem of elems) {
-    if (history.state && history.state[elem]) qs(`#${elem}`).value = history.state[elem];
+    if (state[elem]) qs(`#${elem}`).value = state[elem];
     qs(`#${elem}`).addEventListener('input', stateSave);
   }
 }
 
 function stateSave(e) {
-  const state = copyObject(history.state);
+  const state = navigation
+  ? navigation.currentEntry.getState()
+  : copyObject(history.state);
   state[e.target.id] = e.target.value;
-  history.replaceState(state, '', location.href);
+  navigation
+  ? navigation.updateCurrentEntry({ state })
+  : history.replaceState(state, '', location.href);
 }
 
 export function createOptionsList(elem, options) {
@@ -158,7 +165,7 @@ export const inert = {
     }
     inert._cache.set(elem, page);
   },
-  remove(elem) {
+  remove(elem, elemToFocus) {
     if (!elem) return;
     elem.inert = false;
     const page = inert._cache.get(elem);
@@ -169,10 +176,18 @@ export const inert = {
         el.tabIndex = saved.tabIndex;
       }
     }
-    const elemToFocus = page && page.focused
+    if (!elemToFocus) elemToFocus = page && page.focused
     ? page.focused : elem.querySelector(focusables);
     if (elemToFocus) elemToFocus.focus();
   },
   _cache: new Map(),
   clearCache(elem) { inert._cache.delete(elem); }
 };
+
+export function syncGlobals(globals) {
+  if (!globals.pageInfo) globals.pageInfo = {};
+  const state = navigation
+  ? (dailerData.forcedStateEntry || navigation.currentEntry).getState()
+  : copyObject(history.state);
+  Object.assign(globals.pageInfo, state);
+}

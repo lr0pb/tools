@@ -5,7 +5,7 @@ import {
   priorities, editTask, setPeriodTitle, renderToggler, toggleFunc
 } from './highLevel/taskThings.js'
 import {
-  qs, emjs, copyObject, safeDataInteractions, createOptionsList
+  qs, emjs, copyObject, safeDataInteractions, createOptionsList, syncGlobals
 } from './highLevel/utils.js'
 
 export const taskCreator = {
@@ -34,7 +34,7 @@ export const taskCreator = {
   `,
   script: onTaskCreator,
   onSettingsUpdate: async ({globals}) => {
-    if (!globals.pageInfo) globals.pageInfo = history.state;
+    if (!globals.pageInfo) syncGlobals(globals);
     if (globals.pageInfo.taskAction == 'edit') {
       const id = globals.pageInfo.taskId;
       const task = await globals.db.getItem('tasks', id);
@@ -90,7 +90,7 @@ async function onTaskCreator({globals}) {
   qs('#period').addEventListener('change', async (e) => await onPeriodChange(e, globals));
   qs('#date').min = convertDate(Date.now());
   qs('#date').addEventListener('change', onDateChange);
-  if (!globals.pageInfo) globals.pageInfo = history.state;
+  if (!globals.pageInfo) syncGlobals(globals);
   const isEdit = globals.pageInfo && globals.pageInfo.taskAction == 'edit';
   let td;
   if (isEdit) {

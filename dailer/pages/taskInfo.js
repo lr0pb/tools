@@ -2,7 +2,7 @@ import {
   getToday, convertDate, oneDay, isCustomPeriod
 } from './highLevel/periods.js'
 import { priorities, getTextDate } from './highLevel/taskThings.js'
-import { qs, emjs, getLast, intlDate } from './highLevel/utils.js'
+import { qs, emjs, getLast, intlDate, syncGlobals } from './highLevel/utils.js'
 
 export const taskInfo = {
   header: `${emjs.oldPaper} Task info`,
@@ -14,7 +14,7 @@ export const taskInfo = {
   `,
   script: renderTaskInfo,
   onPageShow: async ({globals, page}) => {
-    if (!globals.pageInfo) globals.pageInfo = history.state;
+    if (!globals.pageInfo) syncGlobals(globals);
     else Object.assign(globals.pageInfo, history.state);
     if (globals.pageInfo.stateChangedTaskId) qs('#edit').style.display = 'none';
     if (!globals.pageInfo.dataChangedTaskId) return;
@@ -25,15 +25,12 @@ export const taskInfo = {
     const iha = isHistoryAvailable(td);
     renderItemsHolder(td, periods, iha);
   },
-  onSettingsUpdate: ({globals}) => {
-    if (!globals.pageInfo) globals.pageInfo = history.state;
-    else Object.assign(globals.pageInfo, history.state);
-  }
+  onSettingsUpdate: ({globals}) => { syncGlobals(globals); }
 };
 
 async function renderTaskInfo({globals, page}) {
   qs('#back').addEventListener('click', () => history.back());
-  if (!globals.pageInfo) globals.pageInfo = history.state;
+  if (!globals.pageInfo) syncGlobals(globals);
   const task = await globals.db.getItem('tasks', globals.pageInfo.taskId);
   const periods = await globals.getPeriods();
   if (task.disabled || task.deleted) {
