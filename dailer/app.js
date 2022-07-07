@@ -70,7 +70,7 @@ const globals = {
     }
     const link = getPageLink(name);
     if (navigation) {
-      if (!replaceState && back) return;
+      if (!replaceState || back) return;
       navigation.navigate(link, {
         state: globals.pageInfo || navigation.currentEntry.getState() || {},
         history: replaceState ? 'push' : 'replace',
