@@ -73,8 +73,7 @@ const globals = {
       let historyAction = null;
       if (!dontPushHistory) historyAction = 'push';
       if (replaceState) historyAction = 'replace';
-      if (!historyAction) return;
-      navigation.navigate(link, {
+      if (historyAction) navigation.navigate(link, {
         state: globals.pageInfo || navigation.currentEntry.getState() || {},
         history: historyAction, info: {call: 'paintPage'}
       });
