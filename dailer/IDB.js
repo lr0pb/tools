@@ -53,7 +53,7 @@ export default class IDB {
 * @item - object e.g. {title: 'title', author: 'name', data: new ArrayBuffer(32)}
 */
   async setItem(store, item) {
-    if (typeof store != 'string' || typeof item != 'object') return this.wrongArguments('setItem');
+    if (typeof store != 'string' || typeof item != 'object') return IDB.wrongArguments('setItem');
     await this.isComplete();
     const check = this.checkStore(store);
     if (!check) return;
@@ -70,7 +70,7 @@ export default class IDB {
     return this;
   }
   async getItem(store, title) {
-    if (typeof store != 'string' || !title) return this.wrongArguments('getItem');
+    if (typeof store != 'string' || !title) return IDB.wrongArguments('getItem');
     await this.isComplete();
     const check = this.checkStore(store);
     if (!check) return;
@@ -90,7 +90,7 @@ export default class IDB {
 * @onData(item) - async function that calls every time when new store item is received
 */
   async getAll(store, onData) {
-    if (typeof store != 'string' || (onData && typeof onData != 'function')) return this.wrongArguments('getAll');
+    if (typeof store != 'string' || (onData && typeof onData != 'function')) return IDB.wrongArguments('getAll');
     await this.isComplete();
     const check = this.checkStore(store);
     if (!check) return;
@@ -115,7 +115,7 @@ export default class IDB {
     return result;
   }
   async deleteItem(store, title) {
-    if (typeof store != 'string' || !title) return this.wrongArguments('deleteItem');
+    if (typeof store != 'string' || !title) return IDB.wrongArguments('deleteItem');
     await this.isComplete();
     const check = this.checkStore(store);
     if (!check) return;

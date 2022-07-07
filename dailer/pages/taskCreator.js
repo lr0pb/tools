@@ -5,7 +5,7 @@ import {
   priorities, editTask, setPeriodTitle, renderToggler, toggleFunc
 } from './highLevel/taskThings.js'
 import {
-  qs, emjs, copyObject, safeDataInteractions, createOptionsList, syncGlobals
+  qs, emjs, copyObject, safeDataInteractions, createOptionsList, syncGlobals, updateState
 } from './highLevel/utils.js'
 
 export const taskCreator = {
@@ -34,7 +34,7 @@ export const taskCreator = {
   `,
   script: onTaskCreator,
   onSettingsUpdate: async ({globals}) => {
-    if (!globals.pageInfo) syncGlobals(globals);
+    syncGlobals(globals);
     if (globals.pageInfo.taskAction == 'edit') {
       const id = globals.pageInfo.taskId;
       const task = await globals.db.getItem('tasks', id);
@@ -46,7 +46,7 @@ export const taskCreator = {
     const period = qs('#period');
     createOptionsList(period, periodsList);
     for (let per of periodsList) {
-      if (per.id == history.state.lastPeriodValue) {
+      if (per.id == globals.pageInfo.lastPeriodValue) {
         period.value = per.id;
         break;
       }
@@ -90,7 +90,7 @@ async function onTaskCreator({globals}) {
   qs('#period').addEventListener('change', async (e) => await onPeriodChange(e, globals));
   qs('#date').min = convertDate(Date.now());
   qs('#date').addEventListener('change', onDateChange);
-  if (!globals.pageInfo) syncGlobals(globals);
+  syncGlobals(globals);
   const isEdit = globals.pageInfo && globals.pageInfo.taskAction == 'edit';
   let td;
   if (isEdit) {
@@ -220,7 +220,7 @@ async function onPeriodChange(e, globals) {
   if (value == '00') {
     return globals.openSettings('periods');
   }
-  history.state.lastPeriodValue = value;
+  updateState({lastPeriodValue: value});
   const date = qs('#date');
   date.value = '';
   date.removeAttribute('max');

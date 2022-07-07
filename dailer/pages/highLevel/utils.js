@@ -70,13 +70,9 @@ export function safeDataInteractions(elems) {
 }
 
 function stateSave(e) {
-  const state = navigation
-  ? navigation.currentEntry.getState()
-  : copyObject(history.state);
+  const state = {};
   state[e.target.id] = e.target.value;
-  navigation
-  ? navigation.updateCurrentEntry({ state })
-  : history.replaceState(state, '', location.href);
+  updateState(state);
 }
 
 export function createOptionsList(elem, options) {
@@ -190,4 +186,17 @@ export function syncGlobals(globals) {
   ? (dailerData.forcedStateEntry || navigation.currentEntry).getState()
   : copyObject(history.state);
   Object.assign(globals.pageInfo, state);
+}
+
+export function updateState(updatedStateEntries) {
+  const state = navigation
+  ? navigation.currentEntry.getState()
+  : copyObject(history.state);
+  if (!state) state = {};
+  for (let key in updatedStateEntries) {
+    state[key] = updatedStateEntries[key];
+  }
+  navigation
+  ? navigation.updateCurrentEntry({ state })
+  : history.replaceState(state, '', location.href);
 }

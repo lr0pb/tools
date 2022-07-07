@@ -229,9 +229,10 @@ function instantPromise() {
 
 navigation.addEventListener('navigate', (e) => {
   const info = e.info || {};
-  if (['paintPage', 'settings'].includes(info.call)) {
+  /*if (['paintPage', 'settings'].includes(info.call)) {
     return e.transitionWhile(instantPromise());
-  }
+  }*/
+  console.log(e.navigationType);
   if (e.navigationType !== 'traverse') {
     return e.transitionWhile(instantPromise());
   }
