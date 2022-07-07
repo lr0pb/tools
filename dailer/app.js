@@ -224,11 +224,17 @@ window.addEventListener('popstate', async (e) => {
   }
 });
 
+function instantPromise() {
+  return new Promise((res) => { res() });
+}
+
 navigation.addEventListener('navigate', (e) => {
   const info = e.info || {};
   if (
     e.navigationType !== 'traverse' || ['paintPage', 'settings'].includes(info.call)
-  ) return;
+  ) {
+    return e.transitionWhile(instantPromise());
+  }
   const idx = navigation.currentEntry.index;
   const rawDiff = idx - e.destination.index;
   let diff = Math.abs(rawDiff);
@@ -252,6 +258,7 @@ navigation.addEventListener('navigate', (e) => {
       globals.additionalBack = 0;
     }
   }
+  e.transitionWhile(instantPromise());
 });
 
 window.addEventListener('appinstalled', () => {
