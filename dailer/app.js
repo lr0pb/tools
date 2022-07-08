@@ -260,9 +260,9 @@ async function onTraverseNavigation(e) {
   const currentParams = getParams(navigation.currentEntry.url);
   const params = getParams(e.destination.url);
   const settings = currentParams.settings || params.settings;
-  const appHistory = navigation.entries();
+  /*const appHistory = navigation.entries();
   const calcIndex = idx - (1 + 0) * dir;
-  const calcEntry = appHistory[calcIndex];
+  const calcEntry = appHistory[calcIndex];*/
   console.log(
     'from index:', idx, '\n',
     'to index:', e.destination.index, '\n',
@@ -271,8 +271,8 @@ async function onTraverseNavigation(e) {
     'onBack:', globals.onBack ? true : false, '\n',
     'additionalBack:', globals.additionalBack, '\n',
     'settings:', params.settings, '\n',
-    'calculated index:', calcIndex, '\n',
-    'calculated url:', calcEntry.url,
+    /*'calculated index:', calcIndex, '\n',
+    'calculated url:', calcEntry.url,*/
   );
   if (dir === -1 && globals.onBack) {
     globals.onBack();
