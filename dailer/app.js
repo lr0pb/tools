@@ -265,7 +265,7 @@ async function onTraverseNavigation(e) {
   const calcEntry = appHistory[calcIndex];
   console.log(
     'from index:', idx, '\n',
-    'to index': e.destination.index, '\n',
+    'to index:', e.destination.index, '\n',
     'abs delta:', diff, '\n',
     'direction:', dir == -1 ? 'backward' : 'forward', '\n'
     'onBack:', globals.onBack ? true : false, '\n',
