@@ -246,7 +246,7 @@ if (navigation) navigation.addEventListener('navigate', (e) => {
   if (!e.canIntercept) return;
   console.log('traverse navigation proccessing');
   e.intercept({
-    handler: async (e) => await onTraverseNavigation(e)
+    handler: async (e) => { await onTraverseNavigation(e) }
   });
 });
 
