@@ -238,15 +238,14 @@ if (navigation) navigation.addEventListener('navigate', (e) => {
     console.log('instantPromise coz internal call');
     return e.transitionWhile(instantPromise());
   }
-  if (e.navigationType !== 'traverse') {
+  if (e.navigationType !== 'traverse' || !e.canIntercept) {
     console.log('instantPromise coz non traverse navigation');
     return e.transitionWhile(instantPromise());
   }
   console.log('traverse navigation proccessing');
-  e.transitionWhile(new Promise(async (res) => {
-    await onTraverseNavigation(e);
-    res();
-  }));
+  e.intercept({
+    handler: async (e) => await onTraverseNavigation(e)
+  });
 });
 
 async function onTraverseNavigation(e) {
