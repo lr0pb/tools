@@ -263,27 +263,25 @@ async function onTraverseNavigation(e) {
     'direction:', dir == -1 ? 'backward' : 'forward'
   );
   const params = getParams(e.destination.url);
-  dir === -1
-  ? hidePage(qs('.current'), params.page)
-  : showPage(qs('.current'), qs(`#${params.page}`), false, true);
+  if (dir === -1 && globals.onBack) {
+    globals.onBack();
+    globals.onBack = null;
+  }
+  if (params.settings) {
+    dir === -1 ? await globals.closeSettings(true) : await globals.openSettings(null, true);
+  } else {
+    dir === -1
+    ? hidePage(qs('.current'), params.page)
+    : showPage(qs('.current'), qs(`#${params.page}`), false, true);
+  }
+  if (/*i === 0 && diff === 1 && */dir === -1 && globals.additionalBack) {
+    diff += globals.additionalBack;
+    globals.additionalBack = 0;
+  }
   /*const appHistory = navigation.entries();
   for (let i = 0; i < diff; i++) {
     const params = getParams(appHistory[idx - (1 + i) * dir].url)
-    if (dir === -1 && globals.onBack) {
-      globals.onBack();
-      globals.onBack = null;
-    }
-    if (params.settings) {
-      dir === -1 ? await globals.closeSettings(true) : await globals.openSettings(null, true);
-    } else {
-      dir === -1
-      ? hidePage(qs('.current'), params.page)
-      : showPage(qs('.current'), qs(`#${params.page}`), false, true);
-    }
-    if (i === 0 && diff === 1 && dir === -1 && globals.additionalBack) {
-      diff += globals.additionalBack;
-      globals.additionalBack = 0;
-    }
+    //
   }*/
 }
 
