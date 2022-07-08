@@ -267,12 +267,12 @@ async function onTraverseNavigation(e) {
     'from index:', idx, '\n',
     'to index:', e.destination.index, '\n',
     'abs delta:', diff, '\n',
-    'direction:', dir == -1 ? 'backward' : 'forward', '\n'
+    'direction:', dir == -1 ? 'backward' : 'forward', '\n',
     'onBack:', globals.onBack ? true : false, '\n',
     'additionalBack:', globals.additionalBack, '\n',
     'settings:', params.settings, '\n',
     'calculated index:', calcIndex, '\n',
-    'calculated url:', calcEntry.url
+    'calculated url:', calcEntry.url,
   );
   if (dir === -1 && globals.onBack) {
     globals.onBack();

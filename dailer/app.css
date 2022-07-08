@@ -155,7 +155,7 @@ html { font-size: 1.25vmin; }
   .floatingMsg.notFixed { min-height: 13rem; }
 }
 
-body, .page, #settings, #popup {
+body, .page, #settings, #popup, noscript {
   width: 100vw; height: 100vh;
   height: stretch;
   height: -webkit-fill-available;
@@ -204,7 +204,8 @@ body, .page, #settings, #popup {
 .content { grid-area: content; }
 .footer { grid-area: footer; }
 
-.header, .content, .footer, .task, .floatingMsg, #infoBackground, .dataLine {
+.header, .content, .footer, .task, .floatingMsg, #infoBackground,
+.dataLine, noscript {
   display: flex;
 }
 .header > h1, .header > h4 {
@@ -223,13 +224,14 @@ body, .page, #settings, #popup {
 .content::-webkit-scrollbar, .hiddenScroll::-webkit-scrollbar {
   width: 0; height: 0;
 }
-.header, .footer, .content.center, .floatingMsg {
+.header, .footer, .content.center, .floatingMsg, noscript {
   align-items: center;
 }
-.footer, .center {
+.footer, .center, noscript {
   justify-content: center;
 }
 .center {
+  align-items: center;
   text-align: center;
 }
 .center h2 {
