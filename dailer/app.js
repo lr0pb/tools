@@ -225,8 +225,10 @@ window.addEventListener('popstate', async (e) => {
   }
 });
 
-function instantPromise() {
-  return new Promise((res) => { res() });
+function instantPromise(e) {
+  return new Promise((res) => {
+    e ? onTraverseNavigation(e) : res();
+  });
 }
 
 if (navigation) navigation.addEventListener('navigate', (e) => {
@@ -245,10 +247,10 @@ if (navigation) navigation.addEventListener('navigate', (e) => {
   console.log('canTransition', e.canTransition);
   console.log('canIntercept', e.canIntercept);
   console.log('traverse navigation proccessing');
-  return e.transitionWhile(onTraverseNavigation(e));
+  return e.transitionWhile(instantPromise(e));
 });
 
-async function onTraverseNavigation(e) {
+function onTraverseNavigation(e) {
   const idx = navigation.currentEntry.index;
   const rawDiff = idx - e.destination.index;
   let diff = Math.abs(rawDiff);
@@ -261,7 +263,7 @@ async function onTraverseNavigation(e) {
       globals.onBack = null;
     }
     if (params.settings) {
-      dir === -1 ? await globals.closeSettings(true) : await globals.openSettings(null, true);
+      dir === -1 ? globals.closeSettings(true) : globals.openSettings(null, true);
     } else {
       dir === -1
       ? hidePage(qs('.current'), params.page)
