@@ -12,7 +12,9 @@ if ('serviceWorker' in navigator && caches) {
   navigator.serviceWorker.register('./sw.js');
 }
 
-if (!window.dailerData) window.dailerData = {};
+if (!window.dailerData) window.dailerData = {
+  nav: false,
+};
 checkForFeatures(['inert', 'focusgroup']);
 dailerData.isDesktop = isDesktop();
 
@@ -69,7 +71,7 @@ const globals = {
       localQs('.openSettings').addEventListener('click', () => globals.openSettings());
     }
     const link = getPageLink(name);
-    if (navigation) {
+    if (dailerData.nav) {
       let historyAction = null;
       if (!dontPushHistory) historyAction = 'push';
       if (replaceState) historyAction = 'replace';
@@ -144,7 +146,7 @@ const globals = {
     inert.remove(qs('#settings'));
     globals.settings = true;
     if (!dontPushHistory) {
-      navigation
+      dailerData.nav
       ? navigation.navigate(getUrl() + '&settings=open', {
           state: {settings: true}, history: 'push', info: {call: 'settings'}
         })
@@ -197,7 +199,7 @@ window.addEventListener('pagehide', () => {
 window.addEventListener('pageshow', async (e) => {
   createDb();
   if (!e.persisted) {
-    navigation ? await startApp() : await renderPage(e, false);
+    dailerData.nav ? await startApp() : await renderPage(e, false);
   }
 });
 
@@ -210,7 +212,7 @@ window.addEventListener('load', async () => {
 });
 
 window.addEventListener('popstate', async (e) => {
-  if (navigation) return;
+  if (dailerData.nav) return;
   if (globals.onBack) {
     globals.onBack();
     globals.onBack = null;
@@ -232,7 +234,7 @@ navigation.addEventListener('navigate', (e) => {
   /*if (['paintPage', 'settings'].includes(info.call)) {
     return e.transitionWhile(instantPromise());
   }*/
-  console.log(e.navigationType);
+  return console.log(e.navigationType);
   if (e.navigationType !== 'traverse') {
     return e.transitionWhile(instantPromise());
   }

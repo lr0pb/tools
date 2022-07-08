@@ -60,7 +60,7 @@ export const emjs = {
 };
 
 export function safeDataInteractions(elems) {
-  const state = navigation
+  const state = dailerData.nav
   ? navigation.currentEntry.getState()
   : history.state || {};
   for (let elem of elems) {
@@ -182,21 +182,21 @@ export const inert = {
 
 export function syncGlobals(globals) {
   if (!globals.pageInfo) globals.pageInfo = {};
-  const state = navigation
+  const state = dailerData.nav
   ? (dailerData.forcedStateEntry || navigation.currentEntry).getState()
   : copyObject(history.state);
   Object.assign(globals.pageInfo, state);
 }
 
 export function updateState(updatedStateEntries) {
-  const state = navigation
+  const state = dailerData.nav
   ? navigation.currentEntry.getState()
   : copyObject(history.state);
   if (!state) state = {};
   for (let key in updatedStateEntries) {
     state[key] = updatedStateEntries[key];
   }
-  navigation
+  dailerData.nav
   ? navigation.updateCurrentEntry({ state })
   : history.replaceState(state, '', location.href);
 }

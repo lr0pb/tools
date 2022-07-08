@@ -14,8 +14,7 @@ export const taskInfo = {
   `,
   script: renderTaskInfo,
   onPageShow: async ({globals, page}) => {
-    if (!globals.pageInfo) syncGlobals(globals);
-    else Object.assign(globals.pageInfo, history.state);
+    syncGlobals(globals);
     if (globals.pageInfo.stateChangedTaskId) qs('#edit').style.display = 'none';
     if (!globals.pageInfo.dataChangedTaskId) return;
     const td = await globals.db.getItem('tasks', globals.pageInfo.taskId);
@@ -30,7 +29,7 @@ export const taskInfo = {
 
 async function renderTaskInfo({globals, page}) {
   qs('#back').addEventListener('click', () => history.back());
-  if (!globals.pageInfo) syncGlobals(globals);
+  syncGlobals(globals);
   const task = await globals.db.getItem('tasks', globals.pageInfo.taskId);
   const periods = await globals.getPeriods();
   if (task.disabled || task.deleted) {
