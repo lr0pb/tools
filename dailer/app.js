@@ -242,7 +242,7 @@ if (navigation) navigation.addEventListener('navigate', (e) => {
     console.log('instantPromise coz non traverse navigation');
     return e.transitionWhile(instantPromise());
   }
-  console.log('canIntercept': e.canIntercept);
+  console.log('canIntercept', e.canIntercept);
   if (!e.canIntercept) return;
   console.log('traverse navigation proccessing');
   e.intercept({
