@@ -28,7 +28,8 @@ const getPageLink = (name) => {
      : getLink('&'))
   : getLink('?');
   link = link.replace(/\&settings=\w+/, '');
-  return link;
+  return dailerData.nav
+  ? '/' + new URL(link).search : link;
 }
 
 const globals = {
@@ -230,7 +231,7 @@ function instantPromise() {
 }
 
 if (navigation) navigation.addEventListener('navigate', (e) => {
-  console.log(e.navigationType);
+  console.log(e);
   if (!dailerData.nav) return;
   const info = e.info || {};
   console.log(info.call);
@@ -251,6 +252,9 @@ if (navigation) navigation.addEventListener('navigate', (e) => {
 });
 
 async function onTraverseNavigation(e) {
+  const params = getParams(e.destination.url)
+  return hidePage(qs('.current'), params.page);
+
   const idx = navigation.currentEntry.index;
   const rawDiff = idx - e.destination.index;
   let diff = Math.abs(rawDiff);
