@@ -28,8 +28,9 @@ const getPageLink = (name) => {
      : getLink('&'))
   : getLink('?');
   link = link.replace(/\&settings=\w+/, '');
+  const url = new URL(link);
   return dailerData.nav
-  ? '/' + new URL(link).search : link;
+  ? url.pathname + url.search : link;
 }
 
 const globals = {
@@ -252,14 +253,20 @@ if (navigation) navigation.addEventListener('navigate', (e) => {
 });
 
 async function onTraverseNavigation(e) {
-  const params = getParams(e.destination.url)
-  return hidePage(qs('.current'), params.page);
-
   const idx = navigation.currentEntry.index;
   const rawDiff = idx - e.destination.index;
   let diff = Math.abs(rawDiff);
-  const dir = rawDiff > 0 ? -1 : 1; // -1 stands for back, 1 stands for forward
-  const appHistory = navigation.entries();
+  const dir = rawDiff > 0 ? -1 : 1; // -1 stands for backward, 1 stands for forward
+  console.log(
+    'from index:', idx, '\n',
+    'abs delta:', diff, '\n',
+    'direction:', dir == -1 ? 'backward' : 'forward'
+  );
+  const params = getParams(e.destination.url);
+  dir === -1
+  ? hidePage(qs('.current'), params.page)
+  : showPage(qs('.current'), qs(`#${params.page}`), false, true);
+  /*const appHistory = navigation.entries();
   for (let i = 0; i < diff; i++) {
     const params = getParams(appHistory[idx - (1 + i) * dir].url)
     if (dir === -1 && globals.onBack) {
@@ -277,7 +284,7 @@ async function onTraverseNavigation(e) {
       diff += globals.additionalBack;
       globals.additionalBack = 0;
     }
-  }
+  }*/
 }
 
 window.addEventListener('appinstalled', () => {
