@@ -24,7 +24,12 @@ export const taskInfo = {
     const iha = isHistoryAvailable(td);
     renderItemsHolder(td, periods, iha);
   },
-  onSettingsUpdate: ({globals}) => { syncGlobals(globals); }
+  onSettingsUpdate: ({globals}) => { syncGlobals(globals); },
+  onBack: (globals) => {
+    if (!globals.pageInfo) return;
+    delete globals.pageInfo.taskId;
+    delete globals.pageInfo.taskAction;
+  }
 };
 
 async function renderTaskInfo({globals, page}) {
@@ -41,11 +46,6 @@ async function renderTaskInfo({globals, page}) {
       globals.paintPage('taskCreator');
     });
   }
-  globals.onBack = () => {
-    if (!globals.pageInfo) return;
-    delete globals.pageInfo.taskId;
-    delete globals.pageInfo.taskAction;
-  };
   const iha = isHistoryAvailable(task);
   page.innerHTML = `
     <div>

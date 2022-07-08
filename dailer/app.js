@@ -39,6 +39,7 @@ const globals = {
   pageInfo: null,
   settings: false,
   additionalBack: 0,
+  history: null,
   getPeriods: async () => {
     await globals.db.getAll('periods', (per) => {
       periods[per.id] = per;
@@ -215,9 +216,8 @@ window.addEventListener('load', async () => {
 
 window.addEventListener('popstate', async (e) => {
   if (dailerData.nav) return;
-  if (globals.onBack) {
-    globals.onBack();
-    globals.onBack = null;
+  if (pages[globals.pageName].onBack) {
+    pages[globals.pageName].onBack(globals);
   }
   await renderPage(e, true);
   if (globals.additionalBack) {
@@ -252,6 +252,10 @@ if (navigation) navigation.addEventListener('navigate', (e) => {
   })());
 });
 
+if (navigate) navigation.addEventListener('navigatesuccess', () => {
+  globals.history = navigation.entries();
+});
+
 async function onTraverseNavigation(e) {
   const idx = navigation.currentEntry.index;
   const rawDiff = idx - e.destination.index;
@@ -260,23 +264,21 @@ async function onTraverseNavigation(e) {
   const currentParams = getParams(navigation.currentEntry.url);
   const params = getParams(e.destination.url);
   const settings = currentParams.settings || params.settings;
-  /*const appHistory = navigation.entries();
   const calcIndex = idx - (1 + 0) * dir;
-  const calcEntry = appHistory[calcIndex];*/
+  const calcEntry = globals.history[calcIndex];
   console.log(
     'from index:', idx, '\n',
     'to index:', e.destination.index, '\n',
     'abs delta:', diff, '\n',
     'direction:', dir == -1 ? 'backward' : 'forward', '\n',
-    'onBack:', globals.onBack ? true : false, '\n',
+    'onBack:', pages[currentParams.page] ? true : false, '\n',
     'additionalBack:', globals.additionalBack, '\n',
     'settings:', params.settings, '\n',
-    /*'calculated index:', calcIndex, '\n',
-    'calculated url:', calcEntry.url,*/
+    'calculated index:', calcIndex, '\n',
+    'calculated url:', calcEntry.url,
   );
-  if (dir === -1 && globals.onBack) {
-    globals.onBack();
-    globals.onBack = null;
+  if (dir === -1 && pages[currentParams.page].onBack) {
+    pages[currentParams.page].onBack(globals);
   }
   if (settings) {
     dir === -1 ? await globals.closeSettings(true) : await globals.openSettings(null, true);

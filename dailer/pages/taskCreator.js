@@ -52,6 +52,10 @@ export const taskCreator = {
       }
     }
     await onPeriodChange({target: period}, globals);
+  },
+  onBack: (globals) => {
+    delete globals.pageInfo.taskId;
+    delete globals.pageInfo.taskAction;
   }
 };
 
@@ -96,10 +100,6 @@ async function onTaskCreator({globals}) {
   if (isEdit) {
     td = await enterEditTaskMode(globals);
     enableEditButtons(globals, td);
-    globals.onBack = () => {
-      delete globals.pageInfo.taskId;
-      delete globals.pageInfo.taskAction;
-    };
   } else {
     const { tasksCount, periodsCount } = await asyncDataReceiving({globals, tasks: 3});
     if (tasksCount >= 3 && periodsCount == 0) globals.floatingMsg({

@@ -34,7 +34,11 @@ export const periodCreator = {
     <button id="savePeriod" class="success">${emjs.save} Save period</button>
   `,
   noSettings: true,
-  script: onPeriodCreator
+  script: onPeriodCreator,
+  onBack: (globals) => {
+    delete globals.pageInfo.periodAction;
+    delete globals.pageInfo.periodId;
+  }
 };
 
 function toggleDays(value) {
@@ -54,10 +58,6 @@ async function onPeriodCreator({globals, page}) {
     if (per.description) qs('#periodDesc').value = per.description;
     qs('#daysCount').value = per.days.length;
     qs('#daysCount').setAttribute('disabled', 'disabled');
-    globals.onBack = () => {
-      delete globals.pageInfo.periodAction;
-      delete globals.pageInfo.periodId;
-    };
   }
   appendDays(isEdit ? per.days : null);
   if (isEdit) toggleDays(per.getWeekStart ? 1 : 0);
