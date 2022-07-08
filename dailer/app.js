@@ -252,7 +252,7 @@ if (navigation) navigation.addEventListener('navigate', (e) => {
   })());
 });
 
-if (navigate) navigation.addEventListener('navigatesuccess', () => {
+if (navigation) navigation.addEventListener('navigatesuccess', () => {
   globals.history = navigation.entries();
 });
 
