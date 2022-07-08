@@ -491,3 +491,4 @@ progress {
 }
 
 .dataLine { align-items: baseline; }
+.dataLine p { word-break: break-word; }

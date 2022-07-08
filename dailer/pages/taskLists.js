@@ -13,7 +13,6 @@ export const planCreator = {
   onPageShow: async ({globals, page}) => {
     await onBackupUploaded({globals, page});
     const periods = await globals.getPeriods();
-    if (!globals.pageInfo) syncGlobals(globals);
     let id = globals.pageInfo.stateChangedTaskId;
     if (id) {
       const elem = qs(`[data-id="${id}"]`);
@@ -127,6 +126,7 @@ async function renderSortedTasksList({globals, page, isBadTask, sort}) {
 }
 
 async function onBackupUploaded({globals, page}) {
+  console.log(globals.pageInfo);
   if (!globals.pageInfo) syncGlobals(globals);
   if (!globals.pageInfo.backupUploaded) return;
   const args = {
