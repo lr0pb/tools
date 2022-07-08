@@ -243,7 +243,10 @@ if (navigation) navigation.addEventListener('navigate', (e) => {
     return e.transitionWhile(instantPromise());
   }
   console.log('traverse navigation proccessing');
-  e.transitionWhile(onTraverseNavigation(e));
+  e.transitionWhile(new Promise(async (res) => {
+    await onTraverseNavigation(e);
+    res();
+  }));
 });
 
 async function onTraverseNavigation(e) {
