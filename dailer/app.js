@@ -229,15 +229,24 @@ function instantPromise() {
   return new Promise((res) => { res() });
 }
 
-navigation.addEventListener('navigate', (e) => {
+if (navigation) navigation.addEventListener('navigate', (e) => {
+  console.log(e.navigationType);
+  if (!dailerData.nav) return;
   const info = e.info || {};
-  /*if (['paintPage', 'settings'].includes(info.call)) {
-    return e.transitionWhile(instantPromise());
-  }*/
-  return console.log(e.navigationType);
-  if (e.navigationType !== 'traverse') {
+  console.log(info.call);
+  if (['paintPage', 'settings'].includes(info.call)) {
+    console.log('instantPromise coz internal call');
     return e.transitionWhile(instantPromise());
   }
+  if (e.navigationType !== 'traverse') {
+    console.log('instantPromise coz non traverse navigation');
+    return e.transitionWhile(instantPromise());
+  }
+  console.log('traverse navigation proccessing');
+  e.transitionWhile(onTraverseNavigation(e));
+});
+
+async function onTraverseNavigation(e) {
   const idx = navigation.currentEntry.index;
   const rawDiff = idx - e.destination.index;
   let diff = Math.abs(rawDiff);
@@ -250,7 +259,7 @@ navigation.addEventListener('navigate', (e) => {
       globals.onBack = null;
     }
     if (params.settings) {
-      dir === -1 ? globals.closeSettings(true) : globals.openSettings(null, true);
+      dir === -1 ? await globals.closeSettings(true) : await globals.openSettings(null, true);
     } else {
       dir === -1
       ? hidePage(qs('.current'), params.page)
@@ -261,8 +270,7 @@ navigation.addEventListener('navigate', (e) => {
       globals.additionalBack = 0;
     }
   }
-  e.transitionWhile(instantPromise());
-});
+}
 
 window.addEventListener('appinstalled', () => {
   localStorage.installed = 'true';
