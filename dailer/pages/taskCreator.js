@@ -9,6 +9,7 @@ import {
 } from './highLevel/utils.js'
 
 export const taskCreator = {
+  title: `${emjs.paperWPen} Create task`,
   header: `${emjs.paperWPen} <span id="taskAction">Add</span> task`,
   page: `
     <h3 id="nameTitle">Enter task you will control</h3>
@@ -102,7 +103,9 @@ async function onTaskCreator({globals}) {
     enableEditButtons(globals, td);
   } else {
     const { tasksCount, periodsCount } = await asyncDataReceiving({globals, tasks: 3});
-    if (tasksCount >= 3 && periodsCount == 0) globals.floatingMsg({
+    if (
+      dailerData.forcePeriodPromo || (tasksCount >= 3 && periodsCount == 0)
+    ) globals.floatingMsg({
       text: `${emjs.light} Tip: you can create your own periods e.g. Every saturday`,
       button: 'Try&nbsp;it',
       onClick: async (e) => {

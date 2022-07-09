@@ -4,7 +4,13 @@ import {
 import { priorities, getTextDate } from './highLevel/taskThings.js'
 import { qs, emjs, getLast, intlDate, syncGlobals } from './highLevel/utils.js'
 
+let taskTitle = null;
+
 export const taskInfo = {
+  get title() {
+    return `${emjs.oldPaper} ${taskTitle || `Task info in dailer ${emjs.sign}`}`;
+  },
+  customTitle: true,
   header: `${emjs.oldPaper} Task info`,
   page: ``,
   styleClasses: 'doubleColumns',
@@ -36,6 +42,7 @@ async function renderTaskInfo({globals, page}) {
   qs('#back').addEventListener('click', () => history.back());
   syncGlobals(globals);
   const task = await globals.db.getItem('tasks', globals.pageInfo.taskId);
+  taskTitle = task.name;
   const periods = await globals.getPeriods();
   if (task.disabled || task.deleted) {
     qs('#edit').style.display = 'none';

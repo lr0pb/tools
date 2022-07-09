@@ -4,6 +4,7 @@ import { renderTask, disable, setPeriodTitle } from './highLevel/taskThings.js'
 import { downloadData } from './settings.js'
 
 export const main = {
+  title: `${emjs.sword} Your tasks for today`,
   header: `${emjs.sword} Today's tasks`,
   styleClasses: 'center doubleColumns',
   page: `

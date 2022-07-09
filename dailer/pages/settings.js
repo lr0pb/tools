@@ -30,6 +30,7 @@ const reminderList = [{
 }];
 
 export const settings = {
+  title: `${emjs.box} Settings`,
   sections: ['periods', 'import'],
   paint: async ({globals, page}) => {
     page.innerHTML = `
@@ -64,7 +65,7 @@ export const settings = {
       <div id="reminder" class="first"></div>
       <button id="toDebug" class="secondary">${emjs.construction} Open debug page</button>
       <h2>About</h2>
-      <h3>${emjs.label} dailer app, version 1.2.2</h3>
+      <h3>${emjs.label} dailer app, version 1.2.3</h3>
       <h3>${emjs.microscope} Created in 2022</h3>
     `;
     qs('#toPeriodCreator').addEventListener('click', () => {

@@ -9,6 +9,7 @@ import { paintPeriods } from './settings.js'
 const maxDays = 7;
 
 export const periodCreator = {
+  title: `${emjs.calendar} Create your own period`,
   header: `${emjs.calendar} <span id="periodAction">Create</span> period`,
   page: `
     <h3>Enter period title</h3>

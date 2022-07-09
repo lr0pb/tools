@@ -57,6 +57,7 @@ export const emjs = {
   microscope: '&#x1F52C;',
   alarmClock: '&#x23F0;',
   bread: '&#x1F35E;',
+  box: '&#x1F4E6;',
 };
 
 export function safeDataInteractions(elems) {

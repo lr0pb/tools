@@ -14,6 +14,7 @@ if ('serviceWorker' in navigator && caches) {
 
 if (!window.dailerData) window.dailerData = {
   nav: navigation ? true : false,
+  forcePeriodPromo: false,
 };
 checkForFeatures(['inert', 'focusgroup']);
 dailerData.isDesktop = isDesktop();
@@ -39,7 +40,6 @@ const globals = {
   pageInfo: null,
   settings: false,
   additionalBack: 0,
-  history: null,
   getPeriods: async () => {
     await globals.db.getAll('periods', (per) => {
       periods[per.id] = per;
@@ -227,9 +227,7 @@ window.addEventListener('popstate', async (e) => {
   }
 });
 
-function instantPromise() {
-  return new Promise((res) => { res() });
-}
+const instantPromise = () => new Promise((res) => { res() });
 
 if (navigation) navigation.addEventListener('navigate', (e) => {
   if (!dailerData.nav) return;
@@ -243,11 +241,15 @@ if (navigation) navigation.addEventListener('navigate', (e) => {
 });
 
 if (navigation) navigation.addEventListener('navigatesuccess', () => {
-  //globals.history = navigation.entries();
+  const params = getParams();
+  const page = pages[params.settings ? 'settings' : params.page];
+  qs('title').innerHTML = `${page.title || page.header}${
+    page.customTitle ? '' : ` in dailer ${emjs.sign}`
+  }`;
 });
 
-async function onTraverseNavigation(e) {
-  const idx = navigation.currentEntry.index;
+async function onTraverseNavigation(e, silent) {
+  const idx = (e.from || navigation.currentEntry).index;
   const rawDiff = idx - e.destination.index;
   let diff = Math.abs(rawDiff);
   const dir = rawDiff > 0 ? -1 : 1; // -1 stands for backward, 1 stands for forward
@@ -258,17 +260,24 @@ async function onTraverseNavigation(e) {
     const currentParams = getParams(appHistory[currentIndex].url);
     const nextParams = getParams(appHistory[nextIndex].url);
     const settings = currentParams.settings || nextParams.settings;
-    if (dir === -1 && pages[currentParams.page].onBack) {
+    if (!silent && dir === -1 && pages[currentParams.page].onBack) {
       pages[currentParams.page].onBack(globals);
     }
     if (settings) {
-      dir === -1 ? await globals.closeSettings(true) : await globals.openSettings(null, true);
+      if (dir === -1 && currentParams.page !== nextParams.page && nextParams.settings) {
+        await globals.openSettings(null, true);
+        await hidePage(qs('.current'), nextParams.page, silent);
+        globals.pageName = nextParams.page;
+      } else {
+        dir === -1
+        ? await globals.closeSettings(!silent) : await globals.openSettings(null, true);
+      }
     } else {
       dir === -1
-      ? await hidePage(qs('.current'), nextParams.page)
+      ? await hidePage(qs('.current'), nextParams.page, silent)
       : await showPage(qs('.current'), qs(`#${nextParams.page}`), false, true);
     }
-    if (i === 0 && diff === 1 && dir === -1 && globals.additionalBack) {
+    if (!silent && i === 0 && diff === 1 && dir === -1 && globals.additionalBack) {
       diff += globals.additionalBack;
       globals.additionalBack = 0;
     }
@@ -315,14 +324,10 @@ async function restoreApp(appHistory) {
   }
   dailerData.forcedStateEntry = null;
   const diff = appHistory.length - 1 - navigation.currentEntry.index;
-  if (diff > 0) {
-    return console.log(diff);
-    const lastEntry = appHistory[appHistory.length - 1];
-    const lastParams = paramsCache.get(lastEntry.url);
-    for (let i = 0; i < diff; i++) {
-      const prevEntry = appHistory[appHistory.length - 1 - i];
-    }
-  }
+  if (diff > 0) await onTraverseNavigation({
+    from: {index: appHistory.length - 1},
+    destination: {index: navigation.currentEntry.index}
+  }, true);
 }
 
 async function renderPage(e, back) {
