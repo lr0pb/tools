@@ -237,16 +237,11 @@ if (navigation) navigation.addEventListener('navigate', (e) => {
   const info = e.info || {};
   console.log(info.call);
   if (['paintPage', 'settings'].includes(info.call)) {
-    console.log('instantPromise coz internal call');
     return e.transitionWhile(instantPromise());
   }
   if (e.navigationType !== 'traverse') {
-    console.log('instantPromise coz non traverse navigation');
     return e.transitionWhile(instantPromise());
   }
-  console.log('canTransition', e.canTransition);
-  console.log('canIntercept', e.canIntercept);
-  console.log('traverse navigation proccessing');
   return e.transitionWhile((async () => {
     await onTraverseNavigation(e);
   })());
@@ -261,42 +256,28 @@ async function onTraverseNavigation(e) {
   const rawDiff = idx - e.destination.index;
   let diff = Math.abs(rawDiff);
   const dir = rawDiff > 0 ? -1 : 1; // -1 stands for backward, 1 stands for forward
-  const currentParams = getParams(navigation.currentEntry.url);
-  const params = getParams(e.destination.url);
-  const settings = currentParams.settings || params.settings;
   const appHistory = navigation.entries();
-  const calcIndex = idx + (1 + 0) * dir;
-  const calcEntry = appHistory[calcIndex] || {};
-  console.log(
-    'from index:', idx, '\n',
-    'to index:', e.destination.index, '\n',
-    'abs delta:', diff, '\n',
-    'direction:', dir == -1 ? 'backward' : 'forward', '\n',
-    'onBack:', pages[currentParams.page] ? true : false, '\n',
-    'additionalBack:', globals.additionalBack, '\n',
-    'settings:', params.settings, '\n',
-    'calculated index:', calcIndex, '\n',
-    'calculated url:', calcEntry.url,
-  );
-  if (dir === -1 && pages[currentParams.page].onBack) {
-    pages[currentParams.page].onBack(globals);
-  }
-  if (settings) {
-    dir === -1 ? await globals.closeSettings(true) : await globals.openSettings(null, true);
-  } else {
-    dir === -1
-    ? hidePage(qs('.current'), params.page)
-    : showPage(qs('.current'), qs(`#${params.page}`), false, true);
-  }
-  if (/*i === 0 && diff === 1 && */dir === -1 && globals.additionalBack) {
-    diff += globals.additionalBack;
-    globals.additionalBack = 0;
-  }
-  /*const appHistory = navigation.entries();
   for (let i = 0; i < diff; i++) {
-    const params = getParams(appHistory[idx - (1 + i) * dir].url)
-    //
-  }*/
+    const currentIndex = idx + i * dir;
+    const nextIndex = currentIndex + dir;
+    const currentParams = getParams(appHistory[currentIndex].url);
+    const nextParams = getParams(appHistory[nextIndex].url);
+    const settings = currentParams.settings || nextParams.settings;
+    if (dir === -1 && pages[currentParams.page].onBack) {
+      pages[currentParams.page].onBack(globals);
+    }
+    if (settings) {
+      dir === -1 ? await globals.closeSettings(true) : await globals.openSettings(null, true);
+    } else {
+      dir === -1
+      ? hidePage(qs('.current'), nextParams.page)
+      : showPage(qs('.current'), qs(`#${nextParams.page}`), false, true);
+    }
+    if (i === 0 && diff === 1 && dir === -1 && globals.additionalBack) {
+      diff += globals.additionalBack;
+      globals.additionalBack = 0;
+    }
+  }
 }
 
 window.addEventListener('appinstalled', () => {
