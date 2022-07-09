@@ -7,9 +7,17 @@ import {
 import { paintPeriods } from './settings.js'
 
 const maxDays = 7;
+let periodTitle = null;
 
 export const periodCreator = {
-  title: `${emjs.calendar} Create your own period`,
+  get title() {
+    return `${emjs.calendar} ${
+      periodTitle ? `Edit period: ${periodTitle}` : 'Create new period'
+    }`;
+  },
+  get titleEnding() {
+    return periodTitle ? 'line' : 'text';
+  },
   header: `${emjs.calendar} <span id="periodAction">Create</span> period`,
   page: `
     <h3>Enter period title</h3>
@@ -50,10 +58,12 @@ function toggleDays(value) {
 async function onPeriodCreator({globals, page}) {
   qs('#back').addEventListener('click', () => history.back());
   syncGlobals(globals);
+  periodTitle = null;
   const isEdit = globals.pageInfo && globals.pageInfo.periodAction == 'edit';
   let per;
   if (isEdit) {
     per = await globals.db.getItem('periods', globals.pageInfo.periodId);
+    periodTitle = per.title;
     qs('#periodAction').innerHTML = 'Edit';
     qs('#periodName').value = per.title;
     if (per.description) qs('#periodDesc').value = per.description;

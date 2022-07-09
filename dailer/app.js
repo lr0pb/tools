@@ -228,12 +228,13 @@ window.addEventListener('popstate', async (e) => {
 });
 
 const instantPromise = () => new Promise((res) => { res() });
+const callsList = ['paintPage', 'settings', 'additionalBack'];
 
 if (navigation) navigation.addEventListener('navigate', (e) => {
   if (!dailerData.nav) return;
   const info = e.info || {};
   if (
-    ['paintPage', 'settings'].includes(info.call) || e.navigationType !== 'traverse'
+    callsList.includes(info.call) || e.navigationType !== 'traverse'
   ) {
     return e.transitionWhile(instantPromise());
   }
@@ -241,44 +242,53 @@ if (navigation) navigation.addEventListener('navigate', (e) => {
 });
 
 if (navigation) navigation.addEventListener('navigatesuccess', () => {
+  console.log(navigation.transition);
   const params = getParams();
   const page = pages[params.settings ? 'settings' : params.page];
+  const te = page.titleEnding || 'text';
+  const default = ` dailer ${emjs.sign}`
   qs('title').innerHTML = `${page.title || page.header}${
-    page.customTitle ? '' : ` in dailer ${emjs.sign}`
+    te == 'text' ? ' in' + default : (te == 'line' ? ' |' + default : '')
   }`;
 });
 
 async function onTraverseNavigation(e, silent) {
   const idx = (e.from || navigation.currentEntry).index;
-  const rawDiff = idx - e.destination.index;
-  let diff = Math.abs(rawDiff);
-  const dir = rawDiff > 0 ? -1 : 1; // -1 stands for backward, 1 stands for forward
+  const rawDelta = idx - e.destination.index;
+  let delta = Math.abs(rawDelta);
+  const dir = rawDelta > 0 ? -1 : 1; // -1 stands for backward, 1 stands for forward
   const appHistory = navigation.entries();
-  for (let i = 0; i < diff; i++) {
+  for (let i = 0; i < delta; i++) {
     const currentIndex = idx + i * dir;
     const nextIndex = currentIndex + dir;
     const currentParams = getParams(appHistory[currentIndex].url);
     const nextParams = getParams(appHistory[nextIndex].url);
     const settings = currentParams.settings || nextParams.settings;
+    const differentPages = currentParams.page !== nextParams.page;
     if (!silent && dir === -1 && pages[currentParams.page].onBack) {
       pages[currentParams.page].onBack(globals);
     }
     if (settings) {
-      if (dir === -1 && currentParams.page !== nextParams.page && nextParams.settings) {
-        await globals.openSettings(null, true);
-        await hidePage(qs('.current'), nextParams.page, silent);
+      if (differentPages) {
+        dir === -1
+        ? await globals.openSettings(null, true) : await globals.closeSettings();
         globals.pageName = nextParams.page;
       } else {
         dir === -1
         ? await globals.closeSettings(!silent) : await globals.openSettings(null, true);
       }
-    } else {
+    }
+    if (!settings || (settings && differentPages)) {
       dir === -1
       ? await hidePage(qs('.current'), nextParams.page, silent)
       : await showPage(qs('.current'), qs(`#${nextParams.page}`), false, true);
     }
-    if (!silent && i === 0 && diff === 1 && dir === -1 && globals.additionalBack) {
-      diff += globals.additionalBack;
+    if (!silent && i === 0 && delta === 1 && dir === -1 && globals.additionalBack) {
+      delta += globals.additionalBack;
+      const finalIndex = idx + delta * dir;
+      navigation.traverseTo(appHistory[finalIndex].key, {
+        info: {call: 'additionalBack'}
+      });
       globals.additionalBack = 0;
     }
   }

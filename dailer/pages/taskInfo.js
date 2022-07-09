@@ -8,9 +8,13 @@ let taskTitle = null;
 
 export const taskInfo = {
   get title() {
-    return `${emjs.oldPaper} ${taskTitle || `Task info in dailer ${emjs.sign}`}`;
+    return `${emjs.oldPaper} ${
+      taskTitle ? `Task info: ${taskTitle}` : 'Task info'
+    }`;
   },
-  customTitle: true,
+  get titleEnding() {
+    return taskTitle ? 'line' : 'text';
+  },
   header: `${emjs.oldPaper} Task info`,
   page: ``,
   styleClasses: 'doubleColumns',

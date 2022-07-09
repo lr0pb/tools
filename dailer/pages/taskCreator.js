@@ -8,8 +8,17 @@ import {
   qs, emjs, copyObject, safeDataInteractions, createOptionsList, syncGlobals, updateState
 } from './highLevel/utils.js'
 
+let taskTitle = null;
+
 export const taskCreator = {
-  title: `${emjs.paperWPen} Create task`,
+  get title() {
+    return `${emjs.paperWPen} ${
+      taskTitle ? `Edit task: ${taskTitle}` : 'Create new task'
+    }`;
+  },
+  get titleEnding() {
+    return taskTitle ? 'line' : 'text';
+  },
   header: `${emjs.paperWPen} <span id="taskAction">Add</span> task`,
   page: `
     <h3 id="nameTitle">Enter task you will control</h3>
@@ -96,11 +105,13 @@ async function onTaskCreator({globals}) {
   qs('#date').min = convertDate(Date.now());
   qs('#date').addEventListener('change', onDateChange);
   syncGlobals(globals);
+  taskTitle = null;
   const isEdit = globals.pageInfo && globals.pageInfo.taskAction == 'edit';
   let td;
   if (isEdit) {
     td = await enterEditTaskMode(globals);
     enableEditButtons(globals, td);
+    taskTitle = td.name;
   } else {
     const { tasksCount, periodsCount } = await asyncDataReceiving({globals, tasks: 3});
     if (

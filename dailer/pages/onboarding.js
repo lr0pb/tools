@@ -2,7 +2,7 @@ import { qs, emjs } from './highLevel/utils.js'
 
 export const onboarding = {
   title: `${emjs.stars} Welcome to the dailer ${emjs.sign}`,
-  customTitle: true,
+  titleEnding: 'none',
   header: '',
   page: `
     <h2 class="emoji">${emjs.stars}</h2>
