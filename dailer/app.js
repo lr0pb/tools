@@ -13,7 +13,7 @@ if ('serviceWorker' in navigator && caches) {
 }
 
 if (!window.dailerData) window.dailerData = {
-  nav: false,
+  nav: navigation ? true : false,
 };
 checkForFeatures(['inert', 'focusgroup']);
 dailerData.isDesktop = isDesktop();
@@ -67,7 +67,7 @@ const globals = {
     if (page.styleClasses && page.styleClasses.includes('doubleColumns')) {
       content.focusgroup = 'horizontal';
     }
-    showPage(qs('.current'), container, noAnim);
+    await showPage(qs('.current'), container, noAnim);
     if (page.noSettings) {
       localQs('.openSettings').style.display = 'none';
     } else {
@@ -232,19 +232,14 @@ function instantPromise() {
 }
 
 if (navigation) navigation.addEventListener('navigate', (e) => {
-  console.log(e);
   if (!dailerData.nav) return;
   const info = e.info || {};
-  console.log(info.call);
-  if (['paintPage', 'settings'].includes(info.call)) {
+  if (
+    ['paintPage', 'settings'].includes(info.call) || e.navigationType !== 'traverse'
+  ) {
     return e.transitionWhile(instantPromise());
   }
-  if (e.navigationType !== 'traverse') {
-    return e.transitionWhile(instantPromise());
-  }
-  return e.transitionWhile((async () => {
-    await onTraverseNavigation(e);
-  })());
+  return e.transitionWhile(onTraverseNavigation(e));
 });
 
 if (navigation) navigation.addEventListener('navigatesuccess', () => {
@@ -270,8 +265,8 @@ async function onTraverseNavigation(e) {
       dir === -1 ? await globals.closeSettings(true) : await globals.openSettings(null, true);
     } else {
       dir === -1
-      ? hidePage(qs('.current'), nextParams.page)
-      : showPage(qs('.current'), qs(`#${nextParams.page}`), false, true);
+      ? await hidePage(qs('.current'), nextParams.page)
+      : await showPage(qs('.current'), qs(`#${nextParams.page}`), false, true);
     }
     if (i === 0 && diff === 1 && dir === -1 && globals.additionalBack) {
       diff += globals.additionalBack;
@@ -299,7 +294,7 @@ async function startApp() {
     const params = getParams();
     const rndr = getRenderPage(params);
     await paintFirstPage(rndr);
-    if (params.settings) globals.openSettings();
+    if (params.settings) await globals.openSettings();
   } else {
     await restoreApp(appHistory);
   }
@@ -334,7 +329,7 @@ async function renderPage(e, back) {
   const params = getParams();
   if (params.settings == 'open') {
     if (globals.pageName !== params.page) {
-      hidePage(qs('.current'), params.page);
+      await hidePage(qs('.current'), params.page);
       globals.pageName = params.page;
     }
     await globals.openSettings(null, true);
@@ -347,7 +342,7 @@ async function renderPage(e, back) {
   }
   const rndr = getRenderPage(params);
   globals.closePopup();
-  back ? hidePage(qs('.current'), rndr) : await paintFirstPage(rndr);
+  back ? await hidePage(qs('.current'), rndr) : await paintFirstPage(rndr);
 }
 
 function getParams(url) {
@@ -377,7 +372,7 @@ async function paintFirstPage(rndr) {
   await globals.paintPage(rndr);
 }
 
-function showPage(prev, current, noAnim, noCleaning) {
+async function showPage(prev, current, noAnim, noCleaning) {
   prev.classList.remove('showing', 'current');
   prev.classList.add('hidePrevPage');
   inert.set(prev);
@@ -393,17 +388,17 @@ function showPage(prev, current, noAnim, noCleaning) {
   } else {
     current.classList.add('current');
     if (pages[current.id].onPageShow) {
-      pages[current.id].onPageShow({globals, page: qs(`#${current.id} .content`)});
+      await pages[current.id].onPageShow({globals, page: qs(`#${current.id} .content`)});
     }
   }
 }
 
-function hidePage(current, prevName, noPageUpdate) {
+async function hidePage(current, prevName, noPageUpdate) {
   inert.set(current);
   const prev = qs(`#${prevName}`);
   if (!prev) {
-    if (!qs('#main')) globals.paintPage('main', false, true);
-    if (prevName !== 'main') globals.paintPage(prevName, true, false);
+    if (!qs('#main')) await globals.paintPage('main', false, true);
+    if (prevName !== 'main') await globals.paintPage(prevName, true, false);
     return;
   }
   prev.classList.remove('hidePrevPage', 'hided');
@@ -412,7 +407,7 @@ function hidePage(current, prevName, noPageUpdate) {
   current.classList.remove('showing', 'current');
   current.classList.add('hided');
   if (!noPageUpdate && pages[prev.id].onPageShow) {
-    pages[prev.id].onPageShow({globals, page: qs(`#${prev.id} .content`)});
+    await pages[prev.id].onPageShow({globals, page: qs(`#${prev.id} .content`)});
   }
 }
 
