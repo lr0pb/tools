@@ -246,9 +246,9 @@ if (navigation) navigation.addEventListener('navigatesuccess', () => {
   const params = getParams();
   const page = pages[params.settings ? 'settings' : params.page];
   const te = page.titleEnding || 'text';
-  const default = ` dailer ${emjs.sign}`
+  const def = ` dailer ${emjs.sign}`;  // default value
   qs('title').innerHTML = `${page.title || page.header}${
-    te == 'text' ? ' in' + default : (te == 'line' ? ' |' + default : '')
+    te == 'text' ? ' in' + def : (te == 'line' ? ' |' + def : '')
   }`;
 });
 
