@@ -253,7 +253,7 @@ if (navigation) navigation.addEventListener('navigate', (e) => {
 });
 
 if (navigation) navigation.addEventListener('navigatesuccess', () => {
-  globals.history = navigation.entries();
+  //globals.history = navigation.entries();
 });
 
 async function onTraverseNavigation(e) {
@@ -264,8 +264,9 @@ async function onTraverseNavigation(e) {
   const currentParams = getParams(navigation.currentEntry.url);
   const params = getParams(e.destination.url);
   const settings = currentParams.settings || params.settings;
-  const calcIndex = idx - (1 + 0) * dir;
-  const calcEntry = globals.history[calcIndex];
+  const appHistory = navigation.entries();
+  const calcIndex = idx + (1 + 0) * dir;
+  const calcEntry = appHistory[calcIndex] || {};
   console.log(
     'from index:', idx, '\n',
     'to index:', e.destination.index, '\n',
