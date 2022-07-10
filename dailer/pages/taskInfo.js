@@ -15,6 +15,7 @@ export const taskInfo = {
   get titleEnding() {
     return taskTitle ? 'line' : 'text';
   },
+  dynamicTitle: true,
   header: `${emjs.oldPaper} Task info`,
   page: ``,
   styleClasses: 'doubleColumns',

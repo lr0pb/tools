@@ -19,6 +19,7 @@ export const taskCreator = {
   get titleEnding() {
     return taskTitle ? 'line' : 'text';
   },
+  dynamicTitle: true,
   header: `${emjs.paperWPen} <span id="taskAction">Add</span> task`,
   page: `
     <h3 id="nameTitle">Enter task you will control</h3>

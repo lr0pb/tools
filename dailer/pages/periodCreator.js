@@ -18,6 +18,7 @@ export const periodCreator = {
   get titleEnding() {
     return periodTitle ? 'line' : 'text';
   },
+  dynamicTitle: true,
   header: `${emjs.calendar} <span id="periodAction">Create</span> period`,
   page: `
     <h3>Enter period title</h3>

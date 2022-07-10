@@ -8,12 +8,12 @@ import { paintPeriods } from './pages/settings.js'
 import { checkInstall } from './pages/main.js'
 import IDB from './IDB.js'
 
-if ('serviceWorker' in navigator && caches) {
+if ('serviceWorker' in navigator && 'caches' in window) {
   navigator.serviceWorker.register('./sw.js');
 }
 
 if (!window.dailerData) window.dailerData = {
-  nav: navigation ? true : false,
+  nav: 'navigation' in window ? true : false,
   forcePeriodPromo: false,
 };
 checkForFeatures(['inert', 'focusgroup']);
@@ -40,6 +40,7 @@ const globals = {
   pageInfo: null,
   settings: false,
   additionalBack: 0,
+  isPageReady: undefined,
   getPeriods: async () => {
     await globals.db.getAll('periods', (per) => {
       periods[per.id] = per;
@@ -48,6 +49,7 @@ const globals = {
   },
   paintPage: async (name, dontPushHistory, replaceState, noAnim) => {
     globals.pageName = name;
+    globals.isPageReady = false;
     const page = pages[name];
     const container = document.createElement('div');
     container.className = 'page current';
@@ -87,6 +89,7 @@ const globals = {
       else if (!dontPushHistory) history.pushState(globals.pageInfo || history.state || {}, '', link);
     }
     await page.script({ globals, page: content });
+    globals.isPageReady = true;
   },
   message: ({state, text}) => {
     const msg = qs('#message');
@@ -144,6 +147,7 @@ const globals = {
     return elem;
   },
   openSettings: async (section, dontPushHistory) => {
+    globals.isPageReady = false;
     qs('#settings').style.transform = 'none';
     inert.set(qs('.current'));
     inert.remove(qs('#settings'));
@@ -159,6 +163,7 @@ const globals = {
     if (section && pages.settings.sections.includes(section)) {
       qs(`[data-section="${section}"]`).scrollIntoView();
     }
+    globals.isPageReady = true;
   },
   closeSettings: async (callSettingsUpdate, backInHistory) => {
     qs('#settings').removeAttribute('style');
@@ -230,7 +235,7 @@ window.addEventListener('popstate', async (e) => {
 const instantPromise = () => new Promise((res) => { res() });
 const callsList = ['paintPage', 'settings', 'additionalBack'];
 
-if (navigation) navigation.addEventListener('navigate', (e) => {
+if ('navigation' in window) navigation.addEventListener('navigate', (e) => {
   if (!dailerData.nav) return;
   const info = e.info || {};
   if (
@@ -241,10 +246,17 @@ if (navigation) navigation.addEventListener('navigate', (e) => {
   return e.transitionWhile(onTraverseNavigation(e));
 });
 
-if (navigation) navigation.addEventListener('navigatesuccess', () => {
-  console.log(navigation.transition);
+if ('navigation' in window) navigation.addEventListener('navigatesuccess', async () => {
   const params = getParams();
   const page = pages[params.settings ? 'settings' : params.page];
+  if (page.dynamicTitle) {
+    await new Promise((res) => {
+      const isReady = () => {
+        setTimeout(() => globals.isPageReady ? res() : isReady(), 10);
+      };
+      isReady();
+    });
+  }
   const te = page.titleEnding || 'text';
   const def = ` dailer ${emjs.sign}`;  // default value
   qs('title').innerHTML = `${page.title || page.header}${
@@ -286,9 +298,9 @@ async function onTraverseNavigation(e, silent) {
     if (!silent && i === 0 && delta === 1 && dir === -1 && globals.additionalBack) {
       delta += globals.additionalBack;
       const finalIndex = idx + delta * dir;
-      navigation.traverseTo(appHistory[finalIndex].key, {
+      await navigation.traverseTo(appHistory[finalIndex].key, {
         info: {call: 'additionalBack'}
-      });
+      }).finished;
       globals.additionalBack = 0;
     }
   }
