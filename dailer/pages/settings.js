@@ -72,7 +72,7 @@ export const settings = {
         func: onReminderClick, args: { globals }
       }], page: qs('#reminder'), value
     });
-    qs('#reminderList').addEventListener('change', (e) => {
+    qs('#reminderList').addEventListener('change', async (e) => {
       const reminder = qs('[data-id="reminder"]');
       reminder.dataset.value = 1;
       reminder.children[1].innerHTML = emjs.sign;
