@@ -1,6 +1,6 @@
 import { pages } from './pages.js'
 import {
-  emjs, qs as localQs, globQs as qs, globQsa as qsa, copyObject, checkForFeatures,
+  emjs, qs as localQs, globQs as qs, globQsa as qsa, copyObject, copyArray, checkForFeatures,
   isDesktop, inert
 } from './pages/highLevel/utils.js'
 import { paintPeriods } from './pages/settings.js'
@@ -53,7 +53,9 @@ const globals = {
       globals._cachedConfigFile = await raw.json();
     }
     if (listName in globals._cachedConfigFile) {
-      return copyArray(globals._cachedConfigFile[listName]);
+      const list = globals._cachedConfigFile[listName];
+      if (Array.isArray(list)) return copyArray(list);
+      return copyObject(list);
     }
   },
   _cachedConfigFile: null,
