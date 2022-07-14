@@ -1,5 +1,5 @@
 {
-  "periods": [{
+  "periods": [
     "01": {
       "id": "01",
       "title": "Today only",
@@ -68,7 +68,7 @@
       "periodDay": -1,
       "special": "untilComplete"
     }
-  }],
+  ],
   "priorities": [{
     "title": "Can miss sometimes",
     "color": "green"
