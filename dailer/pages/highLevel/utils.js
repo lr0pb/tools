@@ -20,6 +20,20 @@ export const copyObject = (obj) => {
   return response;
 };
 
+export const copyArray = (arr) => {
+  const response = [];
+  for (let elem of arr) {
+    if (Array.isArray(elem)) {
+      response.push(copyArray(elem));
+    } else if (typeof elem == 'object') {
+      response.push(copyObject(elem));
+    } else {
+      response.push(elem);
+    }
+  }
+  return response;
+};
+
 export const intlDate = (date) => {
   return new Date(typeof date == 'string' ? Number(date) : date)
     .toLocaleDateString(navigator.language);

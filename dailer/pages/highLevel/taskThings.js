@@ -1,18 +1,6 @@
 import { qs, emjs, getLast, intlDate, handleKeyboard } from './utils.js'
 import { getToday, oneDay, isCustomPeriod } from './periods.js'
 
-export const priorities = [{
-  title: 'Can miss sometimes',
-  color: 'green'
-}, {
-  title: 'Normal',
-  color: 'yellow',
-  selected: true
-}, {
-  title: 'Extra important',
-  color: 'red'
-}];
-
 export function renderToggler({
   name, id, buttons = [], toggler, page, onBodyClick, value, first, disabled
 }) {
@@ -32,17 +20,13 @@ export function renderToggler({
   if (toggler) buttons.push({ emoji: toggler, func: toggleFunc });
   buttons.forEach((btn, i) => {
     buttonsString += `
-      <button
-        data-action="${i}" class="emojiBtn"
-        ${disabled ? 'disabled' : ''} title="${btn.title || 'Toggle value'}"
+      <button data-action="${i}" class="emojiBtn" ${disabled ? 'disabled' : ''}
+        title="${btn.title || 'Toggle value'}" aria-label="${btn.aria || `Toggle ${name} value`}"
         tabIndex="${dailerData.focusgroup ? (noChilds && !onBodyClick && i == 0 ? 0 : -1) : 0}"
       >${btn.emoji}</button>
     `;
   });
-  elem.innerHTML = `
-    <div><h2>${name}</h2></div>
-    ${buttonsString}
-  `;
+  elem.innerHTML = `<div><h2>${name}</h2></div>${buttonsString}`;
   elem.addEventListener('click', async (e) => {
     if (e.target.dataset.action) {
       const btn = buttons[e.target.dataset.action];
@@ -63,13 +47,15 @@ export function toggleFunc({e, elem}) {
   return value;
 }
 
-export function renderTask({type, globals, td, page, onBodyClick, periods}) {
+export function renderTask({
+  type, globals, td, page, onBodyClick, periods, priorities
+}) {
+  const markTitle = (task) => `Mark task${task ? ` "${task}"` : ''} as completed`;
   if (type == 'day') return renderToggler({
     name: td.name, id: td.id, buttons: [{
       emoji: getTaskComplete(td),
-      title: 'Mark task as completed',
-      func: onTaskCompleteClick,
-      args: { globals }
+      title: markTitle(), aria: markTitle(td.name),
+      func: onTaskCompleteClick, args: { globals }
     }], page, onBodyClick
   });
   const task = document.createElement('div');
@@ -89,8 +75,10 @@ export function renderTask({type, globals, td, page, onBodyClick, periods}) {
     </div>
     ${td.disabled ? '' : `
       <button data-action="edit" class="emojiBtn" title="Edit task"
+        aria-label="Edit task: ${td.name}"
         tabIndex="${dailerData.focusgroup ? -1 : 0}">${emjs.pen}</button>
       <button data-action="delete" class="emojiBtn" title="Delete task"
+        aria-label="Delete task: ${td.name}"
         tabIndex="${dailerData.focusgroup ? -1 : 0}">${emjs.trashCan}</button>
     `}
    `;

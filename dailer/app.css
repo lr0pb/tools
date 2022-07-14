@@ -238,7 +238,7 @@ body, .page, #settings, #popup, noscript {
   margin: 3rem 6rem;
 }
 
-body, .content, h1, h2, h3, h4, p, button {
+body, .content, h1, h2, h3, h4, p, button, .floatingMsg {
   margin: 0;
   font-family: Arial, "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
   -webkit-user-select: none;
@@ -279,7 +279,7 @@ button, .task, #message, #infoBackground,
   border: 0.9rem solid var(--darkBorder);
   margin: 2.5rem 1.5rem;
 }
-.content > button {
+.content button {
   margin: 2rem 0;
 }
 
@@ -354,9 +354,9 @@ button:disabled, [disabled]:not(input, select) {
 .floatingMsg {
   width: var(--gridContent);
   background-color: var(--lightBlueBg);
-  margin: 0;
   bottom: var(--footerHeight);
 }
+.floatingMsg.notFixed { margin: 1rem 0; }
 .floatingMsg h3 {
   margin: 3rem;
   text-align: left;

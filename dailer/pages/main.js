@@ -200,11 +200,11 @@ async function checkBackupReminder(globals) {
   if (!localStorage.remindValue) return;
   let nextRemind = Number(localStorage.nextRemind);
   if (nextRemind === getToday() && localStorage.reminded === 'true') return;
-  if (nextRemind === getToday() - oneDay) {
+  while (nextRemind < getToday()) {
     localStorage.reminded = 'false';
-    nextRemind = getToday() - oneDay + Number(localStorage.remindValue);
-    localStorage.nextRemind = nextRemind;
+    nextRemind += Number(localStorage.remindValue);
   }
+  localStorage.nextRemind = nextRemind;
   if (nextRemind === getToday()) {
     const link = await downloadData(globals);
     globals.floatingMsg({

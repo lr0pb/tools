@@ -1,5 +1,5 @@
 [
-  "./", "./app.css",
+  "./", "./app.css", "./config.json",
   "./app.js", "./IDB.js", "./pages.js",
   "./pages/highLevel/utils.js", "./pages/highLevel/periods.js", "./pages/highLevel/taskThings.js",
   "./pages/onboarding.js", "./pages/main.js", "./pages/settings.js", "./pages/taskLists.js", "./pages/taskCreator.js", "./pages/taskInfo.js",

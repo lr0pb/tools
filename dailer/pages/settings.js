@@ -5,29 +5,6 @@ import { uploading } from './highLevel/uploadBackup.js'
 import { getData } from './highLevel/createBackup.js'
 
 const periodsCount = 5;
-const reminderList = [{
-  title: 'Select how often to remind',
-  disabled: true,
-  selected: true
-}, {
-  title: 'Every day',
-  offset: 1
-}, {
-  title: 'Every week',
-  offset: 7
-}, {
-  title: 'Every month',
-  offset: 28
-}, {
-  title: 'Every quarter',
-  offset: 30 * 3
-}, {
-  title: 'Every half year',
-  offset: 30 * 6
-}, {
-  title: 'Every year',
-  offset: 365
-}];
 
 export const settings = {
   title: `${emjs.box} Settings`,
@@ -46,27 +23,33 @@ export const settings = {
       <div class="floatingMsg notFixed">
         <h3>${emjs.lockWKey} Your data is stored only on your device and have no remote access</h3>
       </div>
-      <h3>Backup your data to be safe and prevent accidental deletion or transfer it to other device or upload your existent backup to this device</h3>
-      <button id="uploadData" class="beforeUpload">${emjs.crateDown} Upload existent backup</button>
-      <h3 class="beforeUpload">Accepted .dailer files only</h3>
-      <input type="file" accept=".dailer" id="chooseFile" disabled aria-hidden="true">
-      <progress class="uploadUI"></progress>
-      <h3 class="uploadUI">Be patient and don't quit the app before uploading done</h3>
-      <h2 class="uploadSuccess emoji">${emjs.sign}</h2>
-      <h3 class="uploadSuccess">Upload successfully completed, go back to check the tasks</h3>
-      <button id="getData" class="success">${emjs.crateUp} Backup your current data</button>
-      <progress class="downloadUI"></progress>
-      <a id="downloadData" class="downloadLink" aria-hidden="true"></a>
-      <h3>Set up a reminder to create backups periodically. You will able to download backups just from app's main screen</h3>
-      <div id="reminderInfo">
-        <select id="reminderList" title="Select how often to remind you about creating backups"></select>
-        <h3 id="nextRemind">Next remind</h3>
+      <div class="doubleColumns">
+        <div>
+          <h3>Backup your data to be safe and prevent accidental deletion or transfer it to other device or upload your existent backup to this device</h3>
+          <button id="uploadData" class="beforeUpload">${emjs.crateDown} Upload existent backup</button>
+          <h3 class="beforeUpload">Accepted .dailer files only</h3>
+          <input type="file" accept=".dailer" id="chooseFile" disabled aria-hidden="true">
+          <progress class="uploadUI"></progress>
+          <h3 class="uploadUI">Be patient and don't quit the app before uploading done</h3>
+          <h2 class="uploadSuccess emoji">${emjs.sign}</h2>
+          <h3 class="uploadSuccess">Upload successfully completed, go back to check the tasks</h3>
+          <button id="getData" class="success">${emjs.crateUp} Backup your current data</button>
+          <progress class="downloadUI"></progress>
+          <a id="downloadData" class="downloadLink" aria-hidden="true"></a>
+        </div>
+        <div>
+          <h3>Set up a reminder to create backups periodically. You will able to download backups just from app's main screen</h3>
+          <div id="reminderInfo">
+            <select id="reminderList" title="Select how often to remind you about creating backups"></select>
+            <h3 id="nextRemind">Next remind</h3>
+          </div>
+          <div id="reminder" class="first"></div>
+        </div>
       </div>
-      <div id="reminder" class="first"></div>
       <button id="toDebug" class="secondary">${emjs.construction} Open debug page</button>
       <h2>About</h2>
-      <h3>${emjs.label} dailer app, version 1.2.3</h3>
-      <h3>${emjs.microscope} Created in 2022</h3>
+      <h3>${emjs.label} dailer app, version 1.2.4</h3>
+      <h3>${emjs.microscope} Developed in 2022</h3>
     `;
     qs('#toPeriodCreator').addEventListener('click', () => {
       globals.closeSettings();
@@ -102,6 +85,7 @@ export const settings = {
       await paintPeriods(globals);
     }
     if (!qs('#reminderList').children.length) {
+      const reminderList = await globals.getList('reminderList');
       createOptionsList(qs('#reminderList'), reminderList);
       if (localStorage.remindId) qs('#reminderList').value = localStorage.remindId;
       if (!localStorage.remindValue) return;
@@ -114,29 +98,29 @@ export const settings = {
 export async function paintPeriods(globals) {
   const pc = qs('#periodsContainer');
   const periods = await globals.getPeriods();
+  const editTitle = 'View or edit period';
+  const markTitle = (per) => `Add period${per ? ` "${per}"` : ''} to drop down list`;
   pc.innerHTML = '';
   for (let per in periods) {
     const period = periods[per];
     const buttons = [];
     if (isCustomPeriod(period.id)) {
       buttons.push({
-        emoji: emjs.pen,
-        title: 'View or edit period',
+        emoji: emjs.pen, args: { globals },
+        title: editTitle, aria: `${editTitle}: ${period.title}`,
         func: async ({globals}) => {
           if (!globals.pageInfo) globals.pageInfo = {};
           globals.pageInfo.periodId = period.id;
           globals.pageInfo.periodAction = 'edit';
           globals.closeSettings();
           await globals.paintPage('periodCreator');
-        },
-        args: { globals }
+        }
       });
     }
     buttons.push({
       emoji: getPeriodUsed(per),
-      title: 'Add period to drop down list',
-      func: updatePeriodsList,
-      args: { globals, periodsCount }
+      title: markTitle(), aria: markTitle(period.title),
+      func: updatePeriodsList, args: { globals, periodsCount }
     });
     renderToggler({ name: period.title, id: period.id, page: pc, buttons });
   }
@@ -233,6 +217,7 @@ function onReminderClick({e, elem, globals}) {
 }
 
 function onRemindIdChange(globals, remindId) {
+  const reminderList = await globals.getList('reminderList');
   localStorage.remindValue = reminderList[remindId].offset * oneDay;
   localStorage.nextRemind = getToday() + Number(localStorage.remindValue);
   localStorage.reminded = 'false';

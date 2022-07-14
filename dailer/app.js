@@ -3,7 +3,6 @@ import {
   emjs, qs as localQs, globQs as qs, globQsa as qsa, copyObject, checkForFeatures,
   isDesktop, inert
 } from './pages/highLevel/utils.js'
-import { periods } from './pages/highLevel/periods.js'
 import { paintPeriods } from './pages/settings.js'
 import { checkInstall } from './pages/main.js'
 import IDB from './IDB.js'
@@ -42,11 +41,22 @@ const globals = {
   additionalBack: 0,
   isPageReady: undefined,
   getPeriods: async () => {
+    const periods = await globals.getList('periods');
     await globals.db.getAll('periods', (per) => {
       periods[per.id] = per;
     });
     return periods;
   },
+  getList: async (listName) => {
+    if (!globals._cachedConfigFile) {
+      const raw = await fetch('./config.json');
+      globals._cachedConfigFile = await raw.json();
+    }
+    if (listName in globals._cachedConfigFile) {
+      return copyArray(globals._cachedConfigFile[listName]);
+    }
+  },
+  _cachedConfigFile: null,
   paintPage: async (name, dontPushHistory, replaceState, noAnim) => {
     globals.pageName = name;
     globals.isPageReady = false;
@@ -58,7 +68,9 @@ const globals = {
       <div class="header">
         <h1>${page.header}</h1>
         <button class="pageBtn emojiBtn" title="Page button" disabled aria-hidden="true"></button>
-        <button class="openSettings emojiBtn" title="Open settings">${emjs.settings}</button>
+        <button class="openSettings emojiBtn" title="Open settings" aria-label="Open settings">
+          ${emjs.settings}
+        </button>
       </div>
       <div class="content">${page.page}</div>
       <div class="footer">${page.footer}</div>
@@ -71,7 +83,7 @@ const globals = {
     }
     await showPage(qs('.current'), container, noAnim);
     if (page.noSettings) {
-      localQs('.openSettings').style.display = 'none';
+      localQs('.openSettings').remove();
     } else {
       localQs('.openSettings').addEventListener('click', () => globals.openSettings());
     }
@@ -114,11 +126,11 @@ const globals = {
   },
   pageButton: ({emoji, title, onClick}) => {
     const pageBtn = localQs('.pageBtn');
-    pageBtn.innerHTML = emoji;
-    pageBtn.title = title;
-    pageBtn.onclick = onClick;
-    pageBtn.disabled = false;
-    pageBtn.ariaHidden = false;
+    Object.assign(pageBtn, {
+      innerHTML: emoji, title,
+      onclick: onClick, disable: false,
+      ariaHidden: true, ariaLabel: title
+    });
     pageBtn.style.display = 'block';
   },
   floatingMsg: ({text, button, onClick, pageName, notFixed}) => {
@@ -350,6 +362,9 @@ async function restoreApp(appHistory) {
     from: {index: appHistory.length - 1},
     destination: {index: navigation.currentEntry.index}
   }, true);
+  globals.message({
+    state: 'success', text: 'Previously opened dailer session has been fully restored'
+  });
 }
 
 async function renderPage(e, back) {

@@ -1,4 +1,3 @@
-import { periods } from './highLevel/periods.js'
 import { renderToggler, toggleFunc } from './highLevel/taskThings.js'
 import {
   qs, qsa, globQs, globQsa, emjs, safeDataInteractions, handleKeyboard,

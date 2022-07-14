@@ -83,9 +83,10 @@ async function renderProgressiveTasksList({globals, page, isBadTask}) {
   page.classList.remove('center');
   page.innerHTML = '';
   const periods = await globals.getPeriods();
+  const priorities = await globals.getList('priorities');
   await globals.db.getAll('tasks', (td) => {
     if (isBadTask(td)) return;
-    renderTask({type: 'edit', globals, td, page, periods});
+    renderTask({type: 'edit', globals, td, page, periods, priorities});
   });
   if (!page.children.length) showNoTasks(page);
 }
@@ -93,6 +94,7 @@ async function renderProgressiveTasksList({globals, page, isBadTask}) {
 async function renderSortedTasksList({globals, page, isBadTask, sort}) {
   const tasks = await globals.db.getAll('tasks');
   const periods = await globals.getPeriods();
+  const priorities = await globals.getList('priorities');
   page.innerHTML = '';
   let prevTask = null, prevTaskId = null;
   const setPrev = (task, id) => {
@@ -122,7 +124,7 @@ async function renderSortedTasksList({globals, page, isBadTask, sort}) {
         setPrev(null, null);
       }
     }
-    renderTask({type: 'edit', globals, td, page, periods});
+    renderTask({type: 'edit', globals, td, page, periods, priorities});
   }
   if (!page.children.length) showNoTasks(page);
 }

@@ -1,7 +1,5 @@
-import {
-  getToday, convertDate, oneDay, isCustomPeriod
-} from './highLevel/periods.js'
-import { priorities, getTextDate } from './highLevel/taskThings.js'
+import { getToday, convertDate, oneDay, isCustomPeriod } from './highLevel/periods.js'
+import { getTextDate } from './highLevel/taskThings.js'
 import { qs, emjs, getLast, intlDate, syncGlobals } from './highLevel/utils.js'
 
 let taskTitle = null;
@@ -30,10 +28,11 @@ export const taskInfo = {
     if (!globals.pageInfo.dataChangedTaskId) return;
     const td = await globals.db.getItem('tasks', globals.pageInfo.taskId);
     const periods = await globals.getPeriods();
+    const priorities = await globals.getList('priorities');
     qs('#infoBackground h4').innerHTML = td.name;
     qs('.itemsHolder').innerHTML = '';
     const iha = isHistoryAvailable(td);
-    renderItemsHolder(td, periods, iha);
+    renderItemsHolder({task: td, periods, priorities, iha});
   },
   onSettingsUpdate: ({globals}) => { syncGlobals(globals); },
   onBack: (globals) => {
@@ -49,6 +48,7 @@ async function renderTaskInfo({globals, page}) {
   const task = await globals.db.getItem('tasks', globals.pageInfo.taskId);
   taskTitle = task.name;
   const periods = await globals.getPeriods();
+  const priorities = await globals.getList('priorities');
   if (task.disabled || task.deleted) {
     qs('#edit').style.display = 'none';
   } else {
@@ -73,11 +73,11 @@ async function renderTaskInfo({globals, page}) {
       </div>
     `}</div>
   `;
-  renderItemsHolder(task, periods, iha);
+  renderItemsHolder({task, periods, priorities, iha});
   if (iha) await renderHistory(task);
 }
 
-function renderItemsHolder(task, periods, iha) {
+function renderItemsHolder({task, periods, priorities, iha}) {
   const rawTitle = periods[task.periodId].title;
   const perTitle = isCustomPeriod(task.periodId)
   ? `<span class="customTitle" data-period="${task.periodId}">${rawTitle}</span>`

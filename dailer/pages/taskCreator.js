@@ -2,7 +2,7 @@ import {
   getToday, convertDate, oneDay, getWeekStart, isCustomPeriod
 } from './highLevel/periods.js'
 import {
-  priorities, editTask, setPeriodTitle, renderToggler, toggleFunc
+  editTask, setPeriodTitle, renderToggler, toggleFunc
 } from './highLevel/taskThings.js'
 import {
   qs, emjs, copyObject, safeDataInteractions, createOptionsList, syncGlobals, updateState
@@ -87,6 +87,7 @@ async function getPeriods(globals) {
 async function onTaskCreator({globals}) {
   qs('#back').addEventListener('click', () => history.back());
   if (!localStorage.firstDayEver) qs('#back').style.display = 'none';
+  const priorities = await globals.getList('priorities');
   createOptionsList(qs('#priority'), priorities);
   renderToggler({
     name: 'No limit to end date', id: 'noEndDate',
@@ -247,6 +248,7 @@ async function onPeriodChange(e, globals) {
   if (per.special && per.startDate) day = per.startDate;
   else if (per.getWeekStart) day = getWeekStart();
   else day = getToday();
+  if (per.startDayShift) day += oneDay * per.startDayShift;
   date.value = convertDate(day);
   if (per.selectTitle && !per.getWeekStart) {
     qs('#dateTitle').innerHTML = per.selectTitle;
