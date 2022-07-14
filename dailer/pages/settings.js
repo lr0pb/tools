@@ -77,7 +77,7 @@ export const settings = {
       reminder.dataset.value = 1;
       reminder.children[1].innerHTML = emjs.sign;
       localStorage.remindId = e.target.value;
-      onRemindIdChange(globals, localStorage.remindId);
+      await onRemindIdChange(globals, localStorage.remindId);
     });
   },
   opening: async ({globals}) => {
@@ -201,14 +201,14 @@ export async function downloadData(globals) {
   return link;
 }
 
-function onReminderClick({e, elem, globals}) {
+async function onReminderClick({e, elem, globals}) {
   const value = toggleFunc({e, elem});
   if (value) {
     const remindId = qs('#reminderList').value;
     if (remindId == '0') {
       toggleFunc({e, elem});
       globals.message({ state: 'fail', text: 'Select how often to remind you first' });
-    } else onRemindIdChange(globals, remindId);
+    } else await onRemindIdChange(globals, remindId);
   } else {
     delete localStorage.remindValue;
     qs('#reminderInfo').setStyle('hided');
@@ -216,7 +216,7 @@ function onReminderClick({e, elem, globals}) {
   }
 }
 
-function onRemindIdChange(globals, remindId) {
+async function onRemindIdChange(globals, remindId) {
   const reminderList = await globals.getList('reminderList');
   localStorage.remindValue = reminderList[remindId].offset * oneDay;
   localStorage.nextRemind = getToday() + Number(localStorage.remindValue);
