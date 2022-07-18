@@ -43,16 +43,16 @@ export const recap = {
       counter.innerHTML = `${completedTasks}/${tasksCount}`;
       prog.value = completedTasks;
     };
-    const completeDay = async (completed) => {
-      day.completed = completed;
-      await globals.db.setItem('days', day);
+    const completeDay = async (actualDay, completed) => {
+      actualDay.completed = completed;
+      await globals.db.setItem('days', actualDay);
     }
     updateUI();
     if (tasksCount == completedTasks) {
       for (let elem of qsa('.completed')) {
         elem.style.display = 'block';
       }
-      await completeDay(true);
+      await completeDay(day, true);
     } else {
       for (let elem of qsa('.forgotten')) {
         elem.style.display = 'flex';
@@ -61,9 +61,9 @@ export const recap = {
       for (let taskId of forgottenTasks) {
         const td = await globals.db.getItem('tasks', taskId);
         renderTask({
-          type: 'day', globals, td, page: container, extraFunc: async (value) => {
+          type: 'day', globals, td, page: container, extraFunc: async (actualDay, value) => {
             completedTasks += 1 * (value ? 1 : -1);
-            await completeDay(tasksCount == completedTasks);
+            await completeDay(actualDay, tasksCount == completedTasks);
             updateUI();
           }, forcedDay: date
         });

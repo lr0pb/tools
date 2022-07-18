@@ -191,7 +191,7 @@ export async function onTaskCompleteClick({ e, globals, elem: task, forcedDay, e
   await globals.db.setItem('tasks', td);
   await globals.db.setItem('days', day);
   e.target.innerHTML = getTaskComplete(td);
-  if (extraFunc) await extraFunc(value);
+  if (extraFunc) await extraFunc(day, value);
 }
 
 export function getTaskComplete(td) {
