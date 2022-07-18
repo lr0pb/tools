@@ -1,4 +1,4 @@
-import { getToday, oneDay, isCustomPeriod } from './highLevel/periods.js'
+import { isUnder3AM, getToday, oneDay, isCustomPeriod } from './highLevel/periods.js'
 import { qs, emjs, getLast } from './highLevel/utils.js'
 import { renderTask, disable, setPeriodTitle } from './highLevel/taskThings.js'
 import { downloadData } from './settings.js'
@@ -59,6 +59,8 @@ async function renderDay({globals, page}) {
       }});
     }
   }
+  const existDayNote = await checkDayNote(globals);
+  if (existDayNote) return;
   const existInstallPrompt = await checkInstall(globals);
   if (existInstallPrompt) return;
   await checkBackupReminder(globals);
@@ -174,11 +176,21 @@ function isEmpty(day) {
   return true;
 }
 
+async function checkDayNote(globals) {
+  if (!isUnder3AM()) return;
+  globals.floatingMsg({
+    text: `${emjs.clock} Tasks for new day will arrive at 3:00 AM`,
+    onClick: async (e) => { e.target.parentElement.remove(); },
+    button: 'Okay', pageName: 'main'
+  });
+  return true;
+}
+
 export async function checkInstall(globals) {
   if (navigator.standalone === undefined && !globals.installPrompt) return;
-  const response = await globals.checkPersist();
-  if (response === false || localStorage.installed !== 'true') {
-    if (response && dailerData.isDesktop) return;
+  const persist = await globals.checkPersist();
+  if (persist === false || localStorage.installed !== 'true') {
+    if (persist && dailerData.isDesktop) return;
     globals.floatingMsg({
       text: `${emjs.crateDown} To protect your data, install dailer app on your home screen${
         navigator.standalone === false ? ': click Share > Add to home screen' : ''
@@ -205,17 +217,16 @@ async function checkBackupReminder(globals) {
     nextRemind += Number(localStorage.remindValue);
   }
   localStorage.nextRemind = nextRemind;
-  if (nextRemind === getToday()) {
-    const link = await downloadData(globals);
-    globals.floatingMsg({
-      text: `${emjs.bread} Your data has been backed up`,
-      button: 'Download',
-      pageName: 'main',
-      onClick: async (e) => {
-        localStorage.reminded = 'true';
-        e.target.parentElement.remove();
-        link.click();
-      }
-    });
-  }
+  if (nextRemind !== getToday()) return;
+  globals.floatingMsg({
+    text: `${emjs.bread} Your data has been backed up`,
+    button: 'Download',
+    pageName: 'main',
+    onClick: async (e) => {
+      const link = await downloadData(globals);
+      localStorage.reminded = 'true';
+      e.target.parentElement.remove();
+      link.click();
+    }
+  });
 }

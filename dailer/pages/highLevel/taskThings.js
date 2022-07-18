@@ -48,14 +48,14 @@ export function toggleFunc({e, elem}) {
 }
 
 export function renderTask({
-  type, globals, td, page, onBodyClick, periods, priorities
+  type, globals, td, page, onBodyClick, periods, priorities, forcedDay, extraFunc
 }) {
   const markTitle = (task) => `Mark task${task ? ` "${task}"` : ''} as completed`;
   if (type == 'day') return renderToggler({
     name: td.name, id: td.id, buttons: [{
       emoji: getTaskComplete(td),
       title: markTitle(), aria: markTitle(td.name),
-      func: onTaskCompleteClick, args: { globals }
+      func: onTaskCompleteClick, args: { globals, forcedDay, extraFunc }
     }], page, onBodyClick
   });
   const task = document.createElement('div');
@@ -175,22 +175,23 @@ export function setPeriodTitle(task) {
   }
 }
 
-export async function onTaskCompleteClick({ e, globals, elem: task }) {
+export async function onTaskCompleteClick({ e, globals, elem: task, forcedDay, extraFunc }) {
   const td = await globals.db.getItem('tasks', task.dataset.id);
-  const day = await globals.db.getItem('days', getToday().toString());
+  const date = forcedDay ? forcedDay : getToday().toString();
+  const day = await globals.db.getItem('days', date);
   if (!day) return globals.floatingMsg({
     text: `${emjs.alarmClock} Day is expired! So you need to reload tasks for today`,
-    button: 'Reload',
     onClick: () => location.reload(),
-    pageName: 'main'
+    button: 'Reload', pageName: 'main'
   });
-  const value = getLast(td.history) == 1 ? 0 : 1;
+  const value = !getLast(td.history);
   td.history.pop();
   td.history.push(value);
   day.tasks[td.priority][td.id] = value;
   await globals.db.setItem('tasks', td);
   await globals.db.setItem('days', day);
   e.target.innerHTML = getTaskComplete(td);
+  if (extraFunc) extraFunc(value);
 }
 
 export function getTaskComplete(td) {

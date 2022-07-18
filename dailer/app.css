@@ -15,52 +15,53 @@
   --normalAnim: 0.3s;
   --msgShowing: 3s;
   /* Color section */
-  --mainBg: black;
-  --mainBgRgb: 0, 0, 0;
+  --brand: 215deg;
+
+  --mainBg: hsl(var(--brand), 100%, 6%);
   --mainText: white;
-  --darkBorder: rgba(51, 51, 51, 0.5);
-  --darkShadow: #474747;
-  --accentBlue: #3877cd;
-  --accentGrey: #5c5e60;
+  --darkBorder: hsla(var(--brand), 12%, 18%, 0.5);
+  --darkShadow: hsl(var(--brand), 4%, 35%);
+  --accent: hsl(var(--brand), 60%, 51%);
+  --secondary: hsl(var(--brand), 15%, 35%);
   --accentGreen: #379b00;
   --accentRed: #cb3a3a;
-  --lightBlueBg: #6f879c;
-  --taskBg: #46454582;
+  --lightBlueBg: hsl(var(--brand), 19%, 52%);
+  --taskBg: hsla(var(--brand), 10%, 14%, 0.5);
   --gradientLight: #5a73f2;
   --gradientDark: #0f0b30;
   --infoRectBg: #22222275;
   --lightBorder: rgba(227, 227, 227, 0.35);
   --popupBg: #343434;
-  --marker: aliceblue;
+  --marker: hsl(var(--brand), 100%, 90%);
   --msgBg: var(--mainBg);
   --focusBorder: #d1d1d1;
-  --focusBg: #4b4b4b;
+  --focusBg: hsl(var(--brand), 10%, 22%);
+  accent-color: var(--accent);
 }
 
 html { font-size: 1.25vmin; }
 
 @media (prefers-color-scheme: light) {
   :root {
-    --mainBg: #f2f2f2;
-    --mainBgRgb: 236, 236, 236;
+    --mainBg: hsl(var(--brand), 27%, 95%);
     --mainText: black;
-    --darkBorder: rgba(232, 232, 232, 0.5);
-    --darkShadow: #b1b1b1;
-    /*--accentBlue: #699ade;*/
-    --accentGrey: #a7a7a8;
+    --darkBorder: hsla(var(--brand), 40%, 90%, 0.5);
+    --darkShadow: hsl(var(--brand), 45%, 83%);
+    /*--accent: #699ade;*/
+    --secondary: hsl(var(--brand), 17%, 68%);
     /*--accentGreen: #54c416;
     --accentRed: #ef5353;*/
-    --lightBlueBg: #bdd9f2;
-    --taskBg: #dddddd82;
+    --lightBlueBg: hsl(var(--brand), 67%, 85%);
+    --taskBg: hsla(var(--brand), 52%, 92%, 0.5);
     /*--gradientLight: #9aaafa;*/
     --gradientDark: #463e8c;
     --infoRectBg: #e9e9e975;
     --lightBorder: rgb(174, 174, 174, 0.35);
     --popupBg: var(--mainBg);
-    --marker: #7cc2ff;
+    --marker: hsl(var(--brand), 100%, 75%);
     --msgBg: #232323;
     --focusBorder: #626262;
-    --focusBg: #dbdbdb;
+    --focusBg: hsl(var(--brand), 59%, 88%);
   }
 }
 
@@ -71,7 +72,7 @@ html { font-size: 1.25vmin; }
   input[type="text"]:not(:disabled) { cursor: text; }
   input[type="range"]:not(:disabled) { cursor: grab; }
   input[type="range"]:focus-visible {
-    outline: var(--accentBlue) solid medium;
+    outline: var(--accent) solid medium;
     outline-offset: -0.7rem;
   }
   input:hover:not(:disabled), select:hover:not(:disabled) {
@@ -81,7 +82,7 @@ html { font-size: 1.25vmin; }
     --border: var(--mainText);
   }
   input:focus, select:focus {
-    --border: var(--accentBlue);
+    --border: var(--accent);
     outline: white solid thin;
   }
   button:hover { filter: brightness(0.8); }
@@ -187,8 +188,6 @@ body, .page, #settings, #popup, noscript {
   margin-bottom: 4rem;
 }
 .page {
-  --dark: rgba(var(--mainBgRgb), 0.3);
-  --overlay: linear-gradient(var(--dark), var(--dark));
   transform: translateX(100vw);
   transition: transform var(--normalAnim);
   background-size: cover;
@@ -238,7 +237,7 @@ body, .page, #settings, #popup, noscript {
   margin: 3rem 6rem;
 }
 
-body, .content, h1, h2, h3, h4, p, button, .floatingMsg {
+body, .content, h1, h2, h3, h4, p, button {
   margin: 0;
   font-family: Arial, "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
   -webkit-user-select: none;
@@ -293,7 +292,7 @@ button {
   font-size: 4.3em;
   font-weight: 700;
   padding: 2rem 4rem 2rem 3rem;
-  color: white; --bgColor: var(--accentBlue);
+  color: white; --bgColor: var(--accent);
   background-color: var(--bgColor) !important;
   line-height: 1.3;
   transition: filter var(--fastAnim),
@@ -312,7 +311,7 @@ button.emojiBtn {
   line-height: 1.2;
 }
 button.secondary {
-  --bgColor: var(--accentGrey);
+  --bgColor: var(--secondary);
 }
 button.success {
   --bgColor: var(--accentGreen);
@@ -355,6 +354,7 @@ button:disabled, [disabled]:not(input, select) {
   width: var(--gridContent);
   background-color: var(--lightBlueBg);
   bottom: var(--footerHeight);
+  margin: 0;
 }
 .floatingMsg.notFixed { margin: 1rem 0; }
 .floatingMsg h3 {
@@ -453,7 +453,7 @@ progress {
 }
 .pageBtn, .hidedUI, #editButtons, #popup, input[type="file"],
 .uploadUI, .uploadSuccess, .downloadUI, .downloadLink,
-.historyMonth > [data-used="false"] {
+.historyMonth > [data-used="false"], .completed, .forgotten {
   display: none;
 }
 

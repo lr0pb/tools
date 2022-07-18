@@ -129,10 +129,10 @@ const globals = {
   pageButton: ({emoji, title, onClick}) => {
     const pageBtn = localQs('.pageBtn');
     Object.assign(pageBtn, {
-      innerHTML: emoji, title,
-      onclick: onClick, disable: false,
-      ariaHidden: true, ariaLabel: title
+      innerHTML: emoji, title, ariaLabel: title, onclick: onClick
     });
+    pageBtn.removeAttribute('disabled');
+    pageBtn.setAttribute('aria-hidden', 'false');
     pageBtn.style.display = 'block';
   },
   floatingMsg: ({text, button, onClick, pageName, notFixed}) => {
@@ -401,18 +401,26 @@ function getParams(url) {
   return params;
 }
 
+function getFirstPage() {
+  if (!localStorage.firstDayEver) return 'main';
+  if (localStorage.firstDayEver == getToday()) return 'main';
+  return localStorage.recaped < getToday() : 'recap' : 'main';
+}
+
 function getRenderPage(params) {
   const onbrd = localStorage.onboarded == 'true';
-  let page = (params.page && pages[params.page]) ? params.page : 'main';
-  if (onbrd && page == 'onboarding') page = 'main';
-  return onbrd ? page : 'onboarding';
+  if (!onbrd) return 'onboarding';
+  let page = (params.page && pages[params.page]) ? params.page : getFirstPage();
+  if (onbrd && page == 'onboarding') page = getFirstPage();
+  if (page == 'recap' && localStorage.recaped == getToday()) page = 'main';
+  return page;
 }
 
 async function paintFirstPage(rndr) {
-  if (rndr == 'main' || rndr == 'onboarding') {
-    return globals.paintPage(rndr, false, true);
+  if (['main', 'recap', 'onboarding'].includes(rndr)) {
+    return globals.paintPage(rndr, true, true);
   }
-  await globals.paintPage('main', false, true, true);
+  await globals.paintPage(getFirstPage(), true, true, true);
   await globals.paintPage(rndr);
 }
 

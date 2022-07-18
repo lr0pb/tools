@@ -44,6 +44,7 @@ export const emjs = {
   blank: '&#x2B1C;',
   cross: '&#x274C;',
   back: '&#x23EA;',
+  forward: '&#x23E9;',
   stars: '&#x1F4AB;',
   book: '&#x1F4D2',
   notes: '&#x1F4D1;',
@@ -72,6 +73,8 @@ export const emjs = {
   alarmClock: '&#x23F0;',
   bread: '&#x1F35E;',
   box: '&#x1F4E6;',
+  newspaper: '&#x1F4F0;',
+  party: '&#x1F389;',
 };
 
 export function safeDataInteractions(elems) {
