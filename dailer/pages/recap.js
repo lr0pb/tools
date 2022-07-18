@@ -13,7 +13,7 @@ export const recap = {
     <h3 class="forgotten">
       Check the tasks you didn't complete yesterday and if need mark the ones you forgot
     </h3>
-    <div class="forgotten doubleColumns first" id="tasks"></div>
+    <div class="forgotten content doubleColumns first" id="tasks" focusgroup="horizontal"></div>
   `,
   footer: `
     <button id="toMain">${emjs.forward} Proceed to today</button>
@@ -62,7 +62,7 @@ export const recap = {
         const td = await globals.db.getItem('tasks', taskId);
         renderTask({
           type: 'day', globals, td, page: container, extraFunc: async (value) => {
-            completedTasks + 1 * (value ? 1 : -1);
+            completedTasks += 1 * (value ? 1 : -1);
             await completeDay(tasksCount == completedTasks);
             updateUI();
           }, forcedDay: date

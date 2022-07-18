@@ -184,7 +184,7 @@ export async function onTaskCompleteClick({ e, globals, elem: task, forcedDay, e
     onClick: () => location.reload(),
     button: 'Reload', pageName: 'main'
   });
-  const value = !getLast(td.history);
+  const value = getLast(td.history) ? 0 : 1;
   td.history.pop();
   td.history.push(value);
   day.tasks[td.priority][td.id] = value;
