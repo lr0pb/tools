@@ -416,6 +416,7 @@ function getRenderPage(params) {
   let page = (params.page && pages[params.page]) ? params.page : getFirstPage();
   if (onbrd && page == 'onboarding') page = getFirstPage();
   if (page == 'recap' && localStorage.recaped == getToday()) page = 'main';
+  if (page == 'main') page = getFirstPage();
   return page;
 }
 
