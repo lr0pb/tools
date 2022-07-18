@@ -61,7 +61,7 @@ export const recap = {
       for (let taskId of forgottenTasks) {
         const td = await globals.db.getItem('tasks', taskId);
         renderTask({
-          type: 'day', globals, td, page: container, extraFunc: (value) => {
+          type: 'day', globals, td, page: container, extraFunc: async (value) => {
             completedTasks + 1 * (value ? 1 : -1);
             await completeDay(tasksCount == completedTasks);
             updateUI();
