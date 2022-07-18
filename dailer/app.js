@@ -3,6 +3,7 @@ import {
   emjs, qs as localQs, globQs as qs, globQsa as qsa, copyObject, copyArray, checkForFeatures,
   isDesktop, inert
 } from './pages/highLevel/utils.js'
+import { getToday } from './pages/highLevel/periods.js'
 import { paintPeriods } from './pages/settings.js'
 import { checkInstall } from './pages/main.js'
 import IDB from './IDB.js'
@@ -346,11 +347,12 @@ async function startApp() {
 }
 
 async function restoreApp(appHistory) {
-  const paramsCache = new Map();
   for (let entry of appHistory) {
     dailerData.forcedStateEntry = entry;
     const params = getParams(entry.url);
-    paramsCache.set(entry.url, params);
+    if (['main', 'recap'].includes(params.page)) {
+      params.page = getFirstPage();
+    }
     if (params.settings) {
       await globals.openSettings(null, true);
     } else {
