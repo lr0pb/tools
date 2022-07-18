@@ -404,7 +404,7 @@ function getParams(url) {
 function getFirstPage() {
   if (!localStorage.firstDayEver) return 'main';
   if (localStorage.firstDayEver == getToday()) return 'main';
-  return localStorage.recaped < getToday() : 'recap' : 'main';
+  return localStorage.recaped < getToday() ? 'recap' : 'main';
 }
 
 function getRenderPage(params) {
