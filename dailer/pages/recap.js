@@ -6,9 +6,9 @@ export const recap = {
   header: `${emjs.newspaper} Yesterday recap`,
   noSettings: true,
   page: `
-    <h2 class="emoji completed">${emjs.sing}</h2>
+    <h2 class="emoji completed">${emjs.party}${emjs.sign}</h2>
+    <h2 class="completed" id="congrats">Congratulations! </h2>
     <h3>You done <span id="tasksCount"></span> tasks yesterday</h3>
-    <h3 class="completed">Congratulations ${emjs.party}</h3>
     <progress id="dayProgress"></progress>
     <h3 class="forgotten">
       Check the tasks you didn't complete yesterday and if need mark the ones you forgot
@@ -36,6 +36,7 @@ export const recap = {
         else forgottenTasks.push(taskId);
       }
     }
+    if (tasksCount === 0) qs('#toMain').click();
     const counter = qs('#tasksCount');
     const prog = qs('#dayProgress');
     prog.max = tasksCount;
@@ -49,10 +50,15 @@ export const recap = {
     }
     updateUI();
     if (tasksCount == completedTasks) {
+      await completeDay(day, true);
       for (let elem of qsa('.completed')) {
         elem.style.display = 'block';
       }
-      await completeDay(day, true);
+      for (let elem of qsa('*:not(.completed)')) {
+        elem.style.display = 'none';
+      }
+      page.classList.add('center', 'doubleColumns');
+      qs('#congrats').innerHTML += counter.parentElement.innerHTML;
     } else {
       for (let elem of qsa('.forgotten')) {
         elem.style.display = 'flex';
