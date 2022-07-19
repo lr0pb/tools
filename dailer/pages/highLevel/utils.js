@@ -163,7 +163,7 @@ export const inert = {
     if (!elem) return;
     const page = {};
     if (!dontSaveFocus) page.focused = document.activeElement;
-    elem.inert = true;
+    elem.setAttribute('inert', 'true');
     if (!dailerData.inert) {
       elem.ariaHidden = true;
       let focusableElems = elem.querySelectorAll(focusables);
@@ -181,7 +181,7 @@ export const inert = {
   },
   remove(elem, elemToFocus) {
     if (!elem) return;
-    elem.inert = false;
+    elem.removeAttribute('inert');
     const page = inert._cache.get(elem);
     if (!dailerData.inert) {
       elem.ariaHidden = false;

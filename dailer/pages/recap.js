@@ -25,7 +25,7 @@ export const recap = {
     });
     const date = String(getToday() - oneDay);
     const day = await globals.db.getItem('days', date);
-    if (!day) qs('#toMain').click();
+    if (!day) return qs('#toMain').click();
     let tasksCount = 0;
     let completedTasks = 0;
     let forgottenTasks = [];
@@ -36,7 +36,7 @@ export const recap = {
         else forgottenTasks.push(taskId);
       }
     }
-    if (tasksCount === 0) qs('#toMain').click();
+    if (tasksCount === 0) return qs('#toMain').click();
     const counter = qs('#tasksCount');
     const prog = qs('#dayProgress');
     prog.max = tasksCount;

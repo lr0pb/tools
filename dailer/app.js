@@ -82,7 +82,7 @@ const globals = {
     const content = container.querySelector('.content');
     content.className = `content ${page.styleClasses || ''}`;
     if (page.styleClasses && page.styleClasses.includes('doubleColumns')) {
-      content.focusgroup = 'horizontal';
+      content.setAttribute('focusgroup', 'horizontal');
     }
     await showPage(qs('.current'), container, noAnim);
     if (page.noSettings) {

@@ -140,7 +140,7 @@ function appendDays(days) {
     elem.dataset.value = days ? days[i] : '0';
     if (days) elem.setAttribute('disabled', '');
     if (!days) {
-      elem.role = 'button';
+      elem.setAttribute('role', 'button');
       elem.tabIndex = dailerData.focusgroup ? (i == 0 ? 0 : -1) : 0;
     }
     elem.innerHTML += `

@@ -17,16 +17,16 @@
   /* Color section */
   --brand: 215deg;
 
-  --mainBg: hsl(var(--brand), 100%, 6%);
+  --mainBg: hsl(var(--brand), 100%, 3%);
   --mainText: white;
-  --darkBorder: hsla(var(--brand), 12%, 18%, 0.5);
-  --darkShadow: hsl(var(--brand), 4%, 35%);
+  --darkBorder: hsla(var(--brand), 12%, 16%, 0.5);
+  --darkShadow: hsl(var(--brand), 10%, 35%);
   --accent: hsl(var(--brand), 60%, 51%);
   --secondary: hsl(var(--brand), 15%, 35%);
   --accentGreen: #379b00;
   --accentRed: #cb3a3a;
-  --lightBlueBg: hsl(var(--brand), 19%, 52%);
-  --taskBg: hsla(var(--brand), 10%, 14%, 0.5);
+  --lightBlueBg: hsl(var(--brand), 19%, 48%);
+  --taskBg: hsla(var(--brand), 10%, 13%, 0.5);
   --gradientLight: #5a73f2;
   --gradientDark: #0f0b30;
   --infoRectBg: #22222275;
@@ -35,7 +35,7 @@
   --marker: hsl(var(--brand), 100%, 90%);
   --msgBg: var(--mainBg);
   --focusBorder: #d1d1d1;
-  --focusBg: hsl(var(--brand), 10%, 22%);
+  --focusBg: hsl(var(--brand), 10%, 18%);
   accent-color: var(--accent);
 }
 
@@ -43,15 +43,15 @@ html { font-size: 1.25vmin; }
 
 @media (prefers-color-scheme: light) {
   :root {
-    --mainBg: hsl(var(--brand), 27%, 95%);
+    --mainBg: hsl(var(--brand), 60%, 97%);
     --mainText: black;
-    --darkBorder: hsla(var(--brand), 40%, 90%, 0.5);
-    --darkShadow: hsl(var(--brand), 45%, 83%);
+    --darkBorder: hsla(var(--brand), 60%, 90%, 0.5);
+    --darkShadow: hsl(var(--brand), 35%, 85%);
     /*--accent: #699ade;*/
-    --secondary: hsl(var(--brand), 17%, 68%);
+    --secondary: hsl(var(--brand), 17%, 55%);
     /*--accentGreen: #54c416;
     --accentRed: #ef5353;*/
-    --lightBlueBg: hsl(var(--brand), 67%, 85%);
+    --lightBlueBg: hsl(var(--brand), 67%, 82%);
     --taskBg: hsla(var(--brand), 52%, 92%, 0.5);
     /*--gradientLight: #9aaafa;*/
     --gradientDark: #463e8c;
@@ -61,7 +61,7 @@ html { font-size: 1.25vmin; }
     --marker: hsl(var(--brand), 100%, 75%);
     --msgBg: #232323;
     --focusBorder: #626262;
-    --focusBg: hsl(var(--brand), 59%, 88%);
+    --focusBg: hsl(var(--brand), 59%, 92%);
   }
 }
 
@@ -434,6 +434,7 @@ button:disabled, [disabled]:not(input, select) {
 input, select {
   min-height: 8.5rem;
   padding: 1.5rem 2rem;
+  background-color: white;
   border: 0.8rem solid var(--border);
   --border: var(--darkShadow);
   border-radius: 1.5rem;

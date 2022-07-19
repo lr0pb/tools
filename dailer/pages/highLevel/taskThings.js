@@ -1,8 +1,13 @@
 import { qs, emjs, getLast, intlDate, handleKeyboard } from './utils.js'
 import { getToday, oneDay, isCustomPeriod } from './periods.js'
 
+// req - required
+
 export function renderToggler({
-  name, id, buttons = [], toggler, page, onBodyClick, value, first, disabled
+  name/*if body present - not req*/, body/*not req, html string*/, id/*req, string*/, buttons = []/*not req*/,
+  toggler/*not req*/, value/*if toggler present - req, number 1 | 0*/,
+  onBodyClick/*not req, func*/, args/*not req, object*/,
+  page/*req, html elem*/, first/*not req, boolean*/, disabled/*not req, boolean*/
 }) {
   // toggler property represents emoji, that will arrive as first toggle value
   // but either this prop gives understand to enable default toggle function
@@ -11,11 +16,11 @@ export function renderToggler({
   elem.dataset.id = id;
   const noChilds = page.children.length == 0;
   if (onBodyClick) {
-    elem.role = 'button';
+    elem.setAttribute('role', 'button');
     elem.tabIndex = dailerData.focusgroup ? (noChilds ? 0 : -1) : 0;
     handleKeyboard(elem, true);
   }
-  elem.focusgroup = 'extend horizontal';
+  task.setAttribute('focusgroup', 'extend horizontal');
   let buttonsString = ``;
   if (toggler) buttons.push({ emoji: toggler, func: toggleFunc });
   buttons.forEach((btn, i) => {
@@ -26,7 +31,7 @@ export function renderToggler({
       >${btn.emoji}</button>
     `;
   });
-  elem.innerHTML = `<div><h2>${name}</h2></div>${buttonsString}`;
+  elem.innerHTML = `<div>${body ? body : `<h2>${name}</h2>`}</div>${buttonsString}`;
   elem.addEventListener('click', async (e) => {
     if (e.target.dataset.action) {
       const btn = buttons[e.target.dataset.action];
@@ -58,56 +63,46 @@ export function renderTask({
       func: onTaskCompleteClick, args: { globals, forcedDay, extraFunc }
     }], page, onBodyClick
   });
-  const task = document.createElement('div');
-  task.className = 'task';
-  task.role = 'button';
-  task.tabIndex = dailerData.focusgroup ? (page.children.length == 0 ? 0 : -1) : 0;
-  task.focusgroup = 'extend horizontal';
-  task.dataset.id = td.id;
-  task.innerHTML = `
-    <div>
+  return renderToggler({
+    body: `
       <h3>${td.name}</h3>
       <p>${isCustomPeriod(td.periodId)
         ? `<span class="customTitle" data-period="${td.periodId}">${
           periods[td.periodId].title
         }</span>${td.periodTitle}` : td.periodTitle
       } | ${priorities[td.priority].title}</p>
-    </div>
-    ${td.disabled ? '' : `
-      <button data-action="edit" class="emojiBtn" title="Edit task"
-        aria-label="Edit task: ${td.name}"
-        tabIndex="${dailerData.focusgroup ? -1 : 0}">${emjs.pen}</button>
-      <button data-action="delete" class="emojiBtn" title="Delete task"
-        aria-label="Delete task: ${td.name}"
-        tabIndex="${dailerData.focusgroup ? -1 : 0}">${emjs.trashCan}</button>
-    `}
-   `;
-  task.addEventListener('click', async (e) => {
-    await onTaskManageClick({e, globals, task, page});
+    `, id: td.id, buttons: [{
+      emoji: emjs.pen,
+      title: 'Edit task', aria: `Edit task: ${td.name}`,
+      func: onTaskEditClick, args: { globals }
+    }, {
+      emoji: emjs.trashCan,
+      title: 'Delete task', aria: `Delete task: ${td.name}`,
+      func: onTaskDeleteClick, args: { globals, page }
+    }], page, onBodyClick: onTaskManageClick, args: { globals }
   });
-  handleKeyboard(task, true);
-  if (page) page.append(task);
-  return task;
 }
 
-export async function onTaskManageClick({ e, globals, task, page }) {
-  if (e.target.dataset.action == 'edit') {
-    globals.pageInfo = {
-      taskAction: 'edit',
-      taskId: task.dataset.id
-    };
-    globals.paintPage('taskCreator');
-  } else if (e.target.dataset.action == 'delete') {
-    await editTask({
-      globals, id: task.dataset.id, field: 'deleted', onConfirm: () => {
-        task.remove();
-        if (!page.children.length) showNoTasks(page);
-      }
-    });
-  } else {
-    globals.pageInfo = { taskId: task.dataset.id };
-    globals.paintPage('taskInfo');
+function onTaskEditClick({elem, globals}) {
+  globals.pageInfo = {
+    taskAction: 'edit',
+    taskId: elem.dataset.id
   };
+  globals.paintPage('taskCreator');
+}
+
+async function onTaskDeleteClick({elem, globals, page}) {
+  await editTask({
+    globals, id: elem.dataset.id, field: 'deleted', onConfirm: () => {
+      elem.remove();
+      if (!page.children.length) showNoTasks(page);
+    }
+  });
+}
+
+function onTaskManageClick({elem, globals}) {
+  globals.pageInfo = { taskId: task.dataset.id };
+  globals.paintPage('taskInfo');
 }
 
 export function showNoTasks(page) {
