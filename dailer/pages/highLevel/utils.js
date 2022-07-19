@@ -207,7 +207,7 @@ export function syncGlobals(globals) {
 }
 
 export function updateState(updatedStateEntries) {
-  const state = dailerData.nav
+  let state = dailerData.nav
   ? navigation.currentEntry.getState()
   : copyObject(history.state);
   if (!state) state = {};

@@ -54,7 +54,7 @@ export const recap = {
       for (let elem of qsa('.completed')) {
         elem.style.display = 'block';
       }
-      for (let elem of qsa('.page > .content > *:not(.completed)')) {
+      for (let elem of qsa('.content > *:not(.completed)')) {
         elem.style.display = 'none';
       }
       page.classList.add('center', 'doubleColumns');

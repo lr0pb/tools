@@ -248,7 +248,7 @@ window.addEventListener('popstate', async (e) => {
 });
 
 const instantPromise = () => new Promise((res) => { res() });
-const callsList = ['paintPage', 'settings', 'additionalBack'];
+const callsList = ['paintPage', 'settings', 'additionalBack', 'breakAppRestoring'];
 
 if ('navigation' in window) navigation.addEventListener('navigate', (e) => {
   if (!dailerData.nav) return;
@@ -350,8 +350,16 @@ async function restoreApp(appHistory) {
   for (let entry of appHistory) {
     dailerData.forcedStateEntry = entry;
     const params = getParams(entry.url);
+    const ogPage = params.page;
     if (['main', 'recap'].includes(params.page)) {
       params.page = getFirstPage();
+    }
+    if (ogPage !== params.page) {
+      await navigation.traverseTo(appHistory[0].key, {
+        info: {call: 'breakAppRestoring'}
+      }).finished;
+      await globals.paintPage(params.page, true, true);
+      return;
     }
     if (params.settings) {
       await globals.openSettings(null, true);
