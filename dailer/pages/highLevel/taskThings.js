@@ -20,7 +20,7 @@ export function renderToggler({
     elem.tabIndex = dailerData.focusgroup ? (noChilds ? 0 : -1) : 0;
     handleKeyboard(elem, true);
   }
-  task.setAttribute('focusgroup', 'extend horizontal');
+  elem.setAttribute('focusgroup', 'extend horizontal');
   let buttonsString = ``;
   if (toggler) buttons.push({ emoji: toggler, func: toggleFunc });
   buttons.forEach((btn, i) => {
