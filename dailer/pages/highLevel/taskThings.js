@@ -6,7 +6,7 @@ import { getToday, oneDay, isCustomPeriod } from './periods.js'
 export function renderToggler({
   name/*if body present - not req*/, body/*not req, html string*/, id/*req, string*/, buttons = []/*not req*/,
   toggler/*not req*/, value/*if toggler present - req, number 1 | 0*/,
-  onBodyClick/*not req, func*/, args/*not req, object*/,
+  onBodyClick/*not req, func*/, args = {}/*not req, object*/,
   page/*req, html elem*/, first/*not req, boolean*/, disabled/*not req, boolean*/
 }) {
   // toggler property represents emoji, that will arrive as first toggle value
@@ -37,7 +37,9 @@ export function renderToggler({
       const btn = buttons[e.target.dataset.action];
       if (!btn.args) btn.args = {};
       await btn.func({...btn.args, e, elem});
-    } else if (onBodyClick) onBodyClick({e, elem});
+    } else if (onBodyClick) {
+      await onBodyClick({...args, e, elem});
+    }
   });
   if (value !== undefined) elem.dataset.value = value;
   elem.activate = () => elem.querySelector('button').click();
@@ -63,6 +65,15 @@ export function renderTask({
       func: onTaskCompleteClick, args: { globals, forcedDay, extraFunc }
     }], page, onBodyClick
   });
+  const buttons = [{
+    emoji: emjs.pen,
+    title: 'Edit task', aria: `Edit task: ${td.name}`,
+    func: onTaskEditClick, args: { globals }
+  }, {
+    emoji: emjs.trashCan,
+    title: 'Delete task', aria: `Delete task: ${td.name}`,
+    func: onTaskDeleteClick, args: { globals, page }
+  }];
   return renderToggler({
     body: `
       <h3>${td.name}</h3>
@@ -71,15 +82,8 @@ export function renderTask({
           periods[td.periodId].title
         }</span>${td.periodTitle}` : td.periodTitle
       } | ${priorities[td.priority].title}</p>
-    `, id: td.id, buttons: [{
-      emoji: emjs.pen,
-      title: 'Edit task', aria: `Edit task: ${td.name}`,
-      func: onTaskEditClick, args: { globals }
-    }, {
-      emoji: emjs.trashCan,
-      title: 'Delete task', aria: `Delete task: ${td.name}`,
-      func: onTaskDeleteClick, args: { globals, page }
-    }], page, onBodyClick: onTaskManageClick, args: { globals }
+    `, id: td.id, buttons: td.disabled ? undefined : buttons,
+    page, onBodyClick: onTaskManageClick, args: { globals }
   });
 }
 
@@ -101,7 +105,7 @@ async function onTaskDeleteClick({elem, globals, page}) {
 }
 
 function onTaskManageClick({elem, globals}) {
-  globals.pageInfo = { taskId: task.dataset.id };
+  globals.pageInfo = { taskId: elem.dataset.id };
   globals.paintPage('taskInfo');
 }
 
