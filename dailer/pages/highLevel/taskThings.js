@@ -1,4 +1,4 @@
-import { qs, emjs, getLast, intlDate, handleKeyboard } from './utils.js'
+import { qs, emjs, getLast, intlDate, handleKeyboard, reloadApp } from './utils.js'
 import { getToday, oneDay, isCustomPeriod } from './periods.js'
 
 // req - required
@@ -31,7 +31,7 @@ export function renderToggler({
       >${btn.emoji}</button>
     `;
   });
-  elem.innerHTML = `<div>${body ? body : `<h2>${name}</h2>`}</div>${buttonsString}`;
+  elem.innerHTML = `<div>${body || `<h2>${name}</h2>`}</div>${buttonsString}`;
   elem.addEventListener('click', async (e) => {
     if (e.target.dataset.action) {
       const btn = buttons[e.target.dataset.action];
@@ -180,7 +180,7 @@ export async function onTaskCompleteClick({ e, globals, elem: task, forcedDay, e
   const day = await globals.db.getItem('days', date);
   if (!day) return globals.floatingMsg({
     text: `${emjs.alarmClock} Day is expired! So you need to reload tasks for today`,
-    onClick: () => location.reload(),
+    onClick: async () => await reloadApp(globals),
     button: 'Reload', pageName: 'main'
   });
   const value = getLast(td.history) ? 0 : 1;

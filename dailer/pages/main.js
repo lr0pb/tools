@@ -179,7 +179,7 @@ function isEmpty(day) {
 async function checkDayNote(globals) {
   if (!isUnder3AM()) return;
   globals.floatingMsg({
-    text: `${emjs.clock} Tasks for new day will arrive at 3:00 AM`,
+    text: `${emjs.alarmClock} Tasks for new day will arrive at 3:00 AM`,
     onClick: async (e) => { e.target.parentElement.remove(); },
     button: 'Okay', pageName: 'main'
   });

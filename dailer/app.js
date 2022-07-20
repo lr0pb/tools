@@ -221,17 +221,15 @@ window.addEventListener('pagehide', () => {
 
 window.addEventListener('pageshow', async (e) => {
   createDb();
-  if (!e.persisted) {
-    dailerData.nav ? await startApp() : await renderPage(e, false);
-  }
 });
 
-window.addEventListener('load', async () => {
+window.addEventListener('DOMContentLoaded', async () => {
   document.documentElement.lang = navigator.language;
   await pages.settings.paint({globals, page: qs('#settings > .content')});
   const params = getParams();
   if (!params.settings) inert.set(qs('#settings'), true);
   inert.set(qs('#popup'), true);
+  dailerData.nav ? await startApp() : await renderPage(e, false);
 });
 
 window.addEventListener('popstate', async (e) => {
@@ -248,11 +246,16 @@ window.addEventListener('popstate', async (e) => {
 });
 
 const instantPromise = () => new Promise((res) => { res() });
-const callsList = ['paintPage', 'settings', 'additionalBack', 'breakAppRestoring'];
+const callsList = ['paintPage', 'settings', 'additionalBack', 'traverseToStart'];
 
 if ('navigation' in window) navigation.addEventListener('navigate', (e) => {
   if (!dailerData.nav) return;
   const info = e.info || {};
+  if (!info.call && e.userInitiated && !['traverse', 'reload'].includes(e.navigationType)) {
+    console.log(e.navigationType);
+    return e.transitionWhile(instantPromise());
+  }
+  if (info.call === 'hardReload') return e.transitionWhile(hardReload(info));
   if (
     callsList.includes(info.call) || e.navigationType !== 'traverse'
   ) {
@@ -278,6 +281,18 @@ if ('navigation' in window) navigation.addEventListener('navigatesuccess', async
     te == 'text' ? ' in' + def : (te == 'line' ? ' |' + def : '')
   }`;
 });
+
+async function hardReload(info) {
+  const appHistory = navigation.entries();
+  await navigation.traverseTo(appHistory[0].key, {
+    info: {call: 'traverseToStart'}
+  }).finished;
+  qs('.hidePrevPage').classList.add('current');
+  for (let page of qsa('.page')) {
+    page.remove();
+  }
+  await globals.paintPage(info.page || getFirstPage(), true, true);
+}
 
 async function onTraverseNavigation(e, silent) {
   const idx = (e.from || navigation.currentEntry).index;
@@ -356,7 +371,7 @@ async function restoreApp(appHistory) {
     }
     if (ogPage !== params.page) {
       await navigation.traverseTo(appHistory[0].key, {
-        info: {call: 'breakAppRestoring'}
+        info: {call: 'traverseToStart'}
       }).finished;
       await globals.paintPage(params.page, true, true);
       return;

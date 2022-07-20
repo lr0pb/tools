@@ -14,6 +14,7 @@ export const recap = {
       Check the tasks you didn't complete yesterday and if need mark the ones you forgot
     </h3>
     <div class="forgotten content doubleColumns first" id="tasks" focusgroup="horizontal"></div>
+    <h3 class="forgotten">Tasks with period "One time until complete" not counting as not completed</h3>
   `,
   footer: `
     <button id="toMain">${emjs.forward} Proceed to today</button>
@@ -47,9 +48,9 @@ export const recap = {
     const completeDay = async (actualDay, completed) => {
       actualDay.completed = completed;
       await globals.db.setItem('days', actualDay);
-    }
-    updateUI();
-    if (tasksCount == completedTasks) {
+    };
+    const showCompletedDay = async () => {
+      updateUI();
       await completeDay(day, true);
       for (let elem of qsa('.completed')) {
         elem.style.display = 'block';
@@ -59,6 +60,9 @@ export const recap = {
       }
       page.classList.add('center', 'doubleColumns');
       qs('#congrats').innerHTML += counter.parentElement.innerHTML;
+    };
+    if (tasksCount == completedTasks) {
+      await showCompletedDay();
     } else {
       for (let elem of qsa('.forgotten')) {
         elem.style.display = 'flex';
@@ -66,6 +70,10 @@ export const recap = {
       const container = qs('#tasks.forgotten');
       for (let taskId of forgottenTasks) {
         const td = await globals.db.getItem('tasks', taskId);
+        if (td.special == 'untilComplete') {
+          tasksCount--;
+          continue;
+        }
         renderTask({
           type: 'day', globals, td, page: container, extraFunc: async (actualDay, value) => {
             completedTasks += 1 * (value ? 1 : -1);
@@ -74,6 +82,10 @@ export const recap = {
           }, forcedDay: date
         });
       }
+      updateUI();
     }
+    if (
+      !container.children.length || tasksCount == completedTasks
+    ) await showCompletedDay();
   }
 };

@@ -1,9 +1,21 @@
-import { qs, emjs, intlDate } from './highLevel/utils.js'
+import { qs, emjs, intlDate, reloadApp } from './highLevel/utils.js'
 import { isCustomPeriod } from './highLevel/periods.js'
 
 export const debugPage = {
   header: `${emjs.construction} Debug page`,
-  page: ``,
+  page: `
+    <div id="dataContainer" class="doubleColumns"></div>
+    <div class="doubleColumns">
+      <div>
+        <button id="clear" class="danger noEmoji">Clear database</button>
+        <h3>It's actually delete all your tasks and other. Make sure you have backup</h3>
+      </div>
+      <div>
+        <button id="toRecap" class="noEmoji">Show recap page</button>
+        <h3>Reload app and show Yesterday recap page</h3>
+      </div>
+    </div>
+  `,
   footer: `
     <button id="back" class="secondary">${emjs.back} Back</button>
   `,
@@ -21,11 +33,6 @@ async function renderPage({globals, page}) {
   const days = await globals.db.getAll('days');
   const tasks = await globals.db.getAll('tasks');
   const periods = await globals.db.getAll('periods');
-  page.innerHTML = `
-    <div id="dataContainer" class="doubleColumns"></div>
-    <button id="clear" class="danger">${emjs.trashCan} Clear database</button>
-    <h3>It's actually delete all your tasks and other. Make sure you have backup</h3>
-  `;
   const data = {
     'Is storage persisted': isPersisted.toString(),
     'Persist attempts': localStorage.persistAttempts,
@@ -58,8 +65,11 @@ async function renderPage({globals, page}) {
   }
   qs('#clear').addEventListener('click', async () => {
     await clearDatabase(globals);
-    globals.paintPage('main', false, false, true);
-    location.reload();
+    await reloadApp(globals);
+  });
+  qs('#toRecap').addEventListener('click', async () => {
+    delete localStorage.recaped;
+    await reloadApp(globals);
   });
 }
 

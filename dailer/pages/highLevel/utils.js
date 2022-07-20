@@ -218,3 +218,13 @@ export function updateState(updatedStateEntries) {
   ? navigation.updateCurrentEntry({ state })
   : history.replaceState(state, '', location.href);
 }
+
+export async function reloadApp(globals, page) {
+  if (!dailerData.nav) {
+    await globals.paintPage(page || 'main', false, false, true);
+    return location.reload();
+  }
+  await navigation.reload({
+    info: {call: 'hardReload', page}
+  }).finished;
+}

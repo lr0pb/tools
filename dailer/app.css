@@ -17,7 +17,7 @@
   /* Color section */
   --brand: 215deg;
 
-  --mainBg: hsl(var(--brand), 100%, 3%);
+  --mainBg: black/*hsl(var(--brand), 100%, 3%)*/;
   --mainText: white;
   --darkBorder: hsla(var(--brand), 12%, 16%, 0.5);
   --darkShadow: hsl(var(--brand), 10%, 35%);
@@ -43,7 +43,7 @@ html { font-size: 1.25vmin; }
 
 @media (prefers-color-scheme: light) {
   :root {
-    --mainBg: hsl(var(--brand), 60%, 97%);
+    --mainBg: #f2f2f2/*hsl(var(--brand), 60%, 97%)*/;
     --mainText: black;
     --darkBorder: hsla(var(--brand), 60%, 90%, 0.5);
     --darkShadow: hsl(var(--brand), 35%, 85%);
@@ -152,6 +152,7 @@ html { font-size: 1.25vmin; }
     flex-wrap: wrap;
     justify-content: space-between;
   }
+  .doubleColumns { width: var(--gridContent); }
   .doubleColumns > * { width: var(--fullWidth); }
   .floatingMsg.notFixed { min-height: 13rem; }
 }
@@ -177,6 +178,7 @@ body, .page, #settings, #popup, noscript {
   ;
   grid-template-rows: var(--headerHeight) 1fr var(--footerHeight);
   grid-template-columns: minmax(3rem, 1fr) var(--gridContent) minmax(3rem, 1fr);
+  /*background-image: linear-gradient(180deg, var(--accent) 0.65%, transparent 0%);*/
 }
 #settings {
   z-index: 1;
@@ -384,6 +386,8 @@ button:disabled, [disabled]:not(input, select) {
 .task > div {
   margin: 1rem auto 2rem 2rem;
   text-align: left;
+  display: flex;
+  align-items: center;
 }
 .task h2 { margin: 1.5rem auto 0 1rem; }
 .task > :last-child { margin-right: 2rem; }
