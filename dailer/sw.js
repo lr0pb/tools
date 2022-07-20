@@ -1,6 +1,6 @@
 const APP_CACHE = '01.06-13:32';
-const HTML_TIMEOUT = 600;
-const FILE_TIMEOUT = 250;
+const HTML_TIMEOUT = 670;
+const FILE_TIMEOUT = 290;
 
 self.addEventListener('install', (e) => {
   skipWaiting();

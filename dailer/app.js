@@ -220,10 +220,16 @@ window.addEventListener('pagehide', () => {
 });
 
 window.addEventListener('pageshow', async (e) => {
+  console.log('pageshow event');
   createDb();
 });
 
-window.addEventListener('DOMContentLoaded', async () => {
+window.addEventListener('DOMContentLoaded', () => {
+  console.log('DOMContentLoaded event');
+});
+
+window.addEventListener('load', async () => {
+  console.log('load event');
   document.documentElement.lang = navigator.language;
   await pages.settings.paint({globals, page: qs('#settings > .content')});
   const params = getParams();

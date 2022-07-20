@@ -387,7 +387,8 @@ button:disabled, [disabled]:not(input, select) {
   margin: 1rem auto 2rem 2rem;
   text-align: left;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  justify-content: center;
 }
 .task h2 { margin: 1.5rem auto 0 1rem; }
 .task > :last-child { margin-right: 2rem; }
