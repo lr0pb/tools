@@ -61,13 +61,13 @@ export const recap = {
       page.classList.add('center', 'doubleColumns');
       qs('#congrats').innerHTML += counter.parentElement.innerHTML;
     };
+    const container = qs('#tasks.forgotten');
     if (tasksCount == completedTasks) {
       await showCompletedDay();
     } else {
       for (let elem of qsa('.forgotten')) {
         elem.style.display = 'flex';
       }
-      const container = qs('#tasks.forgotten');
       for (let taskId of forgottenTasks) {
         const td = await globals.db.getItem('tasks', taskId);
         if (td.special == 'untilComplete') {

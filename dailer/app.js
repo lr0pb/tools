@@ -249,10 +249,6 @@ const callsList = ['paintPage', 'settings', 'additionalBack', 'traverseToStart']
 if ('navigation' in window) navigation.addEventListener('navigate', (e) => {
   if (!dailerData.nav) return;
   const info = e.info || {};
-  if (!info.call && e.userInitiated && !['traverse', 'reload'].includes(e.navigationType)) {
-    console.log(e.navigationType);
-    return e.transitionWhile(instantPromise());
-  }
   if (info.call === 'hardReload') return e.transitionWhile(hardReload(info));
   if (
     callsList.includes(info.call) || e.navigationType !== 'traverse'
