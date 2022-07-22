@@ -50,7 +50,7 @@ async function cacheFirst(e) {
 
 self.addEventListener('fetch', (e) => {
   if (e.request.url.includes('twitter')) {
-    return e.respondWith(cacheFirst(e));
+    return; //e.respondWith(cacheFirst(e));
   }
   if (
     e.request.url.includes('manifest.json') || e.request.url.includes('screenshots') ||
