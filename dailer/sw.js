@@ -76,7 +76,8 @@ async function addCache(request, noTimeout) {
       }),
       fetch(request)
     ]);
-    if (response.ok) {
+    console.log(response);
+    if (response && response.ok) {
       const cache = await caches.open(APP_CACHE);
       cache.put(request, response.clone());
       fetchResponse = response;
