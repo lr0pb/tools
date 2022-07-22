@@ -43,7 +43,7 @@ async function cacheFirst(e) {
   let fetchResponse = null;
   console.log(cacheResponse);
   if (!cacheResponse) {
-    fetchResponse = await addCache(e.request);
+    fetchResponse = await addCache(e.request, true);
   }
   return cacheResponse || fetchResponse || getBadResponse();
 }
@@ -59,7 +59,7 @@ self.addEventListener('fetch', (e) => {
   e.respondWith(networkFirst(e));
 });
 
-async function addCache(request) {
+async function addCache(request, noTimeout) {
   if (!navigator.onLine) return null;
   let fetchResponse = null;
   const url = request.url;
@@ -72,7 +72,7 @@ async function addCache(request) {
   try {
     const response = await Promise.race([
       new Promise((res) => {
-        setTimeout(res, isHTML ? HTML_TIMEOUT : FILE_TIMEOUT);
+        setTimeout(res, noTimeout ? 9000 : (isHTML ? HTML_TIMEOUT : FILE_TIMEOUT));
       }),
       fetch(request)
     ]);
