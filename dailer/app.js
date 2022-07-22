@@ -216,7 +216,7 @@ async function loadEmojiList() {
   const resp = await fetch('./emoji.json');
   window._emojiList = await resp.json();
   window.emjs = new Proxy({}, {
-    get(prop) {
+    get(target, prop) {
       if (!(prop in _emojiList)) return '';
       return `<span class="emojiSymbol"
         style="background-image: url(https://twitter.github.io/twemoji/v/latest/${
