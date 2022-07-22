@@ -212,24 +212,32 @@ function createDb() {
   ]);
 }
 
+function getEmojiLink(emoji) {
+  return `https://raw.githubusercontent.com/googlefonts/noto-emoji/main/${
+    dailerData.isDesktop ? 'svg' : 'png/128'
+  }/emoji_u${_emojiList[prop]}.${
+    dailerData.isDesktop ? 'svg' : 'png'
+  }`;
+}
+
 async function loadEmojiList() {
   const resp = await fetch('./emoji.json');
   window._emojiList = await resp.json();
+  const loadArray = [];
+  for (let name in _emojiList) {
+    const link = getEmojiLink(name);
+    loadArray.push(fetch(link));
+  }
+  await Promise.all(loadArray);
   window.emjs = new Proxy({}, {
     get(target, prop) {
       if (!(prop in _emojiList)) return '';
-      return `<span class="emojiSymbol"
-        style="background-image: url(https://raw.githubusercontent.com/googlefonts/noto-emoji/main/${
-          dailerData.isDesktop ? 'svg' : 'png/128'
-        }/emoji_u${_emojiList[prop]}.${
-          dailerData.isDesktop ? 'svg' : 'png'
-        });">
-      </span>`;
+      return `<span class="emojiSymbol" style="background-image: url(${getEmojiLink(prop)});"></span>`;
     }
   });
   window.hasEmoji = (elem) => {
     return typeof elem == 'string' ? elem.includes('emojiSymbol') : undefined;
-  }
+  };
 }
 
 window.addEventListener('pagehide', () => {

@@ -49,8 +49,8 @@ async function cacheFirst(e) {
 
 self.addEventListener('fetch', (e) => {
   if (e.request.url.includes('googlefonts')) {
-    return e.waitUntil(addCache(e.request, true));
-    //e.respondWith(cacheFirst(e));
+    //return e.waitUntil(addCache(e.request, true));
+    return e.respondWith(cacheFirst(e));
   }
   if (
     e.request.url.includes('manifest.json') || e.request.url.includes('screenshots') ||

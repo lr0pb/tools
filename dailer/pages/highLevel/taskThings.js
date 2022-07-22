@@ -52,7 +52,9 @@ export function renderToggler({
 export function toggleFunc({e, elem}) {
   const value = Number(elem.dataset.value) ? 0 : 1;
   elem.dataset.value = value;
-  e.target.innerHTML = value ? emjs.sign : emjs.blank;
+  const target = e.target.dataset.action
+  ? e.target : e.target.parentElement;
+  target.innerHTML = value ? emjs.sign : emjs.blank;
   return value;
 }
 
