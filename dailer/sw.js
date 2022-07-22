@@ -39,9 +39,13 @@ async function networkFirst(e) {
 }
 
 async function cacheFirst(e) {
-  const cacheResponse = await caches.match(e.request, {ignoreSearch: true});
+  let cacheResponse = null;
   let fetchResponse = null;
-  if (!cacheResponse) fetchResponse = await addCache(e.request);
+  try {
+    cacheResponse = await caches.match(e.request, {ignoreSearch: true});
+  } catch (err) {
+    fetchResponse = await addCache(e.request);
+  }
   return cacheResponse || fetchResponse || getBadResponse();
 }
 
