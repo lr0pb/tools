@@ -1,6 +1,6 @@
 import { getToday, convertDate, oneDay, isCustomPeriod } from './highLevel/periods.js'
 import { getTextDate } from './highLevel/taskThings.js'
-import { qs, emjs, getLast, intlDate, syncGlobals } from './highLevel/utils.js'
+import { qs, /*emjs,*/ getLast, intlDate, syncGlobals } from './highLevel/utils.js'
 
 let taskTitle = null;
 
@@ -14,13 +14,13 @@ export const taskInfo = {
     return taskTitle ? 'line' : 'text';
   },
   dynamicTitle: true,
-  header: `${emjs.oldPaper} Task info`,
-  page: ``,
+  get header() { return `${emjs.oldPaper} Task info`},
+  get page() { return ``},
   styleClasses: 'doubleColumns',
-  footer: `
+  get footer() { return `
     <button id="back" class="secondary">${emjs.back} Back</button>
     <button id="edit" class="success">${emjs.pen} Edit task</button>
-  `,
+  `},
   script: renderTaskInfo,
   onPageShow: async ({globals, page}) => {
     syncGlobals(globals);

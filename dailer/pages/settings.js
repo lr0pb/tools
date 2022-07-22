@@ -1,5 +1,5 @@
 import { renderToggler, toggleFunc, getTextDate } from './highLevel/taskThings.js'
-import { emjs, globQs as qs, createOptionsList, togglableElement } from './highLevel/utils.js'
+import { /*emjs,*/ globQs as qs, createOptionsList, togglableElement } from './highLevel/utils.js'
 import { getToday, oneDay, isCustomPeriod } from './highLevel/periods.js'
 import { uploading } from './highLevel/uploadBackup.js'
 import { getData } from './highLevel/createBackup.js'
@@ -48,7 +48,8 @@ export const settings = {
       </div>
       <button id="toDebug" class="secondary">${emjs.construction} Open debug page</button>
       <h2>About</h2>
-      <h3>${emjs.label} dailer app, version 1.2.6</h3>
+      <h3>${emjs.label} dailer app, version 1.2.7</h3>
+      <h3>${emjs.stars} Emojis powered by <a href="https://twemoji.twitter.com/" target="_blank">Twitter</a></h3>
       <!--<h3>${emjs.magic} Codename: Sangria</h3>-->
       <h3>${emjs.microscope} Developed in 2022</h3>
     `;

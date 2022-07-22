@@ -1,19 +1,20 @@
-import { qs, emjs, syncGlobals } from './highLevel/utils.js'
+import { qs, /*emjs,*/ syncGlobals } from './highLevel/utils.js'
 import { renderTask, showNoTasks } from './highLevel/taskThings.js'
 
 export const planCreator = {
   title: `${emjs.notes} Your tasks list`,
-  header: `${emjs.notes} Your tasks`,
-  page: ``,
+  get header() { return `${emjs.notes} Your tasks`},
+  get page() { return ``},
   styleClasses: 'doubleColumns',
-  footer: `
+  get footer() { return `
     <button id="back" class="secondary">${emjs.back} Back</button>
     <button id="addTask">${emjs.paperWPen} Add task</button>
-  `,
+  `},
   script: onPlanCreator,
   onPageShow: async ({globals, page}) => {
     await onBackupUploaded({globals, page});
     const periods = await globals.getPeriods();
+    const priorities = await globals.getList('priorities');
     let id = globals.pageInfo.stateChangedTaskId;
     if (id) {
       const elem = qs(`[data-id="${id}"]`);
@@ -25,8 +26,12 @@ export const planCreator = {
     if (!id) return;
     const td = await globals.db.getItem('tasks', id);
     const elem = qs(`[data-id="${id}"]`);
+    if (!elem && page.classList.contains('center')) {
+      page.innerHTML = '';
+      page.classList.remove('center');
+    }
     const task = renderTask({
-      type: 'edit', globals, td, page: elem ? null : page, periods
+      type: 'edit', globals, td, page: elem ? null : page, periods, priorities
     });
     if (elem && task) elem.replaceWith(task);
     delete globals.pageInfo.dataChangedTaskId;
@@ -64,10 +69,10 @@ async function onPlanCreator({globals, page}) {
 
 export const tasksArchive = {
   title: `${emjs.book} Your archived tasks`,
-  header: `${emjs.book} Archived tasks`,
-  page: ``,
+  get header() { return `${emjs.book} Archived tasks`},
+  get page() { return ``},
   styleClasses: 'doubleColumns',
-  footer: `<button id="back" class="secondary">${emjs.back} Back</button>`,
+  get footer() { return `<button id="back" class="secondary">${emjs.back} Back</button>`},
   script: onTasksArchive,
   onSettingsUpdate: onBackupUploaded
 };

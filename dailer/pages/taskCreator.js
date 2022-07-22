@@ -5,7 +5,7 @@ import {
   editTask, setPeriodTitle, renderToggler, toggleFunc
 } from './highLevel/taskThings.js'
 import {
-  qs, emjs, copyObject, safeDataInteractions, createOptionsList, syncGlobals, updateState
+  qs, /*emjs,*/ copyObject, safeDataInteractions, createOptionsList, syncGlobals, updateState
 } from './highLevel/utils.js'
 
 let taskTitle = null;
@@ -20,8 +20,8 @@ export const taskCreator = {
     return taskTitle ? 'line' : 'text';
   },
   dynamicTitle: true,
-  header: `${emjs.paperWPen} <span id="taskAction">Add</span> task`,
-  page: `
+  get header() { return `${emjs.paperWPen} <span id="taskAction">Add</span> task`},
+  get page() { return `
     <h3 id="nameTitle">Enter task you will control</h3>
     <input type="text" id="name" placeHolder="Task name">
     <h3>How important is this task?</h3>
@@ -38,11 +38,11 @@ export const taskCreator = {
       <button id="disable" class="secondary noEmoji">Disable task</button>
       <button id="delete" class="danger noEmoji">Delete task</button>
     </div>
-  `,
-  footer: `
+  `},
+  get footer() { return `
     <button id="back" class="secondary">${emjs.back} Back</button>
     <button id="saveTask" class="success">${emjs.save} Save task</button>
-  `,
+  `},
   script: onTaskCreator,
   onSettingsUpdate: async ({globals}) => {
     syncGlobals(globals);
@@ -283,6 +283,7 @@ function onDateChange(e) {
 export function createTask(periods, td = {}) {
   const value = qs('#period') ? qs('#period').value : td.periodId;
   const priority = qs('#priority') ? Number(qs('#priority').value) : td.priority;
+  const dateValue = qs('#date') ? new Date(qs('#date').value).getTime() : td.periodStart;
   const per = periods[value];
   const tdPer = td.periodId ? periods[td.periodId] : {};
   const perId = td.periodId || td.ogTitle || per.id;
@@ -296,8 +297,7 @@ export function createTask(periods, td = {}) {
     periodStart: td.periodStart && td.periodStart <= getToday()
     ? td.periodStart
     : tdPer.selectTitle || per.selectTitle || per.getWeekStart
-    ? new Date(qs('#date').value).getTime()
-    : td.periodStart || per.startDate,
+    ? dateValue : td.periodStart || dateValue,
     periodDay: td.periodId
     ? td.periodDay
     : (per.getWeekStart

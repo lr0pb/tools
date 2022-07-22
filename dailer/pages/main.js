@@ -1,19 +1,19 @@
 import { isUnder3AM, getToday, oneDay, isCustomPeriod } from './highLevel/periods.js'
-import { qs, emjs, getLast } from './highLevel/utils.js'
+import { qs, /*emjs,*/ getLast } from './highLevel/utils.js'
 import { renderTask, disable, setPeriodTitle } from './highLevel/taskThings.js'
 import { downloadData } from './settings.js'
 
 export const main = {
-  header: `${emjs.sword} Today's tasks`,
+  get header() { return `${emjs.sword} Today's tasks`},
   styleClasses: 'center doubleColumns',
-  page: `
+  get page() { return `
     <h2 class="emoji">${emjs.eyes}</h2>
     <h2>Tasks loading...</h2>
-  `,
-  footer: `
+  `},
+  get footer() { return `
     <!--<button id="toHistory" class="secondary">${emjs.fileBox} History</button>-->
     <button id="toPlan" class="secondary">${emjs.notes} Edit tasks</button>
-  `,
+  `},
   script: async ({globals, page}) => {
     qs('#toPlan').addEventListener(
       'click', () => globals.paintPage('planCreator')

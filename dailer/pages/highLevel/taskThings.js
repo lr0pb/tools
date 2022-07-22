@@ -1,4 +1,4 @@
-import { qs, emjs, getLast, intlDate, handleKeyboard, reloadApp } from './utils.js'
+import { qs, /*emjs,*/ getLast, intlDate, handleKeyboard, reloadApp } from './utils.js'
 import { getToday, oneDay, isCustomPeriod } from './periods.js'
 
 // req - required
@@ -7,14 +7,14 @@ export function renderToggler({
   name/*if body present - not req*/, body/*not req, html string*/, id/*req, string*/, buttons = []/*not req*/,
   toggler/*not req*/, value/*if toggler present - req, number 1 | 0*/,
   onBodyClick/*not req, func*/, args = {}/*not req, object*/,
-  page/*req, html elem*/, first/*not req, boolean*/, disabled/*not req, boolean*/
+  page/*not req, html elem*/, first/*not req, boolean*/, disabled/*not req, boolean*/
 }) {
   // toggler property represents emoji, that will arrive as first toggle value
   // but either this prop gives understand to enable default toggle function
   const elem = document.createElement('div');
   elem.className = `task ${first ? 'first' : ''}`;
   elem.dataset.id = id;
-  const noChilds = page.children.length == 0;
+  const noChilds = !page ? true : page.children.length == 0;
   if (onBodyClick) {
     elem.setAttribute('role', 'button');
     elem.tabIndex = dailerData.focusgroup ? (noChilds ? 0 : -1) : 0;
@@ -43,7 +43,7 @@ export function renderToggler({
   });
   if (value !== undefined) elem.dataset.value = value;
   elem.activate = () => elem.querySelector('button').click();
-  page.append(elem);
+  if (page) page.append(elem);
   return elem;
 }
 

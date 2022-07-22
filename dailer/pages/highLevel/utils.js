@@ -39,44 +39,6 @@ export const intlDate = (date) => {
     .toLocaleDateString(navigator.language);
 };
 
-export const emjs = {
-  sign: '&#x2705;',
-  blank: '&#x2B1C;',
-  cross: '&#x274C;',
-  back: '&#x23EA;',
-  forward: '&#x23E9;',
-  stars: '&#x1F4AB;',
-  book: '&#x1F4D2',
-  notes: '&#x1F4D1;',
-  paperWPen: '&#x1F4DD;',
-  pen: '&#x1F58A;',
-  trashCan: '&#x1F5D1;',
-  sword: '&#x1F5E1;',
-  empty: '&#x1F4AD;',
-  save: '&#x1F4BE;',
-  magic: '&#x1F52E;',
-  calendar: '&#x1F5D3;',
-  fire: '&#x1F525;',
-  clock: '&#x1F551;',
-  oldPaper: '&#x1F4DC;',
-  paperList: '&#x1F4CB;',
-  construction: '&#x1F3D7;',
-  crateUp: '&#x1F4E4;',
-  crateDown: '&#x1F4E5;',
-  lockWKey: '&#x1F510;',
-  settings: '&#x2699;',
-  eyes: '&#x1F440;',
-  light: '&#x1F4A1',
-  fileBox: '&#x1F5C3;',
-  label: '&#x1F3F7;',
-  microscope: '&#x1F52C;',
-  alarmClock: '&#x23F0;',
-  bread: '&#x1F35E;',
-  box: '&#x1F4E6;',
-  newspaper: '&#x1F4F0;',
-  party: '&#x1F389;',
-};
-
 export function safeDataInteractions(elems) {
   const state = dailerData.nav
   ? navigation.currentEntry.getState()

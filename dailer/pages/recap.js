@@ -1,11 +1,11 @@
 import { getToday, oneDay } from './highLevel/periods.js'
-import { qs, qsa, emjs } from './highLevel/utils.js'
+import { qs, qsa, /*emjs*/ } from './highLevel/utils.js'
 import { renderTask } from './highLevel/taskThings.js'
 
 export const recap = {
-  header: `${emjs.newspaper} Yesterday recap`,
+  get header() { return `${emjs.newspaper} Yesterday recap`},
   noSettings: true,
-  page: `
+  get page() { return `
     <h2 class="emoji completed">${emjs.party}${emjs.sign}</h2>
     <h2 class="completed" id="congrats">Congratulations! </h2>
     <h3>You done <span id="tasksCount"></span> tasks yesterday</h3>
@@ -15,10 +15,10 @@ export const recap = {
     </h3>
     <div class="forgotten content doubleColumns first" id="tasks" focusgroup="horizontal"></div>
     <h3 class="forgotten">Tasks with period "One time until complete" not counting as not completed</h3>
-  `,
-  footer: `
+  `},
+  get footer() { return `
     <button id="toMain">${emjs.forward} Proceed to today</button>
-  `,
+  `},
   script: async ({globals, page}) => {
     qs('#toMain').addEventListener('click', () => {
       localStorage.recaped = getToday();

@@ -1,6 +1,6 @@
 import { pages } from './pages.js'
 import {
-  emjs, qs as localQs, globQs as qs, globQsa as qsa, copyObject, copyArray, checkForFeatures,
+  /*emjs,*/ qs as localQs, globQs as qs, globQsa as qsa, copyObject, copyArray, checkForFeatures,
   isDesktop, inert
 } from './pages/highLevel/utils.js'
 import { getToday } from './pages/highLevel/periods.js'
@@ -212,6 +212,23 @@ function createDb() {
   ]);
 }
 
+async function loadEmojiList() {
+  const resp = await fetch('./emoji.json');
+  window._emojiList = await resp.json();
+  window.emjs = new Proxy({}, {
+    get(prop) {
+      if (!(prop in _emojiList)) return '';
+      return `<span class="emojiSymbol"
+        style="background-image: url(https://twitter.github.io/twemoji/v/latest/${
+          dailerData.isDesktop ? 'svg' : '72x72'
+        }/${_emojiList[prop]}.${
+          dailerData.isDesktop ? 'svg' : 'png'
+        });">
+      </span>`;
+    }
+  });
+}
+
 window.addEventListener('pagehide', () => {
   if (globals.db) {
     globals.db.db.close();
@@ -223,6 +240,7 @@ window.addEventListener('pageshow', async (e) => {
   createDb();
   if (e.persisted) return;
   document.documentElement.lang = navigator.language;
+  await loadEmojiList();
   await pages.settings.paint({globals, page: qs('#settings > .content')});
   const params = getParams();
   if (!params.settings) inert.set(qs('#settings'), true);
@@ -259,6 +277,7 @@ if ('navigation' in window) navigation.addEventListener('navigate', (e) => {
 });
 
 if ('navigation' in window) navigation.addEventListener('navigatesuccess', async () => {
+  return;
   const params = getParams();
   const page = pages[params.settings ? 'settings' : params.page];
   if (page.dynamicTitle) {
@@ -364,10 +383,11 @@ async function restoreApp(appHistory) {
       params.page = getFirstPage();
     }
     if (ogPage !== params.page) {
+      await globals.paintPage(params.page, true, true);
+      dailerData.forcedStateEntry = null;
       await navigation.traverseTo(appHistory[0].key, {
         info: {call: 'traverseToStart'}
       }).finished;
-      await globals.paintPage(params.page, true, true);
       return;
     }
     if (params.settings) {

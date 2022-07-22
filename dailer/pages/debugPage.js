@@ -1,9 +1,9 @@
-import { qs, emjs, intlDate, reloadApp } from './highLevel/utils.js'
+import { qs, /*emjs,*/ intlDate, reloadApp } from './highLevel/utils.js'
 import { isCustomPeriod } from './highLevel/periods.js'
 
 export const debugPage = {
-  header: `${emjs.construction} Debug page`,
-  page: `
+  get header() { return `${emjs.construction} Debug page`},
+  get page() { return `
     <div id="dataContainer" class="doubleColumns"></div>
     <div class="doubleColumns">
       <div>
@@ -15,10 +15,10 @@ export const debugPage = {
         <h3>Reload app and show Yesterday recap page</h3>
       </div>
     </div>
-  `,
-  footer: `
+  `},
+  get footer() { return `
     <button id="back" class="secondary">${emjs.back} Back</button>
-  `,
+  `},
   noSettings: true,
   script: renderPage
 };

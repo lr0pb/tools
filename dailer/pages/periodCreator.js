@@ -1,6 +1,6 @@
 import { renderToggler, toggleFunc } from './highLevel/taskThings.js'
 import {
-  qs, qsa, globQs, globQsa, emjs, safeDataInteractions, handleKeyboard,
+  qs, qsa, globQs, globQsa, /*emjs,*/ safeDataInteractions, handleKeyboard,
   togglableElement, syncGlobals
 } from './highLevel/utils.js'
 import { paintPeriods } from './settings.js'
@@ -18,8 +18,8 @@ export const periodCreator = {
     return periodTitle ? 'line' : 'text';
   },
   dynamicTitle: true,
-  header: `${emjs.calendar} <span id="periodAction">Create</span> period`,
-  page: `
+  get header() { return `${emjs.calendar} <span id="periodAction">Create</span> period`},
+  get page() { return `
     <h3>Enter period title</h3>
     <input type="text" id="periodName" placeHolder="Period title e.g. Every saturday">
     <h3>You also can type period description</h3>
@@ -37,11 +37,11 @@ export const periodCreator = {
     <h3>Automatically set task start day to the previous Sunday</h3>
     <div class="togglerContainer first"></div>
     <h3>This period will be selected by default in periods drop down list if no other default periods created later are in the list</h3>
-  `,
-  footer: `
+  `},
+  get footer() { return `
     <button id="back" class="secondary">${emjs.back} Back</button>
     <button id="savePeriod" class="success">${emjs.save} Save period</button>
-  `,
+  `},
   noSettings: true,
   script: onPeriodCreator,
   onBack: (globals) => {

@@ -25,22 +25,35 @@ self.addEventListener('activate', (e) => {
   );
 });
 
+function getBadResponse() {
+  return new Response(new Blob(), { 'status': 400, 'statusText': 'Something goes wrong with this request' });
+}
+
+async function networkFirst(e) {
+  const fetchResponse = await addCache(e.request);
+  let cacheResponse = null;
+  if (!fetchResponse || (fetchResponse && !fetchResponse.ok)) {
+    cacheResponse = await caches.match(e.request, {ignoreSearch: true});
+  }
+  return cacheResponse || fetchResponse || getBadResponse();
+}
+
+async function cacheFirst(e) {
+  const cacheResponse = await caches.match(e.request, {ignoreSearch: true});
+  let fetchResponse = null;
+  if (!cacheResponse) fetchResponse = await addCache(e.request);
+  return cacheResponse || fetchResponse || getBadResponse();
+}
+
 self.addEventListener('fetch', (e) => {
+  if (e.request.url.includes('twitter')) {
+    return e.respondWith(cacheFirst(e));
+  }
   if (
     e.request.url.includes('manifest.json') || e.request.url.includes('screenshots') ||
     !e.request.url.includes(location.origin)
   ) return;
-  const badResponse = new Response(new Blob, { 'status': 400, 'statusText': 'No network' });
-  e.respondWith(
-    (async () => {
-      const fetchResponse = await addCache(e.request);
-      let cacheResponse = null;
-      if (!fetchResponse || (fetchResponse && !fetchResponse.ok)) {
-        cacheResponse = await caches.match(e.request, {ignoreSearch: true});
-      }
-      return cacheResponse || fetchResponse || badResponse;
-    })()
-  );
+  e.respondWith(networkFirst(e));
 });
 
 async function addCache(request) {
