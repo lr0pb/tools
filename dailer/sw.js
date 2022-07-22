@@ -41,7 +41,6 @@ async function networkFirst(e) {
 async function cacheFirst(e) {
   const cacheResponse = await caches.match(e.request, {ignoreSearch: true});
   let fetchResponse = null;
-  console.log(cacheResponse);
   if (!cacheResponse) {
     fetchResponse = await addCache(e.request, true);
   }
@@ -49,8 +48,8 @@ async function cacheFirst(e) {
 }
 
 self.addEventListener('fetch', (e) => {
-  if (e.request.url.includes('twitter')) {
-    return; //e.respondWith(cacheFirst(e));
+  if (e.request.url.includes('googlefonts')) {
+    e.respondWith(cacheFirst(e));
   }
   if (
     e.request.url.includes('manifest.json') || e.request.url.includes('screenshots') ||
@@ -76,7 +75,6 @@ async function addCache(request, noTimeout) {
       }),
       fetch(request)
     ]);
-    console.log(response);
     if (response && response.ok) {
       const cache = await caches.open(APP_CACHE);
       cache.put(request, response.clone());

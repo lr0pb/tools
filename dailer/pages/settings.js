@@ -49,7 +49,7 @@ export const settings = {
       <button id="toDebug" class="secondary">${emjs.construction} Open debug page</button>
       <h2>About</h2>
       <h3>${emjs.label} dailer app, version 1.2.7</h3>
-      <h3>${emjs.stars} Emojis powered by <a href="https://twemoji.twitter.com/" target="_blank">Twitter</a></h3>
+      <h3>${emjs.stars} Emojis powered by <a href="https://github.com/googlefonts/noto-emoji/" target="_blank">Google</a></h3>
       <!--<h3>${emjs.magic} Codename: Sangria</h3>-->
       <h3>${emjs.microscope} Developed in 2022</h3>
     `;

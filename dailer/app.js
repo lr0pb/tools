@@ -219,9 +219,9 @@ async function loadEmojiList() {
     get(target, prop) {
       if (!(prop in _emojiList)) return '';
       return `<span class="emojiSymbol"
-        style="background-image: url(https://twitter.github.io/twemoji/v/latest/${
-          dailerData.isDesktop ? 'svg' : '72x72'
-        }/${_emojiList[prop]}.${
+        style="background-image: url(https://raw.githubusercontent.com/googlefonts/noto-emoji/main/${
+          dailerData.isDesktop ? 'svg' : 'png/128'
+        }/emoji_u${_emojiList[prop]}.${
           dailerData.isDesktop ? 'svg' : 'png'
         });">
       </span>`;
