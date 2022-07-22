@@ -228,7 +228,7 @@ async function loadEmojiList() {
     }
   });
   window.hasEmoji = (elem) => {
-    return typeof elem == text ? text.includes('emojiSymbol') : undefined;
+    return typeof elem == 'string' ? elem.includes('emojiSymbol') : undefined;
   }
 }
 
