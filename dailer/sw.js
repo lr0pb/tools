@@ -49,7 +49,7 @@ async function cacheFirst(e) {
 
 self.addEventListener('fetch', (e) => {
   if (e.request.url.includes('googlefonts')) {
-    e.respondWith(cacheFirst(e));
+    return ;//e.respondWith(cacheFirst(e));
   }
   if (
     e.request.url.includes('manifest.json') || e.request.url.includes('screenshots') ||
@@ -75,6 +75,7 @@ async function addCache(request, noTimeout) {
       }),
       fetch(request)
     ]);
+    console.log(`${response.url}: ${response.status}`);
     if (response && response.ok) {
       const cache = await caches.open(APP_CACHE);
       cache.put(request, response.clone());
