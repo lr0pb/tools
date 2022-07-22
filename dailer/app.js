@@ -227,6 +227,9 @@ async function loadEmojiList() {
       </span>`;
     }
   });
+  window.hasEmoji = (elem) => {
+    return typeof elem == text ? text.includes('emojiSymbol') : undefined;
+  }
 }
 
 window.addEventListener('pagehide', () => {

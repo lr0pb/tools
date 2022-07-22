@@ -26,15 +26,17 @@ export function renderToggler({
   buttons.forEach((btn, i) => {
     buttonsString += `
       <button data-action="${i}" class="emojiBtn" ${disabled ? 'disabled' : ''}
-        title="${btn.title || 'Toggle value'}" aria-label="${btn.aria || `Toggle ${name} value`}"
+        title="${btn.title || 'Toggle value'}" aria-label="${btn.aria || `Toggle ${hasEmoji(name) ? '' : name} value`}"
         tabIndex="${dailerData.focusgroup ? (noChilds && !onBodyClick && i == 0 ? 0 : -1) : 0}"
       >${btn.emoji}</button>
     `;
   });
   elem.innerHTML = `<div>${body || `<h2>${name}</h2>`}</div>${buttonsString}`;
   elem.addEventListener('click', async (e) => {
-    if (e.target.dataset.action) {
-      const btn = buttons[e.target.dataset.action];
+    const target = e.target.dataset.action
+    ? e.target : e.target.parentElement;
+    if (target.dataset.action) {
+      const btn = buttons[target.dataset.action];
       if (!btn.args) btn.args = {};
       await btn.func({...btn.args, e, elem});
     } else if (onBodyClick) {
