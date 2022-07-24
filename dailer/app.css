@@ -268,9 +268,9 @@ p {
   font-size: 9rem;
 }
 .emojiSymbol {
-  height: 1em; width: 1em;
-  margin: 0 0.1em 0 0.1em;
-  vertical-align: -0.1em;
+  height: 1.1em; width: 1.1em;
+  margin: 0 0.1em;
+  vertical-align: -0.2em;
   display: inline-block;
   background-position: center;
   background-size: contain;
@@ -466,6 +466,8 @@ progress {
   margin: 5rem 0;
   cursor: progress;
 }
+a { color: var(--accent); }
+a:visited { color: var(--secondary); }
 .pageBtn, .hidedUI, #editButtons, #popup, input[type="file"],
 .uploadUI, .uploadSuccess, .downloadUI, .downloadLink,
 .historyMonth > [data-used="false"], .completed, .forgotten {

@@ -48,9 +48,9 @@ export const settings = {
       </div>
       <button id="toDebug" class="secondary">${emjs.construction} Open debug page</button>
       <h2>About</h2>
-      <h3>${emjs.label} dailer app, version 1.2.7</h3>
-      <h3>${emjs.stars} Emojis powered by <a href="https://github.com/googlefonts/noto-emoji/" target="_blank">Google</a></h3>
-      <!--<h3>${emjs.magic} Codename: Sangria</h3>-->
+      <h3>${emjs.label} dailer app, version 1.2.8</h3>
+      <h3>${emjs.sparkles} Emojis powered by <a href="https://github.com/googlefonts/noto-emoji/" target="_blank">Google</a></h3>
+      <!--<h3>${emjs.magicBall} Codename: Sangria</h3>-->
       <h3>${emjs.microscope} Developed in 2022</h3>
     `;
     qs('#toPeriodCreator').addEventListener('click', () => {
@@ -119,8 +119,9 @@ export async function paintPeriods(globals) {
         }
       });
     }
+    const used = getPeriodUsed(per);
     buttons.push({
-      emoji: getPeriodUsed(per),
+      emoji: emjs[used ? 'sign' : 'blank'], value: used,
       title: markTitle(), aria: markTitle(period.title),
       func: updatePeriodsList, args: { globals, periodsCount }
     });
@@ -154,12 +155,11 @@ function updatePeriodsList({e, globals, periodsCount, elem }) {
     return -1;
   });
   localStorage.periodsList = JSON.stringify(list);
-  e.target.innerHTML = getPeriodUsed(id);
+  toggleFunc({e, elem});
 }
 
 function getPeriodUsed(id) {
-  return JSON.parse(localStorage.periodsList).includes(id)
-  ? emjs.sign : emjs.blank;
+  return JSON.parse(localStorage.periodsList).includes(id) ? 1 : 0;
 }
 
 async function uploadData(globals) {

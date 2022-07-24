@@ -18,6 +18,10 @@ export const main = {
     qs('#toPlan').addEventListener(
       'click', () => globals.paintPage('planCreator')
     );
+    /*globals.pageButton({
+      emoji: emjs.star, title: 'Open wishlist',
+      onClick: () => globals.paintPage('wishlist')
+    });*/
     await renderDay({globals, page});
   },
   onPageShow: updatePage,
@@ -40,7 +44,7 @@ async function renderDay({globals, page}) {
   const { day } = await createDay(globals, periods);
   if (day == 'error') {
     page.innerHTML = `
-      <h2 class="emoji">${emjs.magic}</h2>
+      <h2 class="emoji">${emjs.magicBall}</h2>
       <h2>You have no tasks today!</h2>
     `;
     page.classList.add('center');

@@ -1,36 +1,58 @@
-const APP_CACHE = '01.06-13:32';
+const APP_CACHE = 'app-24.07';
+const EMOJI_CACHE = 'emoji-24.07';
 const HTML_TIMEOUT = 670;
 const FILE_TIMEOUT = 290;
 
+async function addToCache(cacheName, fileName, onFileReceived) {
+  const cache = await caches.open(cacheName);
+  const resp = await fetch(`./${fileName}.json`);
+  const respData = await resp.json();
+  const linksToCache = onFileReceived(respData);
+  await Promise.all(
+    linksToCache.map(async (file) => await cache.add(file))
+  );
+}
+
+function getEmojiLink(emoji) {
+  return `https://raw.githubusercontent.com/googlefonts/noto-emoji/main/svg/emoji_u${
+    emoji
+  }.svg`;
+}
+
+async function saveCacheOnInstall() {
+  await addToCache(APP_CACHE, 'files', (data) => data);
+  await addToCache(EMOJI_CACHE, 'emoji', (emojis) => {
+    const emojiLinks = [];
+    for (let name in emojis) {
+      emojiLinks.push(getEmojiLink(emojis[name]));
+    }
+    return emojiLinks;
+  });
+}
+
 self.addEventListener('install', (e) => {
   skipWaiting();
-  e.waitUntil(
-    (async () => {
-      const cache = await caches.open(APP_CACHE);
-      const response = await fetch('./files.json');
-      const offlineFiles = await response.json();
-      offlineFiles.forEach( (file) => cache.add(file));
-    })()
-  );
+  e.waitUntil(saveCacheOnInstall());
 });
+
+async function updateCache() {
+  const keys = await caches.keys();
+  await Promise.all(
+    keys.map((key) => [APP_CACHE, EMOJI_CACHE].includes(key) || caches.delete(key))
+  );
+}
 
 self.addEventListener('activate', (e) => {
   clients.claim();
-  e.waitUntil(
-    caches.keys().then( (keys) => {
-      Promise.all(
-        keys.map( (key) => key == APP_CACHE || caches.delete(key) )
-      );
-    })
-  );
+  e.waitUntil(updateCache());
 });
 
 function getBadResponse() {
   return new Response(new Blob(), { 'status': 400, 'statusText': 'Something goes wrong with this request' });
 }
 
-async function networkFirst(e) {
-  const fetchResponse = await addCache(e.request);
+async function networkFirst(e, cacheName) {
+  const fetchResponse = await addCache(e.request, cacheName);
   let cacheResponse = null;
   if (!fetchResponse || (fetchResponse && !fetchResponse.ok)) {
     cacheResponse = await caches.match(e.request, {ignoreSearch: true});
@@ -38,28 +60,27 @@ async function networkFirst(e) {
   return cacheResponse || fetchResponse || getBadResponse();
 }
 
-async function cacheFirst(e) {
+async function cacheFirst(e, cacheName) {
   const cacheResponse = await caches.match(e.request, {ignoreSearch: true});
   let fetchResponse = null;
   if (!cacheResponse) {
-    fetchResponse = await addCache(e.request, true);
+    fetchResponse = await addCache(e.request, cacheName);
   }
   return cacheResponse || fetchResponse || getBadResponse();
 }
 
 self.addEventListener('fetch', (e) => {
   if (e.request.url.includes('googlefonts')) {
-    //return e.waitUntil(addCache(e.request, true));
-    return e.respondWith(cacheFirst(e));
+    return e.respondWith(cacheFirst(e, EMOJI_CACHE));
   }
   if (
     e.request.url.includes('manifest.json') || e.request.url.includes('screenshots') ||
     !e.request.url.includes(location.origin)
   ) return;
-  e.respondWith(networkFirst(e));
+  e.respondWith(networkFirst(e, APP_CACHE));
 });
 
-async function addCache(request, noTimeout) {
+async function addCache(request, cacheName) {
   if (!navigator.onLine) return null;
   let fetchResponse = null;
   const url = request.url;
@@ -72,13 +93,12 @@ async function addCache(request, noTimeout) {
   try {
     const response = await Promise.race([
       new Promise((res) => {
-        setTimeout(res, noTimeout ? 9000 : (isHTML ? HTML_TIMEOUT : FILE_TIMEOUT));
+        setTimeout(res, cacheName == EMOJI_CACHE ? 9000 : (isHTML ? HTML_TIMEOUT : FILE_TIMEOUT));
       }),
       fetch(request)
     ]);
-    console.log(`${response.url} - ${response.type} - ${response.status}`);
     if (response && response.ok) {
-      const cache = await caches.open(APP_CACHE);
+      const cache = await caches.open(cacheName);
       cache.put(request, response.clone());
       fetchResponse = response;
     };

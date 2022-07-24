@@ -154,7 +154,8 @@ function appendDays(days) {
   hm.addEventListener('click', (e) => {
     const elem = e.target.dataset.value
     ? e.target : ['H4', 'H3'].includes(e.target.tagName)
-    ? e.target.parentElement : null;
+    ? e.target.parentElement : e.target.tagName == 'SPAN'
+    ? e.target.parentElement.parentElement : null;
     if (!(elem.dataset && elem.dataset.value)) return;
     const value = Number(elem.dataset.value) == 1 ? 0 : 1;
     elem.dataset.value = value;

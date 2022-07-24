@@ -1,11 +1,11 @@
 import { qs, /*emjs*/ } from './highLevel/utils.js'
 
 export const onboarding = {
-  title: `${emjs.stars} Welcome to the dailer ${emjs.sign}`,
+  title: `${emjs.sparkles} Welcome to the dailer ${emjs.sign}`,
   titleEnding: 'none',
   get header() { return ''},
   get page() { return `
-    <h2 class="emoji">${emjs.stars}</h2>
+    <h2 class="emoji">${emjs.sparkles}</h2>
     <h2>Create your everyday plan for manage how you grow yourself over time</h2>
   `},
   styleClasses: 'center doubleColumns',

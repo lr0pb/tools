@@ -91,7 +91,7 @@ function renderItemsHolder({task, periods, priorities, iha}) {
   createInfoRect(emjs.calendar, periodText, 'blue', !iha && !task.disabled ? 1 : 2);
 
   const isActiveText = `Today ${task.period[task.periodDay] ? 'you should do' : `you haven't`} this task`;
-  if (!task.disabled) createInfoRect(emjs.clock, isActiveText, task.period[task.periodDay] ? 'green' : 'red');
+  if (!task.disabled) createInfoRect(emjs.alarmClock, isActiveText, task.period[task.periodDay] ? 'green' : 'red');
 
   createInfoRect(emjs.fire, `Importance: ${priorities[task.priority].title}`, priorities[task.priority].color);
 

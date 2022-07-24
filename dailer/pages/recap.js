@@ -44,6 +44,7 @@ export const recap = {
     const updateUI = () => {
       counter.innerHTML = `${completedTasks}/${tasksCount}`;
       prog.value = completedTasks;
+      prog.max = tasksCount;
     };
     const completeDay = async (actualDay, completed) => {
       actualDay.completed = completed;

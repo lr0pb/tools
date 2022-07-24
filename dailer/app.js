@@ -213,11 +213,9 @@ function createDb() {
 }
 
 function getEmojiLink(emoji) {
-  return `https://raw.githubusercontent.com/googlefonts/noto-emoji/main/${
-    dailerData.isDesktop ? 'svg' : 'png/128'
-  }/emoji_u${_emojiList[emoji]}.${
-    dailerData.isDesktop ? 'svg' : 'png'
-  }`;
+  return `https://raw.githubusercontent.com/googlefonts/noto-emoji/main/svg/emoji_u${
+    _emojiList[emoji]
+  }.svg`;
 }
 
 async function loadEmojiList() {

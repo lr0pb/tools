@@ -58,8 +58,7 @@ const meta = {
 
 async function onPlanCreator({globals, page}) {
   globals.pageButton({
-    emoji: emjs.book,
-    title: 'Open tasks archive',
+    emoji: emjs.book, title: 'Open tasks archive',
     onClick: () => globals.paintPage('tasksArchive')
   });
   qs('#back').addEventListener('click', () => history.back());

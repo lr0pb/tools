@@ -67,7 +67,7 @@ export function renderTask({
       emoji: getTaskComplete(td),
       title: markTitle(), aria: markTitle(td.name),
       func: onTaskCompleteClick, args: { globals, forcedDay, extraFunc }
-    }], page, onBodyClick
+    }], page, onBodyClick, value: getLast(td.history)
   });
   const buttons = [{
     emoji: emjs.pen,
@@ -178,8 +178,8 @@ export function setPeriodTitle(task) {
   }
 }
 
-export async function onTaskCompleteClick({ e, globals, elem: task, forcedDay, extraFunc }) {
-  const td = await globals.db.getItem('tasks', task.dataset.id);
+export async function onTaskCompleteClick({ e, globals, elem, forcedDay, extraFunc }) {
+  const td = await globals.db.getItem('tasks', elem.dataset.id);
   const date = forcedDay ? forcedDay : getToday().toString();
   const day = await globals.db.getItem('days', date);
   if (!day) return globals.floatingMsg({
@@ -187,13 +187,12 @@ export async function onTaskCompleteClick({ e, globals, elem: task, forcedDay, e
     onClick: async () => await reloadApp(globals),
     button: 'Reload', pageName: 'main'
   });
-  const value = getLast(td.history) ? 0 : 1;
+  const value = toggleFunc({e, elem});
   td.history.pop();
   td.history.push(value);
   day.tasks[td.priority][td.id] = value;
   await globals.db.setItem('tasks', td);
   await globals.db.setItem('days', day);
-  e.target.innerHTML = getTaskComplete(td);
   if (extraFunc) await extraFunc(day, value);
 }
 
