@@ -9,7 +9,10 @@ async function addToCache(cacheName, fileName, onFileReceived) {
   const respData = await resp.json();
   const linksToCache = onFileReceived(respData);
   await Promise.all(
-    linksToCache.map(async (file) => await cache.add(file))
+    linksToCache.map(async (file) => {
+      const data = await fetch(file);
+      if (data.ok) await cache.put(file, data);
+    })
   );
 }
 
