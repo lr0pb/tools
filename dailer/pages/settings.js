@@ -43,10 +43,10 @@ export const settings = {
             <select id="reminderList" title="Select how often to remind you about creating backups"></select>
             <h3 id="nextRemind">Next remind</h3>
           </div>
-          <div id="reminder"></div>
+          <div id="reminder" class="first"></div>
         </div>
       </div>
-      <div id="experiments" class="first"></div>
+      <div id="experiments"></div>
       <button id="toDebug" class="secondary">${emjs.construction} Open debug page</button>
       <h2>About</h2>
       <h3>${emjs.label} dailer app, version 1.2.9</h3>
