@@ -1,5 +1,7 @@
 export const isUnder3AM = (date) => {
-  return (date || new Date()).getHours() < 3;
+  if (!date) date = new Date();
+  return date.getTime() === date.setHours(0, 0, 0, 0)
+  ? false : date.getHours() < 3;
 };
 
 export const oneDay = 86400000; // 86 400 000 milliseconds in one day

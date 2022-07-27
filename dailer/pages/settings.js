@@ -43,7 +43,7 @@ export const settings = {
             <select id="reminderList" title="Select how often to remind you about creating backups"></select>
             <h3 id="nextRemind">Next remind</h3>
           </div>
-          <div id="reminder" class="first"></div>
+          <div id="reminder"></div>
         </div>
       </div>
       <div id="experiments" class="first"></div>

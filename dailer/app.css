@@ -182,11 +182,11 @@ body, .page, #settings, #popup, noscript {
 .compress .page, .compress #settings {
   --headerHeight: 15rem;
   --footerHeight: 17rem;
-  background-image: linear-gradient(180deg, var(--accent) 0.65%, transparent 0%);
+  background-image: linear-gradient(180deg, var(--accent) 0.55%, transparent 0%);
 }
 #settings {
   z-index: 1;
-  --footerHeight: 0;
+  --footerHeight: 0 !important;
   transform: translateX(100vw);
   transition: transform var(--fastAnim);
 }
@@ -274,7 +274,7 @@ p {
 .emojiSymbol {
   height: 1.1em; width: 1.1em;
   margin: 0.25em 0.1em;
-  vertical-align: -0.4em;
+  vertical-align: -0.05em;
   color: transparent;
   display: inline-block;
   background-position: center;
@@ -304,7 +304,7 @@ button, [role="button"] { outline: none !important; }
     transform var(--normalAnim), border-color var(--normalAnim);
 }
 button {
-  min-height: 11.6rem;
+  min-height: 12.6rem;
   font-size: 4.3em;
   font-weight: 700;
   padding: 2rem 4rem 2rem 3rem;
@@ -313,6 +313,10 @@ button {
   line-height: 1.3;
   transition: filter var(--fastAnim),
     transform var(--normalAnim), border-color var(--normalAnim);
+}
+.compress button {
+  min-height: 11.6rem;
+  padding: 1.5rem 4rem 1.5rem 3rem;
 }
 button.noEmoji {
   padding-right: 3rem;
