@@ -501,8 +501,8 @@ async function showPage(prev, current, noAnim, noCleaning) {
     }
   }
   return new Promise((res) => {
-    while (!done) { setTimeout(() => {}, 10) }
-    res();
+    const isDone = () => {done ? res() : setTimeout(isDone, 10)};
+    isDone();
   });
 }
 
