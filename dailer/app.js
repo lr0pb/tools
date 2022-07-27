@@ -1,10 +1,10 @@
 import { pages } from './pages.js'
 import {
   /*emjs,*/ qs as localQs, globQs as qs, globQsa as qsa, copyObject, copyArray, checkForFeatures,
-  isDesktop, inert
+  isDesktop, inert, convertEmoji
 } from './pages/highLevel/utils.js'
 import { getToday } from './pages/highLevel/periods.js'
-import { paintPeriods } from './pages/settings.js'
+import { paintPeriods, toggleExperiments } from './pages/settings.js'
 import { checkInstall } from './pages/main.js'
 import IDB from './IDB.js'
 
@@ -15,6 +15,7 @@ if ('serviceWorker' in navigator && 'caches' in window) {
 if (!window.dailerData) window.dailerData = {
   nav: 'navigation' in window ? true : false,
   forcePeriodPromo: false,
+  experiments: Number(localStorage.experiments),
 };
 checkForFeatures(['inert', 'focusgroup']);
 dailerData.isDesktop = isDesktop();
@@ -230,7 +231,11 @@ async function loadEmojiList() {
   window.emjs = new Proxy({}, {
     get(target, prop) {
       if (!(prop in _emojiList)) return '';
-      return `<span class="emojiSymbol" style="background-image: url(${getEmojiLink(prop)});"></span>`;
+      return `
+        <span class="emojiSymbol" style="background-image: url(${getEmojiLink(prop)});">&#x${
+          _emojiList[prop]
+        };</span>
+      `;
     }
   });
   window.hasEmoji = (elem) => {
@@ -250,6 +255,7 @@ window.addEventListener('pageshow', async (e) => {
   if (e.persisted) return;
   document.documentElement.lang = navigator.language;
   await loadEmojiList();
+  toggleExperiments();
   await pages.settings.paint({globals, page: qs('#settings > .content')});
   const params = getParams();
   if (!params.settings) inert.set(qs('#settings'), true);
@@ -286,7 +292,6 @@ if ('navigation' in window) navigation.addEventListener('navigate', (e) => {
 });
 
 if ('navigation' in window) navigation.addEventListener('navigatesuccess', async () => {
-  return;
   const params = getParams();
   const page = pages[params.settings ? 'settings' : params.page];
   if (page.dynamicTitle) {
@@ -299,9 +304,9 @@ if ('navigation' in window) navigation.addEventListener('navigatesuccess', async
   }
   const te = page.titleEnding || 'text';
   const def = ` dailer ${emjs.sign}`;  // default value
-  qs('title').innerHTML = `${page.title || page.header}${
+  qs('title').innerHTML = convertEmoji(`${page.title || page.header}${
     te == 'text' ? ' in' + def : (te == 'line' ? ' |' + def : '')
-  }`;
+  }`);
 });
 
 async function hardReload(info) {
@@ -479,8 +484,10 @@ async function showPage(prev, current, noAnim, noCleaning) {
   prev.classList.add('hidePrevPage');
   inert.set(prev);
   inert.remove(current);
+  let done = false;
   setTimeout(() => {
     current.classList.add('showing');
+    done = true;
   }, noAnim ? 0 : 10);
   if (!noCleaning) {
     for (let elem of qsa('.hided')) {
@@ -493,6 +500,10 @@ async function showPage(prev, current, noAnim, noCleaning) {
       await pages[current.id].onPageShow({globals, page: qs(`#${current.id} .content`)});
     }
   }
+  return new Promise((res) => {
+    while (!done) { setTimeout(() => {}, 10) }
+    res();
+  });
 }
 
 async function hidePage(current, prevName, noPageUpdate) {

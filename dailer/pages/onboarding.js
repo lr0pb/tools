@@ -1,7 +1,7 @@
 import { qs, /*emjs*/ } from './highLevel/utils.js'
 
 export const onboarding = {
-  title: `${emjs.sparkles} Welcome to the dailer ${emjs.sign}`,
+  get title() { return `${emjs.sparkles} Welcome to the dailer ${emjs.sign}`},
   titleEnding: 'none',
   get header() { return ''},
   get page() { return `

@@ -24,17 +24,17 @@ export const periodCreator = {
     <input type="text" id="periodName" placeHolder="Period title e.g. Every saturday">
     <h3>You also can type period description</h3>
     <input type="text" id="periodDesc" placeHolder="Period description">
-    <h3>How much days will be in period?</h3>
-    <input type="range" id="daysCount" min="1" max="${maxDays}" value="${maxDays}">
-    <h3>Select the days you need to perform the task</h3>
-    <h3>At least one day is required</h3>
+    <h3 class="excludeInEdit">How much days will be in period?</h3>
+    <input type="range" id="daysCount" class="excludeInEdit" min="1" max="${maxDays}" value="${maxDays}">
+    <h3 class="excludeInEdit">Select the days you need to perform the task</h3>
+    <h3 class="excludeInEdit">At least one day is required</h3>
     <div>
       <div class="historyMonth" focusgroup="horizontal"></div>
     </div>
     <div class="togglerContainer first"></div>
-    <h3>When period is over, task will continue period from start</h3>
+    <h3 class="excludeInEdit">When period is over, task will continue period from start</h3>
     <div class="togglerContainer first"></div>
-    <h3>Automatically set task start day to the previous Sunday</h3>
+    <h3 class="excludeInEdit">Automatically set task start day to the previous Sunday</h3>
     <div class="togglerContainer first"></div>
     <h3>This period will be selected by default in periods drop down list if no other default periods created later are in the list</h3>
   `},
@@ -69,6 +69,13 @@ async function onPeriodCreator({globals, page}) {
     if (per.description) qs('#periodDesc').value = per.description;
     qs('#daysCount').value = per.days.length;
     qs('#daysCount').setAttribute('disabled', 'disabled');
+    for (let elem of qsa('.excludeInEdit')) {
+      elem.style.display = 'none';
+    }
+    for (let elem of qsa('.togglerContainer')) {
+      elem.classList.remove('first');
+    }
+    qs('.historyMonth:last-child').style.margin = '1rem 0';
   }
   appendDays(isEdit ? per.days : null);
   if (isEdit) toggleDays(per.getWeekStart ? 1 : 0);

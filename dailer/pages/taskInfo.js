@@ -1,4 +1,4 @@
-import { getToday, convertDate, oneDay, isCustomPeriod } from './highLevel/periods.js'
+import { getToday, normalizeDate, oneDay, isCustomPeriod } from './highLevel/periods.js'
 import { getTextDate } from './highLevel/taskThings.js'
 import { qs, /*emjs,*/ getLast, intlDate, syncGlobals } from './highLevel/utils.js'
 
@@ -132,7 +132,7 @@ async function renderHistory(task) {
 }
 
 export async function getHistory({task, onEmptyDays, onBlankDay, onActiveDay}) {
-  const creationDay = new Date(Number(task.created || task.id)).setHours(0, 0, 0, 0);
+  const creationDay = normalizeDate(task.created || task.id);
   const startDay = new Date(creationDay > task.periodStart ? creationDay : task.periodStart);
   const borderValues = (value) => {
     if (value == -1) return 6;
@@ -145,7 +145,7 @@ export async function getHistory({task, onEmptyDays, onBlankDay, onActiveDay}) {
   }
   let periodCursor = creationDay > task.periodStart ? new Date(creationDay).getDay() : 0;
   let hardUpdate = false;
-  let day = startDay.setHours(0, 0, 0, 0);
+  let day = normalizeDate(startDay);
   const addValue = () => {
     periodCursor++;
     hardUpdate = false;

@@ -1,5 +1,7 @@
-import { qs, /*emjs,*/ getLast, intlDate, handleKeyboard, reloadApp } from './utils.js'
-import { getToday, oneDay, isCustomPeriod } from './periods.js'
+import {
+  qs, /*emjs,*/ getLast, intlDate, handleKeyboard, reloadApp, convertEmoji
+} from './utils.js'
+import { getToday, oneDay, normalizeDate, isCustomPeriod } from './periods.js'
 
 // req - required
 
@@ -26,7 +28,7 @@ export function renderToggler({
   buttons.forEach((btn, i) => {
     buttonsString += `
       <button data-action="${i}" class="emojiBtn" ${disabled ? 'disabled' : ''}
-        title="${btn.title || 'Toggle value'}" aria-label="${btn.aria || `Toggle ${hasEmoji(name) ? '' : name} value`}"
+        title="${btn.title || 'Toggle value'}" aria-label="${btn.aria || `Toggle ${convertEmoji(name)} value`}"
         tabIndex="${dailerData.focusgroup ? (noChilds && !onBodyClick && i == 0 ? 0 : -1) : 0}"
       >${btn.emoji}</button>
     `;
@@ -163,7 +165,7 @@ export function getTextDate(date) {
 }
 
 export function setPeriodTitle(task) {
-  task.periodStart = new Date(task.periodStart).setHours(0, 0, 0, 0);
+  task.periodStart = normalizeDate(task.periodStart);
   const startTitle = getTextDate(task.periodStart);
   const endTitle = task.endDate ? getTextDate(task.endDate) : null;
 

@@ -18,10 +18,12 @@ export const main = {
     qs('#toPlan').addEventListener(
       'click', () => globals.paintPage('planCreator')
     );
-    /*globals.pageButton({
+    if (dailerData.experiments) globals.pageButton({
       emoji: emjs.star, title: 'Open wishlist',
-      onClick: () => globals.paintPage('wishlist')
-    });*/
+      onClick: () => globals.message({
+        state: 'success', text: 'There are will be wishlist page that currently in development'
+      })
+    });
     await renderDay({globals, page});
   },
   onPageShow: updatePage,
@@ -63,10 +65,10 @@ async function renderDay({globals, page}) {
       }});
     }
   }
-  const existDayNote = await checkDayNote(globals);
-  if (existDayNote) return;
   const existInstallPrompt = await checkInstall(globals);
   if (existInstallPrompt) return;
+  const existDayNote = await checkDayNote(globals);
+  if (existDayNote) return;
   await checkBackupReminder(globals);
 }
 

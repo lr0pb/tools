@@ -1,12 +1,18 @@
-export const isUnder3AM = () => {
-  return new Date().getHours() < 3;
+export const isUnder3AM = (date) => {
+  return (date || new Date()).getHours() < 3;
 };
 
 export const oneDay = 86400000; // 86 400 000 milliseconds in one day
 
+export const normalizeDate = (date) => {
+  if (typeof date == 'string') date = Number(date);
+  date = new Date(date);
+  const rawDate = date.setHours(0, 0, 0, 0);
+  return isUnder3AM(date) ? rawDate - oneDay : rawDate;
+};
+
 export const getToday = () => { // date in milliseconds
-  const rawToday = new Date().setHours(0, 0, 0, 0);
-  return isUnder3AM() ? rawToday - oneDay : rawToday;
+  return normalizeDate(Date.now());
 };
 
 export const convertDate = (date) => {

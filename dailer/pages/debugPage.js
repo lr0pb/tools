@@ -6,11 +6,11 @@ export const debugPage = {
   get page() { return `
     <div id="dataContainer" class="doubleColumns"></div>
     <div class="doubleColumns">
-      <div>
+      <div class="content">
         <button id="clear" class="danger noEmoji">Clear database</button>
         <h3>It's actually delete all your tasks and other. Make sure you have backup</h3>
       </div>
-      <div>
+      <div class="content">
         <button id="toRecap" class="noEmoji">Show recap page</button>
         <h3>Reload app and show Yesterday recap page</h3>
       </div>

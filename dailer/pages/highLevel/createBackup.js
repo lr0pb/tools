@@ -1,8 +1,10 @@
+import { getToday, normalizeDate } from './periods.js'
+
 export async function getData(globals) {
   const data = {
     dailer_about: `User's data backup from dailer app`,
     dailer_link: location.origin + location.pathname,
-    dailer_created: Date.now(),
+    dailer_created: getToday(),
     dailer_tasks: [],
     dailer_periods: []
   };
@@ -14,7 +16,7 @@ export async function getData(globals) {
       periodId: td.periodId,
       periodDay: td.periodDay,
       periodStart: td.periodStart,
-      created: td.created || new Date(Number(td.id)).setHours(0, 0, 0, 0),
+      created: td.created || normalizeDate(td.id),
       priority: td.priority,
       history: td.history
     };

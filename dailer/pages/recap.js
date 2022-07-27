@@ -65,6 +65,7 @@ export const recap = {
     const container = qs('#tasks.forgotten');
     if (tasksCount == completedTasks) {
       await showCompletedDay();
+      return;
     } else {
       for (let elem of qsa('.forgotten')) {
         elem.style.display = 'flex';

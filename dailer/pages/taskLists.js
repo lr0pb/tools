@@ -2,7 +2,7 @@ import { qs, /*emjs,*/ syncGlobals } from './highLevel/utils.js'
 import { renderTask, showNoTasks } from './highLevel/taskThings.js'
 
 export const planCreator = {
-  title: `${emjs.notes} Your tasks list`,
+  get title() { return `${emjs.notes} Your tasks list`},
   get header() { return `${emjs.notes} Your tasks`},
   get page() { return ``},
   styleClasses: 'doubleColumns',
@@ -67,7 +67,7 @@ async function onPlanCreator({globals, page}) {
 }
 
 export const tasksArchive = {
-  title: `${emjs.book} Your archived tasks`,
+  get title() { return `${emjs.book} Your archived tasks`},
   get header() { return `${emjs.book} Archived tasks`},
   get page() { return ``},
   styleClasses: 'doubleColumns',

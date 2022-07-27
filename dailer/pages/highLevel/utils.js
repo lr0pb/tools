@@ -39,6 +39,12 @@ export const intlDate = (date) => {
     .toLocaleDateString(navigator.language);
 };
 
+export const convertEmoji = (str) => {
+  return str
+    .replace(/<span class\="emojiSymbol"[\s\w-:()/;"=.]+>/g, '')
+    .replace(/<\/span>/g, '');
+};
+
 export function safeDataInteractions(elems) {
   const state = dailerData.nav
   ? navigation.currentEntry.getState()

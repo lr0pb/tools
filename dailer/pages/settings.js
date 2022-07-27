@@ -7,7 +7,7 @@ import { getData } from './highLevel/createBackup.js'
 const periodsCount = 5;
 
 export const settings = {
-  title: `${emjs.box} Settings`,
+  get title() { return `${emjs.box} Settings`},
   sections: ['periods', 'import'],
   paint: async ({globals, page}) => {
     page.innerHTML = `
@@ -24,7 +24,7 @@ export const settings = {
         <h3>${emjs.lockWKey} Your data is stored only on your device and have no remote access</h3>
       </div>
       <div class="doubleColumns">
-        <div>
+        <div class="content">
           <h3>Backup your data to be safe and prevent accidental deletion or transfer it to other device or upload your existent backup to this device</h3>
           <button id="uploadData" class="beforeUpload">${emjs.crateDown} Upload existent backup</button>
           <h3 class="beforeUpload">Accepted .dailer files only</h3>
@@ -46,9 +46,10 @@ export const settings = {
           <div id="reminder" class="first"></div>
         </div>
       </div>
+      <div id="experiments" class="first"></div>
       <button id="toDebug" class="secondary">${emjs.construction} Open debug page</button>
       <h2>About</h2>
-      <h3>${emjs.label} dailer app, version 1.2.8</h3>
+      <h3>${emjs.label} dailer app, version 1.2.9</h3>
       <h3>${emjs.sparkles} Emojis powered by <a href="https://github.com/googlefonts/noto-emoji/" target="_blank">Google</a></h3>
       <!--<h3>${emjs.magicBall} Codename: Sangria</h3>-->
       <h3>${emjs.microscope} Developed in 2022</h3>
@@ -80,6 +81,19 @@ export const settings = {
       reminder.children[1].innerHTML = emjs.sign;
       localStorage.remindId = e.target.value;
       await onRemindIdChange(globals, localStorage.remindId);
+    });
+    renderToggler({
+      name: `${emjs.experiments} Enable experiments`, id: 'experiments', buttons: [{
+        emoji: emjs[dailerData.experiments ? 'sign' : 'blank'],
+        func: ({e, elem}) => {
+          dailerData.experiments = toggleFunc({e, elem});
+          localStorage.experiments = dailerData.experiments;
+          globals.message({
+            state: 'success', text: 'You probably need to reload app for all experiments will take effect'
+          });
+          toggleExperiments();
+        }
+      }], page: qs('#experiments'), value: dailerData.experiments
     });
   },
   opening: async ({globals}) => {
@@ -179,7 +193,7 @@ async function uploadData(globals) {
         state: 'fail', text: 'Unknown file content'
       });
       const cr = data.dailer_created;
-      if ( !cr || (cr && new Date(cr).setHours(0, 0, 0, 0) !== getToday()) ) return globals.message({
+      if ( !cr || (cr !== getToday()) ) return globals.message({
         state: 'fail', text: `You must upload today's created backup`
       });
       await uploading(globals, data);
@@ -235,4 +249,12 @@ export function getNextRemindText() {
     return `You got reminder today`;
   }
   return `Next reminder will be ${getTextDate(localStorage.nextRemind)}`;
+}
+
+export function toggleExperiments() {
+  if (dailerData.experiments) {
+    document.documentElement.classList.add('compress');
+  } else {
+    document.documentElement.classList.remove('compress');
+  }
 }
