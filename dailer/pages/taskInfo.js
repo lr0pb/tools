@@ -67,7 +67,7 @@ async function renderTaskInfo({globals, page}) {
       </div>
       <div class="itemsHolder"></div>
     </div>
-    <div>${isa ? `
+    <div style="min-height: var(--fullHeight);">${isa ? `
       <h2>Stats</h2>
       <div id="stats">
         <h3>Stats for this tasks is available and will be rendering with coming updates to app</h3>

@@ -446,7 +446,7 @@ button:disabled, [disabled]:not(input, select) {
 }
 
 .itemsHolder, #history, .historyMonth {
-  min-width: var(--fullWidth);
+  width: var(--fullWidth);
   display: flex; flex-wrap: wrap;
 }
 
