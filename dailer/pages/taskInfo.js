@@ -111,7 +111,7 @@ function renderItemsHolder({task, periods, priorities, iha}) {
   const isActive = task.period[task.periodDay];
   const isActiveText = `Today ${isActive ? 'you should do' : `you haven't`} this task`;
   if (!task.disabled) createInfoRect(
-    emjs[isActive ? 'alarmClock' : 'moon'], isActiveText, isActive ? 'green' : 'red'
+    emjs[isActive ? 'alarmClock' : 'moon'], isActiveText, isActive ? 'green' : 'yellow'
   );
 
   const priority = priorities[task.priority];
@@ -172,6 +172,7 @@ function getPeriodsData(task) {
 
 function isStatsAvailable(task) {
   if (!dailerData.experiments) return undefined;
+  if (task.special && task.period.length == 1) return undefined;
   const { periodsInWeek, runnedPeriods } = getPeriodsData(task);
   if (runnedPeriods >= periodsInWeek * 2) return true;
   return false;
@@ -197,17 +198,17 @@ async function renderHistory(task) {
   const init = (date) => {
     date = new Date(date);
     const month = date.getMonth();
-    if (!hm || hm.parentElement.dataset.month !== month) {
+    if (!hm || hm.parentElement.dataset.month !== String(month)) {
       hm = createMonth(formatter.format(date), month, h);
-    }
-    const borderValues = (value) => {
-      if (value == -1) return 6;
-      if (value == 6) return -1;
-      return value;
-    };
-    const emptyDays = borderValues(date.getDay() - 1);
-    for (let i = 0; i < emptyDays; i++) {
-      hm.innerHTML += `<h4> </h4>`;
+      const borderValues = (value) => {
+        if (value == -1) return 6;
+        if (value == 6) return -1;
+        return value;
+      };
+      const emptyDays = borderValues(date.getDay() - 1);
+      for (let i = 0; i < emptyDays; i++) {
+        hm.innerHTML += `<h4> </h4>`;
+      }
     }
   };
   await getHistory({

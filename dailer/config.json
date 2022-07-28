@@ -71,7 +71,7 @@
   },
   "priorities": [{
     "title": "Can miss sometimes",
-    "color": "green",
+    "color": "blue",
     "emoji": "moon"
   }, {
     "title": "Normal",
