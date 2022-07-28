@@ -1,5 +1,7 @@
 import { renderToggler, toggleFunc, getTextDate } from './highLevel/taskThings.js'
-import { /*emjs,*/ globQs as qs, createOptionsList, togglableElement } from './highLevel/utils.js'
+import {
+  /*emjs,*/ globQs as qs, globQsa as qsa, createOptionsList, togglableElement
+} from './highLevel/utils.js'
 import { getToday, oneDay, isCustomPeriod } from './highLevel/periods.js'
 import { uploading } from './highLevel/uploadBackup.js'
 import { getData } from './highLevel/createBackup.js'
