@@ -87,7 +87,7 @@ async function renderTaskInfo({globals, page}) {
   `;
   renderItemsHolder({task, periods, priorities, iha});
   if (iha) await renderHistory(task);
-  if (isa) await renderStat(task);
+  if (isa) await renderStats(task);
 }
 
 function renderItemsHolder({task, periods, priorities, iha}) {
@@ -262,6 +262,6 @@ export async function getHistory({task, onEmptyDays, onBlankDay, onActiveDay}) {
   }
 }
 
-async function renderHistory(task) {
+async function renderStats(task) {
   //
 }

@@ -154,7 +154,7 @@ html { font-size: 1.25vmin; }
   }
   .doubleColumns { width: var(--gridContent); }
   .doubleColumns > * { width: var(--fullWidth); }
-  .doubleColumns > div { height: var(--fullHeight); }
+  .doubleColumns > div:not(.task) { height: var(--fullHeight); }
   .floatingMsg.notFixed { min-height: 13rem; }
 }
 
