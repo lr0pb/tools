@@ -71,14 +71,16 @@
   },
   "priorities": [{
     "title": "Can miss sometimes",
-    "color": "green"
+    "color": "green",
+    "emoji": "moon"
   }, {
     "title": "Normal",
     "color": "yellow",
     "selected": true
   }, {
     "title": "Extra important",
-    "color": "red"
+    "color": "red",
+    "emoji": "fire"
   }],
   "reminderList": [{
     "title": "Select how often to remind",

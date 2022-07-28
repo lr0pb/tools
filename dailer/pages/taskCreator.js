@@ -51,7 +51,12 @@ export const taskCreator = {
       const task = await globals.db.getItem('tasks', id);
       if (!isCustomPeriod(task.periodId)) return;
       const period = await globals.db.getItem('periods', task.periodId);
-      return qs('#period').children[0].innerHTML = period.title;
+      if (qs('#period').children.length) return;
+      const opt = document.createElement('option');
+      opt.setAttribute('selected', '');
+      opt.innerHTML = period.title || task.ogTitle || task.periodTitle;
+      qs('#period').append(opt);
+      return qs('#period').setAttribute('disabled', '');
     }
     const periodsList = await getPeriods(globals);
     const period = qs('#period');
@@ -183,11 +188,6 @@ async function enterEditTaskMode(globals) {
   if (td.nameEdited) qs('#name').disabled = 'disabled';
   qs('#priority').value = td.priority;
   if (!td.periodId) setPeriodId(td, periods);
-  const opt = document.createElement('option');
-  opt.selected = 'selected';
-  opt.innerHTML = td.ogTitle || periods[td.periodId].title || td.periodTitle;
-  qs('#period').append(opt);
-  qs('#period').disabled = 'disabled';
   qs('#date').value = convertDate(td.periodStart);
   if (td.periodStart > getToday() && periods[td.periodId].selectTitle) {
     qs('#dateTitle').innerHTML = periods[td.periodId].selectTitle;

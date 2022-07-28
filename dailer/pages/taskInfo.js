@@ -1,6 +1,6 @@
 import { getToday, normalizeDate, oneDay, isCustomPeriod } from './highLevel/periods.js'
 import { getTextDate } from './highLevel/taskThings.js'
-import { qs, /*emjs,*/ getLast, intlDate, syncGlobals } from './highLevel/utils.js'
+import { qs, /*emjs,*/ intlDate, syncGlobals } from './highLevel/utils.js'
 
 let taskTitle = null;
 
@@ -59,6 +59,7 @@ async function renderTaskInfo({globals, page}) {
     });
   }
   const iha = isHistoryAvailable(task);
+  const isa = isStatsAvailable(task);
   page.innerHTML = `
     <div>
       <div id="infoBackground">
@@ -66,7 +67,18 @@ async function renderTaskInfo({globals, page}) {
       </div>
       <div class="itemsHolder"></div>
     </div>
-    <div>${!iha ? '' : `
+    <div>${isa ? `
+      <h2>Stats</h2>
+      <div id="stats">
+        <h3>Stats for this tasks is available and will be rendering with coming updates to app</h3>
+      </div>
+      ` : isa === false && !task.disabled ? `
+      <h2>Stats</h2>
+      <div class="content center">
+        <h2 class="emoji">${emjs.empty}</h2>
+        <h3>Stats will be available as soon as you running this task for 2 weeks</h3>
+      </div>` : ''
+    }${!iha ? '' : `
       <h2>History</h2>
       <div id="history" class="hiddenScroll">
         <div class="historyMonth"></div>
@@ -75,9 +87,13 @@ async function renderTaskInfo({globals, page}) {
   `;
   renderItemsHolder({task, periods, priorities, iha});
   if (iha) await renderHistory(task);
+  if (isa) await renderStat(task);
 }
 
 function renderItemsHolder({task, periods, priorities, iha}) {
+  const { periodsInWeek, runnedPeriods } = getPeriodsData(task);
+  const showQS = runnedPeriods >= periodsInWeek;
+
   const rawTitle = periods[task.periodId].title;
   const perTitle = isCustomPeriod(task.periodId)
   ? `<span class="customTitle" data-period="${task.periodId}">${rawTitle}</span>`
@@ -88,12 +104,34 @@ function renderItemsHolder({task, periods, priorities, iha}) {
     ? `${perTitle} from ${startTitle}${task.endDate ? ` to ${endTitle}` : ''}`
     : (task.endDate
       ? `${perTitle}${task.disabled ? '. Ended' : ' to'} ${endTitle}` : task.periodTitle);
-  createInfoRect(emjs.calendar, periodText, 'blue', !iha && !task.disabled ? 1 : 2);
+  createInfoRect(
+    emjs.calendar, periodText, 'blue', (!iha && !task.disabled) || (iha && showQS) ? 1 : 2
+  );
 
-  const isActiveText = `Today ${task.period[task.periodDay] ? 'you should do' : `you haven't`} this task`;
-  if (!task.disabled) createInfoRect(emjs.alarmClock, isActiveText, task.period[task.periodDay] ? 'green' : 'red');
+  const isActive = task.period[task.periodDay];
+  const isActiveText = `Today ${isActive ? 'you should do' : `you haven't`} this task`;
+  if (!task.disabled) createInfoRect(
+    emjs[isActive ? 'alarmClock' : 'moon'], isActiveText, isActive ? 'green' : 'red'
+  );
 
-  createInfoRect(emjs.fire, `Importance: ${priorities[task.priority].title}`, priorities[task.priority].color);
+  const priority = priorities[task.priority];
+  createInfoRect(emjs[priority.emoji || 'fire'], `Importance: ${priority.title}`, priority.color);
+
+  if (iha && showQS) {
+    const quickStats = {
+      amount: task.period.length * periodsInWeek,
+      completed: 0, done: false
+    };
+    for (let i = 1; i < quickStats.amount + 1; i++) {
+      if (task.history.at(-1 * i)) quickStats.completed++;
+    }
+    if (quickStats.completed == quickStats.amount) quickStats.done = true;
+    createInfoRect(
+      emjs[quickStats.done ? 'party' : 'chartUp'],
+      `Last week you done task ${quickStats.completed}/${quickStats.amount} times`,
+      quickStats.done ? 'green' : 'blue'
+    );
+  }
 
   if (iha) return;
   let emoji = emjs.cross, color = 'red';
@@ -121,31 +159,86 @@ export function isHistoryAvailable(task) {
   return undefined;
 }
 
+function getPeriodsData(task) {
+  let activeDays = 0;
+  for (let day of task.period) {
+    if (day) activeDays++;
+  }
+  return {
+    periodsInWeek: 7 / task.period.length,
+    runnedPeriods: task.history.length / activeDays
+  };
+}
+
+function isStatsAvailable(task) {
+  if (!dailerData.experiments) return undefined;
+  const { periodsInWeek, runnedPeriods } = getPeriodsData(task);
+  if (runnedPeriods >= periodsInWeek * 2) return true;
+  return false;
+}
+
+function createMonth(name, month, history) {
+  const elem = document.createElement('div');
+  elem.dataset.month = month;
+  elem.innerHTML = `
+    <h3>${name}</h3>
+    <div class="historyMonth"></div>
+  `;
+  history.append(elem);
+  return elem.querySelector('.historyMonth');
+}
+
 async function renderHistory(task) {
-  const hb = qs('.historyMonth');
+  const h = qs('#history');
+  let hm = null;
+  const formatter = new Intl.DateTimeFormat(navigator.language, {
+    month: "long"
+  });
+  const init = (date) => {
+    date = new Date(date);
+    const month = date.getMonth();
+    if (!hm || hm.parentElement.dataset.month !== month) {
+      hm = createMonth(formatter.format(date), month, h);
+    }
+    const borderValues = (value) => {
+      if (value == -1) return 6;
+      if (value == 6) return -1;
+      return value;
+    };
+    const emptyDays = borderValues(date.getDay() - 1);
+    for (let i = 0; i < emptyDays; i++) {
+      hm.innerHTML += `<h4> </h4>`;
+    }
+  };
   await getHistory({
     task,
-    onEmptyDays: () => hb.innerHTML += `<h4> </h4>`,
-    onBlankDay: () => hb.innerHTML += `<h4>${emjs.blank}</h4>`,
-    onActiveDay: (date, item) => hb.innerHTML += `<h4>${item ? emjs.sign : emjs.cross}</h4>`
+    onBlankDay: (date) => {
+      init(date);
+      hm.innerHTML += `<h4>${emjs.blank}</h4>`;
+    },
+    onActiveDay: (date, item) => {
+      init(date);
+      hm.innerHTML += `<h4>${item ? emjs.sign : emjs.cross}</h4>`;
+    }
   });
+  qs('#history .historyMonth:last-child').scrollIntoView();
 }
 
 export async function getHistory({task, onEmptyDays, onBlankDay, onActiveDay}) {
   const creationDay = normalizeDate(task.created || task.id);
   const startDay = new Date(creationDay > task.periodStart ? creationDay : task.periodStart);
+  let day = normalizeDate(startDay);
   const borderValues = (value) => {
     if (value == -1) return 6;
     if (value == 6) return -1;
     return value;
   };
   const emptyDays = borderValues(startDay.getDay() - 1);
-  if (onEmptyDays) for (let i = 0; i < emptyDays; i++) {
-    onEmptyDays();
+  if (onEmptyDays) for (let i = emptyDays; i > 0; i--) {
+    onEmptyDays(day - oneDay * i);
   }
   let periodCursor = creationDay > task.periodStart ? new Date(creationDay).getDay() : 0;
   let hardUpdate = false;
-  let day = normalizeDate(startDay);
   const addValue = () => {
     periodCursor++;
     hardUpdate = false;
@@ -157,14 +250,14 @@ export async function getHistory({task, onEmptyDays, onBlankDay, onActiveDay}) {
   };
   for (let item of task.history) {
     while (!task.period[periodCursor]) {
-      if (onBlankDay) onBlankDay();
+      if (onBlankDay) onBlankDay(day);
       addValue();
     }
     await onActiveDay(day, item); addValue();
   }
   periodCursor = borderValues(periodCursor);
   while (periodCursor <= task.periodDay && !hardUpdate && !task.period[task.periodDay]) {
-    if (onBlankDay) onBlankDay();
+    if (onBlankDay) onBlankDay(day);
     addValue();
   }
 }

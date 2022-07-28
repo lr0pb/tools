@@ -1,7 +1,7 @@
 :root {
   --headerHeight: 16rem;
   --footerHeight: 18rem;
-  --fullHeight: calc(100vh - var(--footerHeight) * 2 - 4rem);
+  --fullHeight: calc(100vh - var(--headerHeight) - var(--footerHeight));
   --defaultFullWidth: 92.5vw;
   --fullWidth: var(--defaultFullWidth);
   --defaultGridContent: calc(100vw - 6rem);
@@ -154,6 +154,7 @@ html { font-size: 1.25vmin; }
   }
   .doubleColumns { width: var(--gridContent); }
   .doubleColumns > * { width: var(--fullWidth); }
+  .doubleColumns > div { height: var(--fullHeight); }
   .floatingMsg.notFixed { min-height: 13rem; }
 }
 
@@ -182,7 +183,8 @@ body, .page, #settings, #popup, noscript {
 .compress .page, .compress #settings {
   --headerHeight: 15rem;
   --footerHeight: 17rem;
-  background-image: linear-gradient(180deg, var(--accent) 0.55%, transparent 0%);
+  --fullHeight: calc(100vh - var(--headerHeight) - var(--footerHeight));
+  /*background-image: linear-gradient(180deg, var(--accent) 0.35%, transparent 0%);*/
 }
 #settings {
   z-index: 1;
@@ -239,8 +241,10 @@ body, .page, #settings, #popup, noscript {
   align-items: center;
   text-align: center;
 }
-.center h2 {
-  margin: 3rem 6rem;
+.center > h2 { margin: 3rem; }
+.center > * {
+  margin-left: 6rem;
+  margin-right: 6rem;
 }
 
 body, .content, h1, h2, h3, h4, p, button {
@@ -426,7 +430,7 @@ button:disabled, [disabled]:not(input, select) {
   backdrop-filter: blur(var(--blur));
 }
 
-#infoBackground, .itemsHolder, #history, #history > .historyMonth {
+#infoBackground, .itemsHolder, #history, #history > div {
   scroll-snap-align: start;
 }
 
@@ -434,7 +438,7 @@ button:disabled, [disabled]:not(input, select) {
   width: var(--fullWidth); min-height: 32rem;
   background-image: linear-gradient(135deg, var(--gradientLight) -10%, var(--gradientDark) 60%);
   flex-direction: column-reverse;
-  margin: 0 0 1rem;
+  margin: 0 0 2rem;
 }
 #infoBackground > h4 {
   margin: 2rem 3rem;
@@ -442,6 +446,7 @@ button:disabled, [disabled]:not(input, select) {
 }
 
 .itemsHolder, #history, .historyMonth {
+  min-width: var(--fullWidth);
   display: flex; flex-wrap: wrap;
 }
 
@@ -504,8 +509,9 @@ a:visited { color: var(--secondary); }
 }
 
 #history {
-  width: var(--fullWidth); min-height: var(--fullHeight);
-  flex-direction: column;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-content: baseline;
   overflow: auto hidden;
   scroll-snap-type: x mandatory;
 }
@@ -517,9 +523,10 @@ a:visited { color: var(--secondary); }
   border: 0.8rem solid transparent;
   border-radius: 2rem;
 }
-#history .historyMonth > *:last-child {
+#history .historyMonth:last-child > *:last-child {
   background-color: var(--marker);
 }
+
 .togglableElement > *:first-child {
   transition: transform var(--normalAnim);
 }

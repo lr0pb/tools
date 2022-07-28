@@ -1,5 +1,5 @@
 import { isUnder3AM, getToday, oneDay, isCustomPeriod } from './highLevel/periods.js'
-import { qs, /*emjs,*/ getLast } from './highLevel/utils.js'
+import { qs, /*emjs*/ } from './highLevel/utils.js'
 import { renderTask, disable, setPeriodTitle } from './highLevel/taskThings.js'
 import { downloadData } from './settings.js'
 
@@ -114,7 +114,7 @@ async function createDay(globals, periods, today = getToday()) {
         }
         await globals.db.setItem('tasks', task);
       } else if (task.period[task.periodDay]) {
-        day.tasks[task.priority][task.id] = getLast(task.history);
+        day.tasks[task.priority][task.id] = task.history.at(-1);
       }
     }
   }

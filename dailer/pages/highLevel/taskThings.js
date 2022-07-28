@@ -1,5 +1,5 @@
 import {
-  qs, /*emjs,*/ getLast, intlDate, handleKeyboard, reloadApp, convertEmoji
+  qs, /*emjs,*/ intlDate, handleKeyboard, reloadApp, convertEmoji
 } from './utils.js'
 import { getToday, oneDay, normalizeDate, isCustomPeriod } from './periods.js'
 
@@ -69,7 +69,7 @@ export function renderTask({
       emoji: getTaskComplete(td),
       title: markTitle(), aria: markTitle(td.name),
       func: onTaskCompleteClick, args: { globals, forcedDay, extraFunc }
-    }], page, onBodyClick, value: getLast(td.history)
+    }], page, onBodyClick, value: td.history.at(-1)
   });
   const buttons = [{
     emoji: emjs.pen,
@@ -80,6 +80,8 @@ export function renderTask({
     title: 'Delete task', aria: `Delete task: ${td.name}`,
     func: onTaskDeleteClick, args: { globals, page }
   }];
+  const priority = priorities[td.priority];
+  const emoji = emjs[priority.emoji || ''];
   return renderToggler({
     body: `
       <h3>${td.name}</h3>
@@ -87,7 +89,7 @@ export function renderTask({
         ? `<span class="customTitle" data-period="${td.periodId}">${
           periods[td.periodId].title
         }</span>${td.periodTitle}` : td.periodTitle
-      } | ${priorities[td.priority].title}</p>
+      } | ${emoji}${emoji === '' ? '' : ' '}${priority.title}</p>
     `, id: td.id, buttons: td.disabled ? undefined : buttons,
     page, onBodyClick: onTaskManageClick, args: { globals }
   });
@@ -199,5 +201,5 @@ export async function onTaskCompleteClick({ e, globals, elem, forcedDay, extraFu
 }
 
 export function getTaskComplete(td) {
-  return getLast(td.history) ? emjs.sign : emjs.blank;
+  return td.history.at(-1) ? emjs.sign : emjs.blank;
 }

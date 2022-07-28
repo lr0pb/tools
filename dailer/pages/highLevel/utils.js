@@ -12,8 +12,6 @@ function q(func, elem, page, local) {
   return document[func](`${local ? '.current ' : ''}${elem}`);
 }
 
-export const getLast = (arr) => arr[arr.length - 1];
-
 export const copyObject = (obj) => {
   const response = {};
   for (let name in obj) response[name] = obj[name];

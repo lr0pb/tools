@@ -19,6 +19,17 @@ if (!window.dailerData) window.dailerData = {
 };
 checkForFeatures(['inert', 'focusgroup']);
 dailerData.isDesktop = isDesktop();
+if (!('at' in Array.prototype)) {
+  function at(n) {
+    n = Math.trunc(n) || 0;
+    if (n < 0) n += this.length;
+    if (n < 0 || n >= this.length) return undefined;
+    return this[n];
+  }
+  Object.defineProperty(Array.prototype, 'at', {
+    value: at, writable: true, enumerable: false, configurable: true
+  });
+}
 
 const getUrl = () => location.href.toString();
 
@@ -283,6 +294,7 @@ if ('navigation' in window) navigation.addEventListener('navigate', (e) => {
   if (!dailerData.nav) return;
   const info = e.info || {};
   if (info.call === 'hardReload') return e.transitionWhile(hardReload(info));
+  if (e.downloadRequest || e.navigationType == 'reload') return;
   if (
     callsList.includes(info.call) || e.navigationType !== 'traverse'
   ) {
@@ -337,11 +349,11 @@ async function onTraverseNavigation(e, silent) {
     if (!silent && dir === -1 && pages[currentParams.page].onBack) {
       pages[currentParams.page].onBack(globals);
     }
+    globals.pageName = nextParams.page;
     if (settings) {
       if (differentPages) {
         dir === -1
         ? await globals.openSettings(null, true) : await globals.closeSettings();
-        globals.pageName = nextParams.page;
       } else {
         dir === -1
         ? await globals.closeSettings(!silent) : await globals.openSettings(null, true);
