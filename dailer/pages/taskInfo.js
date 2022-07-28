@@ -261,3 +261,7 @@ export async function getHistory({task, onEmptyDays, onBlankDay, onActiveDay}) {
     addValue();
   }
 }
+
+async function renderHistory(task) {
+  //
+}
