@@ -67,9 +67,10 @@ async function renderTaskInfo({globals, page}) {
       </div>
       <div class="itemsHolder"></div>
     </div>
-    <div style="min-height: var(--fullHeight);">${isa ? `
+    <div class="fullHeight">${isa ? `
       <h2>Stats</h2>
-      <div id="stats">
+      <div id="stats" class="content center">
+        <h2 class="emoji">${emjs.sparkles}</h2>
         <h3>Stats for this tasks is available and will be rendering with coming updates to app</h3>
       </div>
       ` : isa === false && !task.disabled ? `
@@ -80,9 +81,7 @@ async function renderTaskInfo({globals, page}) {
       </div>` : ''
     }${!iha ? '' : `
       <h2>History</h2>
-      <div id="history" class="hiddenScroll">
-        <div class="historyMonth"></div>
-      </div>
+      <div id="history" class="hiddenScroll"></div>
     `}</div>
   `;
   renderItemsHolder({task, periods, priorities, iha});
@@ -91,7 +90,7 @@ async function renderTaskInfo({globals, page}) {
 }
 
 function renderItemsHolder({task, periods, priorities, iha}) {
-  const { periodsInWeek, runnedPeriods } = getPeriodsData(task);
+  const { daysInWeek, periodsInWeek, runnedPeriods } = getPeriodsData(task);
   const showQS = runnedPeriods >= periodsInWeek;
 
   const rawTitle = periods[task.periodId].title;
@@ -119,7 +118,7 @@ function renderItemsHolder({task, periods, priorities, iha}) {
 
   if (iha && showQS) {
     const quickStats = {
-      amount: task.period.length * periodsInWeek,
+      amount: daysInWeek,
       completed: 0, done: false
     };
     for (let i = 1; i < quickStats.amount + 1; i++) {
@@ -128,7 +127,7 @@ function renderItemsHolder({task, periods, priorities, iha}) {
     if (quickStats.completed == quickStats.amount) quickStats.done = true;
     createInfoRect(
       emjs[quickStats.done ? 'party' : 'chartUp'],
-      `Last week you done task ${quickStats.completed}/${quickStats.amount} times`,
+      `In last 7 days you done task ${quickStats.completed}/${quickStats.amount} times`,
       quickStats.done ? 'green' : 'blue'
     );
   }
@@ -164,8 +163,10 @@ function getPeriodsData(task) {
   for (let day of task.period) {
     if (day) activeDays++;
   }
+  const periodsInWeek = 7 / task.period.length;
   return {
-    periodsInWeek: 7 / task.period.length,
+    periodsInWeek,
+    daysInWeek: activeDays * periodsInWeek,
     runnedPeriods: task.history.length / activeDays
   };
 }
@@ -189,26 +190,60 @@ function createMonth(name, month, history) {
   return elem.querySelector('.historyMonth');
 }
 
+const formatter = new Intl.DateTimeFormat('en', {
+  month: "long"
+});
+
+function borderValues(value) {
+  if (value == -1) return 6;
+  if (value == 6) return -1;
+  return value;
+}
+
+function getWeekendDays(date, month) {
+  const weekDay = date.getDay();
+  const days = [];
+  const firstDayInWeek = date.getTime() - borderValues(weekDay) * oneDay;
+  let currentDay = weekDay == 6 ? date : firstDayInWeek - oneDay;
+  let phase = weekDay == 6 ? 0 : 1;
+  while (new Date(currentDay).getMonth() == month) {
+    days.push(currentDay);
+    phase = phase == 0 ? 1 : 0;
+    const coef = !phase ? 1 : 6;
+    currentDay -= oneDay * coef;
+  }
+  return days;
+}
+
+function renderEmptyDays(hm, count) {
+  for (let i = 0; i < count; i++) {
+    hm.innerHTML += `<h4> </h4>`;
+  }
+}
+
 async function renderHistory(task) {
   const h = qs('#history');
   let hm = null;
-  const formatter = new Intl.DateTimeFormat(navigator.language, {
-    month: "long"
-  });
   const init = (date) => {
     date = new Date(date);
     const month = date.getMonth();
     if (!hm || hm.parentElement.dataset.month !== String(month)) {
       hm = createMonth(formatter.format(date), month, h);
-      const borderValues = (value) => {
-        if (value == -1) return 6;
-        if (value == 6) return -1;
-        return value;
-      };
       const emptyDays = borderValues(date.getDay() - 1);
-      for (let i = 0; i < emptyDays; i++) {
-        hm.innerHTML += `<h4> </h4>`;
+      let rwd = null; // remainingWeekendDays
+      if (date.getDate() !== 1) {
+        rwd = getWeekendDays(date, month);
+        const firstWeekendDay = new Date(rwd.at(-1)).getDay();
+        renderEmptyDays(hm, borderValues(firstWeekendDay));
+        for (let i = 1; i < rwd.length + 1; i++) {
+          const weekendDay = new Date(rwd.at(-1 * i));
+          hm.innerHTML += `<h4>${weekendDay.getDate()}</h4>`
+          if (weekendDay.getDay() == 0) renderEmptyDays(hm, 5);
+        }
       }
+      if (
+        (rwd && rwd[0] + oneDay !== date.getTime()) || !rwd
+      ) renderEmptyDays(hm, emptyDays);
     }
   };
   await getHistory({
@@ -222,18 +257,14 @@ async function renderHistory(task) {
       hm.innerHTML += `<h4>${item ? emjs.sign : emjs.cross}</h4>`;
     }
   });
-  qs('#history .historyMonth:last-child').scrollIntoView();
+  qs('#history > div:last-child').scrollIntoView();
+  qs('> :first-child').scrollIntoView();
 }
 
 export async function getHistory({task, onEmptyDays, onBlankDay, onActiveDay}) {
   const creationDay = normalizeDate(task.created || task.id);
   const startDay = new Date(creationDay > task.periodStart ? creationDay : task.periodStart);
   let day = normalizeDate(startDay);
-  const borderValues = (value) => {
-    if (value == -1) return 6;
-    if (value == 6) return -1;
-    return value;
-  };
   const emptyDays = borderValues(startDay.getDay() - 1);
   if (onEmptyDays) for (let i = emptyDays; i > 0; i--) {
     onEmptyDays(day - oneDay * i);

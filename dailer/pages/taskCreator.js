@@ -46,20 +46,19 @@ export const taskCreator = {
   script: onTaskCreator,
   onSettingsUpdate: async ({globals}) => {
     syncGlobals(globals);
-    if (globals.pageInfo.taskAction == 'edit') {
-      const id = globals.pageInfo.taskId;
-      const task = await globals.db.getItem('tasks', id);
-      if (!isCustomPeriod(task.periodId)) return;
-      const period = await globals.db.getItem('periods', task.periodId);
-      if (qs('#period').children.length) return;
-      const opt = document.createElement('option');
-      opt.setAttribute('selected', '');
-      opt.innerHTML = period.title || task.ogTitle || task.periodTitle;
-      qs('#period').append(opt);
-      return qs('#period').setAttribute('disabled', '');
-    }
     const periodsList = await getPeriods(globals);
     const period = qs('#period');
+    if (globals.pageInfo.taskAction == 'edit') {
+      if (period.children.length) return;
+      const id = globals.pageInfo.taskId;
+      const task = await globals.db.getItem('tasks', id);
+      const per = periods[task.periodId];
+      const opt = document.createElement('option');
+      opt.setAttribute('selected', '');
+      opt.innerHTML = per.title || task.ogTitle || task.periodTitle;
+      period.append(opt);
+      return period.setAttribute('disabled', '');
+    }
     createOptionsList(period, periodsList);
     for (let per of periodsList) {
       if (per.id == globals.pageInfo.lastPeriodValue) {
