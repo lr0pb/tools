@@ -18,6 +18,7 @@
   --brand: 215deg;
 
   --mainBg: black/*hsl(var(--brand), 100%, 3%)*/;
+  --transparentBg: rgba(0, 0, 0, 0.1);
   --mainText: white;
   --darkBorder: hsla(var(--brand), 12%, 16%, 0.5);
   --darkShadow: hsl(var(--brand), 10%, 35%);
@@ -44,6 +45,7 @@ html { font-size: 1.25vmin; }
 @media (prefers-color-scheme: light) {
   :root {
     --mainBg: #f2f2f2/*hsl(var(--brand), 60%, 97%)*/;
+    --transparentBg: rgba(255, 255, 255, 0.2);
     --mainText: black;
     --darkBorder: hsla(var(--brand), 60%, 90%, 0.5);
     --darkShadow: hsl(var(--brand), 35%, 85%);
@@ -154,9 +156,10 @@ html { font-size: 1.25vmin; }
   }
   .doubleColumns { width: var(--gridContent); }
   .doubleColumns > * { width: var(--fullWidth); }
-  .doubleColumns > .fullHeight { height: var(--fullHeight); }
   .floatingMsg.notFixed { min-height: 13rem; }
 }
+
+.doubleColumns > .fullHeight { min-height: var(--fullHeight); }
 
 body, .page, #settings, #popup, noscript {
   width: 100vw; height: 100vh;
@@ -328,6 +331,13 @@ button {
   min-height: 11.5rem;
   padding: 1.5rem 4rem 1.5rem 3rem;
 }
+button.smallBtn {
+  min-height: 7.87rem;
+  font-size: 4em;
+  padding: 0 2rem 0 1.5rem;
+  margin: 0;
+  border-color: transparent;
+}
 button.noEmoji {
   padding-right: 3rem;
 }
@@ -348,6 +358,10 @@ button.success {
 }
 button.danger {
   --bgColor: var(--accentRed);
+}
+button.transparent {
+  color: var(--mainText);
+  --bgColor: var(--transparentBg);
 }
 button:disabled, [disabled]:not(input, select) {
   filter: grayscale(1);

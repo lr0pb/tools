@@ -203,7 +203,7 @@ function borderValues(value) {
 function getWeekendDays(date, month) {
   const weekDay = date.getDay();
   const days = [];
-  const firstDayInWeek = date.getTime() - borderValues(weekDay) * oneDay;
+  const firstDayInWeek = date.getTime() - borderValues(weekDay - 1) * oneDay;
   let currentDay = weekDay == 6 ? date : firstDayInWeek - oneDay;
   let phase = weekDay == 6 ? 0 : 1;
   while (new Date(currentDay).getMonth() == month) {

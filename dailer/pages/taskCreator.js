@@ -52,7 +52,7 @@ export const taskCreator = {
       if (period.children.length) return;
       const id = globals.pageInfo.taskId;
       const task = await globals.db.getItem('tasks', id);
-      const per = periods[task.periodId];
+      const per = periodsList[task.periodId];
       const opt = document.createElement('option');
       opt.setAttribute('selected', '');
       opt.innerHTML = per.title || task.ogTitle || task.periodTitle;
