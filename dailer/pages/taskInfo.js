@@ -85,8 +85,7 @@ async function renderTaskInfo({globals, page}) {
     `}</div>
   `;
   renderItemsHolder({task, periods, priorities, iha});
-  if (iha) await renderHistory(task);
-  if (isa) await renderStats(task);
+  if (iha) await renderHistory(task, isa);
 }
 
 function renderItemsHolder({task, periods, priorities, iha}) {
@@ -118,7 +117,7 @@ function renderItemsHolder({task, periods, priorities, iha}) {
 
   if (iha && showQS) {
     const quickStats = {
-      amount: daysInWeek,
+      amount: Math[task.period[task.periodDay] ? 'ceil' : 'floor'](daysInWeek),
       completed: 0, done: false
     };
     for (let i = 1; i < quickStats.amount + 1; i++) {
@@ -195,6 +194,7 @@ const formatter = new Intl.DateTimeFormat('en', {
 });
 
 function borderValues(value) {
+  value--;
   if (value == -1) return 6;
   if (value == 6) return -1;
   return value;
@@ -203,7 +203,7 @@ function borderValues(value) {
 function getWeekendDays(date, month) {
   const weekDay = date.getDay();
   const days = [];
-  const firstDayInWeek = date.getTime() - borderValues(weekDay - 1) * oneDay;
+  const firstDayInWeek = date.getTime() - borderValues(weekDay) * oneDay;
   let currentDay = weekDay == 6 ? date : firstDayInWeek - oneDay;
   let phase = weekDay == 6 ? 0 : 1;
   while (new Date(currentDay).getMonth() == month) {
@@ -221,51 +221,57 @@ function renderEmptyDays(hm, count) {
   }
 }
 
-async function renderHistory(task) {
+function init(date, h, hm) {
+  const month = date.getMonth();
+  if (!hm || hm.parentElement.dataset.month !== String(month)) {
+    hm = createMonth(formatter.format(date), month, h);
+    const emptyDays = borderValues(date.getDay());
+    let rwd = null; // remainingWeekendDays
+    if (date.getDate() !== 1) {
+      rwd = getWeekendDays(date, month);
+      const firstWeekendDay = new Date(rwd.at(-1)).getDay();
+      renderEmptyDays(hm, borderValues(firstWeekendDay));
+      for (let i = 1; i < rwd.length + 1; i++) {
+        const weekendDay = new Date(rwd.at(-1 * i));
+        hm.innerHTML += `<h4>${weekendDay.getDate()}</h4>`
+        if (weekendDay.getDay() == 0) renderEmptyDays(hm, 5);
+      }
+    }
+    if (
+      (rwd && rwd[0] + oneDay !== date.getTime()) || !rwd
+    ) renderEmptyDays(hm, emptyDays);
+  }
+  return hm;
+}
+
+async function renderHistory(task, isa) {
   const h = qs('#history');
   let hm = null;
-  const init = (date) => {
+  const initial = (date, item) => {
     date = new Date(date);
-    const month = date.getMonth();
-    if (!hm || hm.parentElement.dataset.month !== String(month)) {
-      hm = createMonth(formatter.format(date), month, h);
-      const emptyDays = borderValues(date.getDay() - 1);
-      let rwd = null; // remainingWeekendDays
-      if (date.getDate() !== 1) {
-        rwd = getWeekendDays(date, month);
-        const firstWeekendDay = new Date(rwd.at(-1)).getDay();
-        renderEmptyDays(hm, borderValues(firstWeekendDay));
-        for (let i = 1; i < rwd.length + 1; i++) {
-          const weekendDay = new Date(rwd.at(-1 * i));
-          hm.innerHTML += `<h4>${weekendDay.getDate()}</h4>`
-          if (weekendDay.getDay() == 0) renderEmptyDays(hm, 5);
-        }
-      }
-      if (
-        (rwd && rwd[0] + oneDay !== date.getTime()) || !rwd
-      ) renderEmptyDays(hm, emptyDays);
-    }
-  };
+    hm = init(date, h, hm);
+    if (item && isa) addToStats(date, item);
+  }
   await getHistory({
     task,
     onBlankDay: (date) => {
-      init(date);
+      initial(date);
       hm.innerHTML += `<h4>${emjs.blank}</h4>`;
     },
     onActiveDay: (date, item) => {
-      init(date);
+      initial(date, item);
       hm.innerHTML += `<h4>${item ? emjs.sign : emjs.cross}</h4>`;
     }
   });
   qs('#history > div:last-child').scrollIntoView();
-  qs('> :first-child').scrollIntoView();
+  qs('.content > :first-child').scrollIntoView();
 }
 
 export async function getHistory({task, onEmptyDays, onBlankDay, onActiveDay}) {
   const creationDay = normalizeDate(task.created || task.id);
   const startDay = new Date(creationDay > task.periodStart ? creationDay : task.periodStart);
   let day = normalizeDate(startDay);
-  const emptyDays = borderValues(startDay.getDay() - 1);
+  const emptyDays = borderValues(startDay.getDay());
   if (onEmptyDays) for (let i = emptyDays; i > 0; i--) {
     onEmptyDays(day - oneDay * i);
   }
@@ -287,13 +293,13 @@ export async function getHistory({task, onEmptyDays, onBlankDay, onActiveDay}) {
     }
     await onActiveDay(day, item); addValue();
   }
-  periodCursor = borderValues(periodCursor);
+  periodCursor = borderValues(periodCursor + 1);
   while (periodCursor <= task.periodDay && !hardUpdate && !task.period[task.periodDay]) {
     if (onBlankDay) onBlankDay(day);
     addValue();
   }
 }
 
-async function renderStats(task) {
+function addToStats(date, item) {
   //
 }

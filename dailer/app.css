@@ -8,7 +8,7 @@
   --gridContent: var(--defaultGridContent);
 
   --yellow: #cda61a;
-  --red: #a11818;
+  --red: #e32727;
   --green: #3ea317;
   --blue: #1aa2cd;
   --fastAnim: 0.15s;
@@ -414,8 +414,12 @@ button:disabled, [disabled]:not(input, select) {
   0% {opacity: 0;}
   100% {opacity: 1;}
 }
-.task, .itemsHolder, #history, .floatingMsg {
-  animation: elemShowing var(--normalAnim);
+.task, .infoRect, #history, .floatingMsg {
+  animation: elemShowing var(--normalAnim) forwards;
+}
+.task, .infoRect {
+  opacity: 0;
+  animation-delay: 0.1s;
 }
 
 .task {

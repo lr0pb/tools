@@ -212,7 +212,7 @@ export async function downloadData(globals) {
   const data = await getData(globals);
   const blob = new Blob([JSON.stringify(data)], {type: 'application/vnd.dailer+json'});
   const link = qs('#downloadData');
-  const name = String(data.dailer_created).match(/(?<=\d\d)\d{6}/)[0];
+  const name = String(data.dailer_created).match(/(?:\d\d)\d{6}/)[0];
   link.download = `${name}.dailer`;
   link.href = URL.createObjectURL(blob);
   prog.style.display = 'none';

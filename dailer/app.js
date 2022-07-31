@@ -37,7 +37,7 @@ const getPageLink = (name) => {
   const getLink = (sign) => getUrl() + sign + `page=${name}`;
   let link = getUrl().includes('?')
   ? (getUrl().includes('page')
-     ? getUrl().replace(/(?<=page=)\w+/, name)
+     ? getUrl().replace(/(?:page=)\w+/, name)
      : getLink('&'))
   : getLink('?');
   link = link.replace(/\&settings=\w+/, '');
