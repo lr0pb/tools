@@ -153,6 +153,7 @@ html { font-size: 1.25vmin; }
     flex-direction: row !important;
     flex-wrap: wrap;
     justify-content: space-between;
+    align-content: baseline;
   }
   .doubleColumns { width: var(--gridContent); }
   .doubleColumns > * { width: var(--fullWidth); }

@@ -35,7 +35,7 @@ const getUrl = () => location.href.toString();
 
 const getPageLink = (name) => {
   const getLink = (sign) => getUrl() + sign + `page=${name}`;
-  const matcher = getUrl().match(/(?:page=)(\w)+/);
+  const matcher = getUrl().match(/(?:page=)(\w+)/);
   let link = getUrl().includes('?')
   ? (getUrl().includes('page')
      ? getUrl().replace(matcher[1], name)
