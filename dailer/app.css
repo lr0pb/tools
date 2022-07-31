@@ -149,7 +149,7 @@ html { font-size: 1.25vmin; }
 @media (min-width: 935px) and (orientation: landscape) {
   :root { --gridContent: calc(var(--fullWidth) * 2 + 3rem); }
   .doubleColumns:not(.center) {
-    display: flex; height: fit-content;
+    display: flex; min-height: fit-content;
     flex-direction: row !important;
     flex-wrap: wrap;
     justify-content: space-between;

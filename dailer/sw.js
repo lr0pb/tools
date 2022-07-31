@@ -87,10 +87,10 @@ async function addCache(request, cacheName) {
   if (!navigator.onLine) return null;
   let fetchResponse = null;
   const url = request.url;
-  const params = url.match(/(?:\/)[\w\&=\.\?]+$/);
+  const params = url.match(/(?:\/)([\w\&=\.\?]+)$/);
   let isHTML = false;
-  if (params && (!params[0].includes('.') || params[0].includes('.html')) ) {
-    request = new Request(url.replace(params, ''));
+  if (params && (!params[1].includes('.') || params[1].includes('.html')) ) {
+    request = new Request(url.replace(params[1], ''));
     isHTML = true;
   }
   try {

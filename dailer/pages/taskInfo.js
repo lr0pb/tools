@@ -234,7 +234,7 @@ function init(date, h, hm) {
       for (let i = 1; i < rwd.length + 1; i++) {
         const weekendDay = new Date(rwd.at(-1 * i));
         hm.innerHTML += `<h4>${weekendDay.getDate()}</h4>`
-        if (weekendDay.getDay() == 0) renderEmptyDays(hm, 5);
+        if (weekendDay.getDay() == 0 && i !== rwd.length) renderEmptyDays(hm, 5);
       }
     }
     if (
