@@ -29,10 +29,13 @@ export const taskCreator = {
     <h3>How often will you perform this task?</h3>
     <select id="period" title="Select how often or when will you perform this task"></select>
     <h3 id="description" class="hidedUI"></h3>
+    <h3 id="startDateTitle" class="hidedUI">When start to performing this task?</h3>
+    <select id="startDate" class="hidedUI" title="Select option when start to performing this task">
+    </select>
     <h3 id="dateTitle" class="hidedUI"></h3>
     <input type="date" id="date" class="hidedUI">
     <div id="endDateToggler"></div>
-    <h3 id="endDateTitle" class="hidedUI">Select tasks end date</h3>
+    <h3 id="endDateTitle" class="hidedUI">Select day when stop to performing this task</h3>
     <input type="date" id="endDate" class="hidedUI">
     <div id="editButtons">
       <button id="disable" class="secondary noEmoji">Disable task</button>
@@ -93,6 +96,8 @@ async function onTaskCreator({globals}) {
   if (!localStorage.firstDayEver) qs('#back').style.display = 'none';
   const priorities = await globals.getList('priorities');
   createOptionsList(qs('#priority'), priorities);
+  const startDateOptions = await globals.getList('startDateOptions');
+  createOptionsList(qs('#startDate'), startDateOptions);
   renderToggler({
     name: 'No limit to end date', id: 'noEndDate',
     page: qs('#endDateToggler'), value: 1, first: true,
@@ -106,8 +111,9 @@ async function onTaskCreator({globals}) {
     }]
   });
   await taskCreator.onSettingsUpdate({globals});
-  safeDataInteractions(['name', 'priority', 'period', 'date', 'endDate']);
+  safeDataInteractions(['name', 'priority', 'period', 'startDate', 'date', 'endDate']);
   qs('#period').addEventListener('change', async (e) => await onPeriodChange(e, globals));
+  qs('#startDate').addEventListener('change', onStartDateChange);
   qs('#date').min = convertDate(Date.now());
   qs('#date').addEventListener('change', onDateChange);
   syncGlobals(globals);
@@ -237,11 +243,15 @@ async function onPeriodChange(e, globals) {
   }
   updateState({lastPeriodValue: value});
   const date = qs('#date');
+  const dateTitle = qs('#dateTitle');
+  const startDate = qs('#startDate');
+  const startDateTitle = qs('#startDateTitle');
+  const desc = qs('#description');
   date.value = '';
   date.removeAttribute('max');
-  date.style.display = 'none';
-  qs('#dateTitle').style.display = 'none';
-  qs('#description').style.display = 'none';
+  for (let elem of [date, dateTitle, startDate, startDateTitle, desc]) {
+    elem.style.display = 'none';
+  }
   const per = periods[value];
   let day;
   if (per.special && per.startDate) day = per.startDate;
@@ -250,24 +260,25 @@ async function onPeriodChange(e, globals) {
   if (per.startDayShift) day += oneDay * per.startDayShift;
   date.value = convertDate(day);
   if (per.selectTitle && !per.getWeekStart) {
-    qs('#dateTitle').innerHTML = per.selectTitle;
-    qs('#dateTitle').style.display = 'block';
-    date.style.display = 'block';
+    dateTitle.innerHTML = per.selectTitle;
+    startDateTitle.style.display = 'block';
+    startDate.style.display = 'block';
+    startDate.value = '0';
     if (per.maxDate) {
       const maxDate = getToday() + oneDay * per.maxDate;
       date.max = convertDate(maxDate);
     }
   }
   if (per.description) {
-    qs('#description').innerHTML = per.description;
-    qs('#description').style.display = 'block';
+    desc.innerHTML = per.description;
+    desc.style.display = 'block';
   }
   if (per.special == 'oneTime') {
     const toggler = qs('[data-id="noEndDate"]');
     if (!Number(toggler.dataset.value)) toggler.activate();
     toggler.style.display = 'none';
   } else qs('[data-id="noEndDate"]').style.display = 'flex';
-  onDateChange({ target: qs('#date') });
+  onDateChange({ target: date });
 }
 
 function onDateChange(e) {
@@ -277,6 +288,23 @@ function onDateChange(e) {
   const newEnd = value + oneDay;
   qs('#endDate').min = convertDate(newEnd);
   if (endValue <= newEnd) qs('#endDate').value = convertDate(newEnd);
+}
+
+function onStartDateChange(e) {
+  const date = qs('#date');
+  const dateTitle = qs('#dateTitle');
+  if (['0', '2'].includes(e.target.value)) {
+    date.value = convertDate(getToday());
+  } else {
+    const today = getToday();
+    const weekDay = new Date(today).getDay();
+    const closestMonday = today + oneDay * (7 - weekDay);
+    date.value = convertDate(!weekDay ? today : closestMonday);
+  }
+  if (e.target.value == '2') {
+    date.style.display = 'block';
+    dateTitle.style.display = 'block';
+  }
 }
 
 export function createTask(periods, td = {}) {

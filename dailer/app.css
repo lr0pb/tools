@@ -420,7 +420,7 @@ button:disabled, [disabled]:not(input, select) {
 }
 .task, .infoRect {
   opacity: 0;
-  animation-delay: 0.1s;
+  animation-delay: 0.05s;
 }
 
 .task {
@@ -541,7 +541,7 @@ a:visited { color: var(--secondary); }
   scroll-snap-type: x mandatory;
 }
 .historyMonth > * {
-  width: calc(var(--fullWidth) / 7);
+  width: calc(var(--fullWidth) / 7); height: 1.87em;
   text-align: center;
   margin: 0.5rem 0;
   padding: 0.5rem 0;

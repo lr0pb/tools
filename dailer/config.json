@@ -82,6 +82,14 @@
     "color": "red",
     "emoji": "fire"
   }],
+  "startDateOptions": [{
+    "title": "Today",
+    "selected": true
+  }, {
+    "title": "Closest monday"
+  }, {
+    "title": "Custom date"
+  }],
   "reminderList": [{
     "title": "Select how often to remind",
     "disabled": true,

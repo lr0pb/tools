@@ -495,6 +495,7 @@ async function paintFirstPage(rndr) {
 async function showPage(prev, current, noAnim, noCleaning) {
   prev.classList.remove('showing', 'current');
   prev.classList.add('hidePrevPage');
+  current.classList.remove('hided');
   inert.set(prev);
   inert.remove(current);
   let done = false;
