@@ -541,13 +541,14 @@ a:visited { color: var(--secondary); }
   scroll-snap-type: x mandatory;
 }
 .historyMonth > * {
-  width: calc(var(--fullWidth) / 7); height: 1.87em;
+  width: calc(var(--fullWidth) / 7);
   text-align: center;
   margin: 0.5rem 0;
   padding: 0.5rem 0;
   border: 0.8rem solid transparent;
   border-radius: 2rem;
 }
+.historyMonth > h4 { height: 1.87em; }
 #history div:last-child .historyMonth > *:last-child {
   background-color: var(--marker);
 }

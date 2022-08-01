@@ -49,13 +49,13 @@ export const taskCreator = {
   script: onTaskCreator,
   onSettingsUpdate: async ({globals}) => {
     syncGlobals(globals);
-    const periodsList = await getPeriods(globals);
+    const { periods, periodsList } = await getPeriods(globals);
     const period = qs('#period');
     if (globals.pageInfo.taskAction == 'edit') {
       if (period.children.length) return;
       const id = globals.pageInfo.taskId;
       const task = await globals.db.getItem('tasks', id);
-      const per = periodsList[task.periodId];
+      const per = periods[task.periodId];
       const opt = document.createElement('option');
       opt.setAttribute('selected', '');
       opt.innerHTML = per.title || task.ogTitle || task.periodTitle;
@@ -88,7 +88,7 @@ async function getPeriods(globals) {
     id: '00',
     title: 'No right period? Click to check others'
   });
-  return periodsList;
+  return { periods, periodsList };
 }
 
 async function onTaskCreator({globals}) {
@@ -278,6 +278,7 @@ async function onPeriodChange(e, globals) {
     if (!Number(toggler.dataset.value)) toggler.activate();
     toggler.style.display = 'none';
   } else qs('[data-id="noEndDate"]').style.display = 'flex';
+  onStartDateChange({ target: startDate });
   onDateChange({ target: date });
 }
 
@@ -293,13 +294,15 @@ function onDateChange(e) {
 function onStartDateChange(e) {
   const date = qs('#date');
   const dateTitle = qs('#dateTitle');
+  date.style.display = 'none';
+  dateTitle.style.display = 'none';
   if (['0', '2'].includes(e.target.value)) {
     date.value = convertDate(getToday());
   } else {
     const today = getToday();
     const weekDay = new Date(today).getDay();
     const closestMonday = today + oneDay * (7 - weekDay);
-    date.value = convertDate(!weekDay ? today : closestMonday);
+    date.value = convertDate(weekDay == 0 ? today : closestMonday);
   }
   if (e.target.value == '2') {
     date.style.display = 'block';
