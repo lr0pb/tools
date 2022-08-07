@@ -77,7 +77,7 @@ async function onPeriodCreator({globals, page}) {
     }
     qs('.historyMonth:last-child').style.margin = '1rem 0';
   }
-  appendDays(isEdit ? per.days : undefined, isEdit ? per.getWeekStart ? undefined);
+  appendDays(isEdit ? per.days : undefined, isEdit ? per.getWeekStart : undefined);
   if (isEdit) toggleDays(per.getWeekStart ? 1 : 0);
   qs('#daysCount').addEventListener('input', onDaysCountChange);
   const containers = qsa('.togglerContainer');
