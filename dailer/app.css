@@ -146,6 +146,8 @@ html { font-size: 1.25vmin; }
   :root { --fullWidth: 75vw; }
 }
 
+.historyMonth > h4 { height: 1.87em; }
+
 @media (min-width: 935px) and (orientation: landscape) {
   :root { --gridContent: calc(var(--fullWidth) * 2 + 3rem); }
   .doubleColumns:not(.center) {
@@ -158,6 +160,7 @@ html { font-size: 1.25vmin; }
   .doubleColumns { width: var(--gridContent); }
   .doubleColumns > * { width: var(--fullWidth); }
   .floatingMsg.notFixed { min-height: 13rem; }
+  .historyMonth > h4 { height: 1.6em; }
 }
 
 .doubleColumns > .fullHeight { min-height: var(--fullHeight); }
@@ -540,6 +543,8 @@ a:visited { color: var(--secondary); }
   overflow: auto hidden;
   scroll-snap-type: x mandatory;
 }
+#history > * { scroll-snap-stop: always; }
+#history > * > h3 { text-align: center; }
 .historyMonth > * {
   width: calc(var(--fullWidth) / 7);
   text-align: center;
@@ -548,7 +553,6 @@ a:visited { color: var(--secondary); }
   border: 0.8rem solid transparent;
   border-radius: 2rem;
 }
-.historyMonth > h4 { height: 1.87em; }
 #history div:last-child .historyMonth > *:last-child {
   background-color: var(--marker);
 }

@@ -190,7 +190,7 @@ function createMonth(name, month, history) {
 }
 
 const formatter = new Intl.DateTimeFormat('en', {
-  month: "long"
+  month: 'long', year: 'numeric'
 });
 
 function borderValues(value) {

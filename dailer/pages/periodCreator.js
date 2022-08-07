@@ -1,7 +1,7 @@
 import { renderToggler, toggleFunc } from './highLevel/taskThings.js'
 import {
   qs, qsa, globQs, globQsa, /*emjs,*/ safeDataInteractions, handleKeyboard,
-  togglableElement, syncGlobals
+  togglableElement, syncGlobals, copyArray
 } from './highLevel/utils.js'
 import { paintPeriods } from './settings.js'
 
@@ -77,7 +77,7 @@ async function onPeriodCreator({globals, page}) {
     }
     qs('.historyMonth:last-child').style.margin = '1rem 0';
   }
-  appendDays(isEdit ? per.days : null);
+  appendDays(isEdit ? per.days : undefined, isEdit ? per.getWeekStart ? undefined);
   if (isEdit) toggleDays(per.getWeekStart ? 1 : 0);
   qs('#daysCount').addEventListener('input', onDaysCountChange);
   const containers = qsa('.togglerContainer');
@@ -87,7 +87,7 @@ async function onPeriodCreator({globals, page}) {
     page: containers[0], value: isEdit ? (per.special == 'oneTime' ? 0 : 1) : 1, disabled: isEdit
   });
   renderToggler({
-    name: 'Start on Sundays', id: 'getWeekStart',
+    name: 'Start on Mondays', id: 'getWeekStart',
     page: containers[1], value: isEdit ? (per.getWeekStart ? 1 : 0) : 0,
     buttons: [{
       emoji: isEdit ? emjs[per.getWeekStart ? 'sign' : 'blank'] : emjs.blank,
@@ -137,9 +137,14 @@ async function onPeriodCreator({globals, page}) {
   });
 }
 
-function appendDays(days) {
+function appendDays(originalDays, getWeekStart) {
   const hm = qs('.historyMonth:last-child');
-  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const days = originalDays ? copyArray(originalDays) : undefined;
+  if (days && getWeekStart) {
+    days.push(days[0]);
+    days.shift();
+  }
   const daysCount = days ? days.length : maxDays;
   for (let i = 0; i < daysCount; i++) {
     const elem = document.createElement('div');
@@ -199,6 +204,10 @@ export function createPeriod(per = {}, isEdit) {
   } else {
     if (!getValue('isRepeatable')) period.special = 'oneTime';
     if (getValue('getWeekStart')) period.getWeekStart = true;
+  }
+  if (!per.days && period.getWeekStart) {
+    period.days.unshift(period.days.at(-1));
+    period.days.pop();
   }
   if (isEdit || !per.title) {
     if (qs('#periodDesc').value !== '') period.description = qs('#periodDesc').value;

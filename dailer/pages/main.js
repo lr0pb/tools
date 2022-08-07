@@ -72,7 +72,7 @@ async function renderDay({globals, page}) {
   await checkBackupReminder(globals);
 }
 
-async function createDay(globals, periods, today = getToday()) {
+export async function createDay(globals, periods, today = getToday()) {
   if (!localStorage.firstDayEver) {
     localStorage.firstDayEver = today.toString();
   }

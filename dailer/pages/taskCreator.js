@@ -40,6 +40,7 @@ export const taskCreator = {
     <div id="editButtons">
       <button id="disable" class="secondary noEmoji">Disable task</button>
       <button id="delete" class="danger noEmoji">Delete task</button>
+      <h3>Make sure that you can't undo any of these actions</h3>
     </div>
   `},
   get footer() { return `
@@ -110,8 +111,8 @@ async function onTaskCreator({globals}) {
       }
     }]
   });
-  await taskCreator.onSettingsUpdate({globals});
   safeDataInteractions(['name', 'priority', 'period', 'startDate', 'date', 'endDate']);
+  await taskCreator.onSettingsUpdate({globals});
   qs('#period').addEventListener('change', async (e) => await onPeriodChange(e, globals));
   qs('#startDate').addEventListener('change', onStartDateChange);
   qs('#date').min = convertDate(Date.now());
@@ -193,12 +194,18 @@ async function enterEditTaskMode(globals) {
   if (td.nameEdited) qs('#name').disabled = 'disabled';
   qs('#priority').value = td.priority;
   if (!td.periodId) setPeriodId(td, periods);
-  qs('#date').value = convertDate(td.periodStart);
-  if (td.periodStart > getToday() && periods[td.periodId].selectTitle) {
-    qs('#dateTitle').innerHTML = periods[td.periodId].selectTitle;
-    qs('#dateTitle').style.display = 'block';
-    qs('#date').max = convertDate(periods[td.periodId].maxDate);
-    qs('#date').style.display = 'block';
+  const date = qs('#date');
+  const dateTitle = qs('#dateTitle');
+  const per = periods[td.periodId];
+  date.value = convertDate(td.periodStart);
+  if (td.periodStart > getToday() && per.selectTitle) {
+    dateTitle.innerHTML = per.selectTitle;
+    dateTitle.style.display = 'block';
+    if (per.maxDate) {
+      const maxDate = getToday() + oneDay * per.maxDate;
+      date.max = convertDate(maxDate);
+    }
+    date.style.display = 'block';
   }
   if (td.endDate) {
     qs('[data-id="noEndDate"]').activate();

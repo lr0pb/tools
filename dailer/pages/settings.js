@@ -51,7 +51,7 @@ export const settings = {
       <div id="experiments"></div>
       <button id="toDebug" class="secondary">${emjs.construction} Open debug page</button>
       <h2>About</h2>
-      <h3>${emjs.label} dailer app, version 1.3.1</h3>
+      <h3>${emjs.label} dailer app, version 1.3.2</h3>
       <h3>${emjs.sparkles} Emojis powered by <a href="https://github.com/googlefonts/noto-emoji/" target="_blank">Google</a></h3>
       <!--<h3>${emjs.magicBall} Codename: Sangria</h3>-->
       <h3>${emjs.microscope} Developed in 2022</h3>
@@ -162,6 +162,7 @@ function updatePeriodsList({e, globals, periodsCount, elem }) {
         state: 'fail', text: `You already choose ${periodsCount} periods`
       })
     : list.push(id);
+    if (list.length == periodsCount) return;
   }
   list.sort((el1, el2) => {
     el1 = Number(el1);
@@ -255,13 +256,13 @@ export function getNextRemindText() {
 
 export function toggleExperiments() {
   if (dailerData.experiments) {
-    document.documentElement.classList.add('compress');
+    //document.documentElement.classList.add('compress');
     const color = getComputedStyle(document.documentElement).accentColor;
     for (let elem of qsa('meta[name="theme-color"]')) {
       elem.content = color;
     }
   } else {
-    document.documentElement.classList.remove('compress');
+    //document.documentElement.classList.remove('compress');
     const metas = qsa('meta[name="theme-color"]');
     metas[0].content = '#f2f2f2';
     metas[1].content = '#000000';

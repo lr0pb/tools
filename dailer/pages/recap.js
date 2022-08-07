@@ -1,6 +1,7 @@
 import { getToday, oneDay } from './highLevel/periods.js'
 import { qs, qsa, /*emjs*/ } from './highLevel/utils.js'
 import { renderTask } from './highLevel/taskThings.js'
+import { createDay } from './main.js'
 
 export const recap = {
   get header() { return `${emjs.newspaper} Yesterday recap`},
@@ -26,7 +27,11 @@ export const recap = {
     });
     const date = String(getToday() - oneDay);
     const day = await globals.db.getItem('days', date);
-    if (!day) return qs('#toMain').click();
+    if (!day) {
+      if (!dailerData.experiments) return qs('#toMain').click();
+      const periods = await globals.getPeriods();
+      await createDay(globals, periods, Number(date));
+    }
     let tasksCount = 0;
     let completedTasks = 0;
     let forgottenTasks = [];
