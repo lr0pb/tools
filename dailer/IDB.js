@@ -1,4 +1,4 @@
-const database = {
+export const database = {
   name: 'dailer',
   version: 5,
   stores: [
@@ -15,7 +15,7 @@ const database = {
 * @objectStores - array e.g. [{name: 'name', index: {keyPath: 'title'}}]
 */
 
-class IDB {
+export class IDB {
   constructor(name, version, objectStores) {
     if (typeof name != 'string' || typeof version != 'number' || !Array.isArray(objectStores)) {
       return console.error(`[IDB] Wrong arguments data types, can't open database`);

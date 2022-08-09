@@ -6,7 +6,7 @@ import {
 import { getToday, oneDay } from './pages/highLevel/periods.js'
 import { paintPeriods, toggleExperiments } from './pages/settings.js'
 import { checkInstall } from './pages/main.js'
-import * as idb from './IDB.js'
+import { IDB, database } from './IDB.js'
 
 if (
   'serviceWorker' in navigator && 'caches' in window && 'permissions' in navigator
@@ -230,8 +230,8 @@ const globals = {
 }
 
 function createDb() {
-  if (!globals.db) globals.db = new idb.IDB(
-    idb.database.name, idb.database.version, idb.database.stores
+  if (!globals.db) globals.db = new IDB(
+    database.name, database.version, database.stores
   );
 }
 
