@@ -1,4 +1,4 @@
-export const database = {
+const database = {
   name: 'dailer',
   version: 5,
   stores: [
@@ -10,6 +10,8 @@ export const database = {
     { name: 'themes', index: {keyPath: 'id'} },
   ]
 };
+
+export database;
 
 /**
 * @objectStores - array e.g. [{name: 'name', index: {keyPath: 'title'}}]

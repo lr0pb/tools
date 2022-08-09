@@ -115,7 +115,7 @@ export const settings = {
       }], page: qs('#experiments'), value: dailerData.experiments
     });
     if (!dailerData.experiments) return;
-    qs('#notificationsC').display = 'flex';
+    qs('#notificationsC').style.display = 'flex';
     const getNotifPerm = (value = Notification.permission) => value == 'granted' ? 1 : value == 'denied' ? 2 : 0;
     const getEmoji = (notifPerm) => {
       const value = getNotifPerm(notifPerm);

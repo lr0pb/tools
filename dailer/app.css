@@ -567,3 +567,5 @@ a:visited { color: var(--secondary); }
 
 .dataLine { align-items: baseline; }
 .dataLine p { word-break: break-word; }
+
+#notificationsC { min-height: 35rem; }
