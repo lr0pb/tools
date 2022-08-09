@@ -124,7 +124,7 @@ export const settings = {
     renderToggler({
       name: `${emjs.bell} Enable notifications`, id: 'notifications', buttons: [{
         emoji: getEmoji(),
-        func: ({e, elem}) => {
+        func: async ({e, elem}) => {
           if (Notification.permission !== 'default') return;
           const target = e.target.dataset.action ? e.target : e.target.parentElement;
           target.innerHTML = emjs.loading;

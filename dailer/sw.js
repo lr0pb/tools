@@ -1,9 +1,9 @@
-importScripts('./IDB.js');
+//importScripts('./IDB.js');
 
 const APP_CACHE = 'app-24.07';
 const EMOJI_CACHE = 'emoji-24.07';
 const HTML_TIMEOUT = 670;
-const FILE_TIMEOUT = 290;
+const FILE_TIMEOUT = 340;
 
 async function addToCache(cacheName, fileName, onFileReceived) {
   const cache = await caches.open(cacheName);
@@ -117,8 +117,8 @@ self.addEventListener('periodicsync', (e) => {
 });
 
 async function checkNotifications() {
-  const db = new IDB(
+  const db = ['bruh'];/* new IDB(
     database.name, database.version, database.stores
-  );
+  );*/
   console.log(db);
 }
