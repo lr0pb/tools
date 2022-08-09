@@ -2,6 +2,7 @@
   "sign": "2705",
   "blank": "2b1c",
   "cross": "274c",
+  "loading": "1f518",
   "back": "25c0",
   "forward": "23e9",
   "sparkles": "2728",
@@ -36,5 +37,6 @@
   "star": "2b50",
   "experiments": "1f9ea",
   "moon": "1f319",
-  "chartUp": "1f4c8"
+  "chartUp": "1f4c8",
+  "bell": "1f514"
 }

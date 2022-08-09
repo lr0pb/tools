@@ -26,11 +26,12 @@ export const recap = {
       globals.paintPage('main', true, true);
     });
     const date = String(getToday() - oneDay);
-    const day = await globals.db.getItem('days', date);
+    let day = await globals.db.getItem('days', date);
     if (!day) {
       if (!dailerData.experiments) return qs('#toMain').click();
       const periods = await globals.getPeriods();
-      await createDay(globals, periods, Number(date));
+      const resp = await createDay(globals, periods, Number(date));
+      day = resp.day;
     }
     let tasksCount = 0;
     let completedTasks = 0;

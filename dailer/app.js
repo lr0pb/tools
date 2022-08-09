@@ -3,14 +3,28 @@ import {
   /*emjs,*/ qs as localQs, globQs as qs, globQsa as qsa, copyObject, copyArray, checkForFeatures,
   isDesktop, inert, convertEmoji
 } from './pages/highLevel/utils.js'
-import { getToday } from './pages/highLevel/periods.js'
+import { getToday, oneDay } from './pages/highLevel/periods.js'
 import { paintPeriods, toggleExperiments } from './pages/settings.js'
 import { checkInstall } from './pages/main.js'
-import IDB from './IDB.js'
+import { IDB, database } from './IDB.js'
 
-if ('serviceWorker' in navigator && 'caches' in window) {
-  navigator.serviceWorker.register('./sw.js');
-}
+if (
+  'serviceWorker' in navigator && 'caches' in window && 'permissions' in navigator
+) {(async () => {
+  const reg = await navigator.serviceWorker.register('./sw.js');
+  const status = await navigator.permissions.query({
+    name: 'periodic-background-sync',
+  });
+  if (status.state === 'granted' && 'periodicSync' in reg) {
+    try {
+      await reg.periodicSync.register('dailyNotification', {
+        minInterval: oneDay
+      });
+    } catch (err) {}
+    const tags = await reg.periodicSync.getTags();
+    console.log(tags);
+  }
+})()}
 
 if (!window.dailerData) window.dailerData = {
   nav: 'navigation' in window ? true : false,
@@ -216,13 +230,9 @@ const globals = {
 }
 
 function createDb() {
-  if (!globals.db) globals.db = new IDB('dailer', 4, [
-    { name: 'tasks', index: {keyPath: 'id'} },
-    { name: 'days', index: {keyPath: 'date'} },
-    { name: 'periods', index: {keyPath: 'id'} },
-    { name: 'labels', index: {keyPath: 'id'} },
-    { name: 'themes', index: {keyPath: 'id'} },
-  ]);
+  if (!globals.db) globals.db = new IDB(
+    database.name, database.version, database.stores
+  );
 }
 
 function getEmojiLink(emoji) {
@@ -268,6 +278,7 @@ window.addEventListener('pageshow', async (e) => {
   document.documentElement.lang = navigator.language;
   await loadEmojiList();
   toggleExperiments();
+  pages.settings.fillHeader({page: qs('#settings > .header')});
   await pages.settings.paint({globals, page: qs('#settings > .content')});
   const params = getParams();
   if (!params.settings) inert.set(qs('#settings'), true);
@@ -537,8 +548,6 @@ async function hidePage(current, prevName, noPageUpdate) {
     await pages[prev.id].onPageShow({globals, page: qs(`#${prev.id} .content`)});
   }
 }
-
-qs('#closeSettings').addEventListener('click', () => history.back());
 
 qs('#popup').addEventListener('click', (e) => {
   if (e.target.dataset.action == 'cancel') globals.closePopup();

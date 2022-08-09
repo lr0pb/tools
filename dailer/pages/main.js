@@ -69,7 +69,9 @@ async function renderDay({globals, page}) {
   if (existInstallPrompt) return;
   const existDayNote = await checkDayNote(globals);
   if (existDayNote) return;
-  await checkBackupReminder(globals);
+  const existReminder = await checkBackupReminder(globals);
+  if (existReminder) return;
+  await checkNotifications(globals);
 }
 
 export async function createDay(globals, periods, today = getToday()) {
@@ -235,4 +237,22 @@ async function checkBackupReminder(globals) {
       link.click();
     }
   });
+  return true;
+}
+
+async function checkNotifications(globals) {
+  if (!dailerData.experiments) return;
+  if (!('Notification' in window)) return;
+  if (Notification.permission !== 'default') return;
+  //if (Number(localStorage.firstDayEver) == getToday()) return;
+  globals.floatingMsg({
+    text: `${emjs.bell} Get a daily recap of the tasks through notifications`,
+    button: 'Turn&nbsp;on',
+    pageName: 'main',
+    onClick: async (e) => {
+      e.target.parentElement.remove();
+      await Notification.requestPermission();
+    }
+  });
+  return true;
 }

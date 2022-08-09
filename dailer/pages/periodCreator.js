@@ -27,16 +27,16 @@ export const periodCreator = {
     <h3 class="excludeInEdit">How much days will be in period?</h3>
     <input type="range" id="daysCount" class="excludeInEdit" min="1" max="${maxDays}" value="${maxDays}">
     <h3 class="excludeInEdit">Select the days you need to perform the task</h3>
-    <h3 class="excludeInEdit">At least one day is required</h3>
+    <h3 class="excludeInEdit">At least one selected day is required</h3>
     <div>
       <div class="historyMonth" focusgroup="horizontal"></div>
     </div>
     <div class="togglerContainer first"></div>
-    <h3 class="excludeInEdit">When period is over, task will continue period from start</h3>
+    <h3 class="excludeInEdit">When period is over, it will repeat again</h3>
     <div class="togglerContainer first"></div>
-    <h3 class="excludeInEdit">Automatically set task start day to the previous Sunday</h3>
+    <h3 class="excludeInEdit">Period days will be linked to week days<!--, no matter when you start task with this period--></h3>
     <div class="togglerContainer first"></div>
-    <h3>This period will be selected by default in periods drop down list if no other default periods created later are in the list</h3>
+    <h3>This period will be selected by default when you creating new tasks</h3>
   `},
   get footer() { return `
     <button id="back" class="secondary">${emjs.back} Back</button>
@@ -79,23 +79,33 @@ async function onPeriodCreator({globals, page}) {
   }
   appendDays(isEdit ? per.days : undefined, isEdit ? per.getWeekStart : undefined);
   if (isEdit) toggleDays(per.getWeekStart ? 1 : 0);
-  qs('#daysCount').addEventListener('input', onDaysCountChange);
+  const daysCount = qs('#daysCount');
+  daysCount.addEventListener('input', onDaysCountChange);
   const containers = qsa('.togglerContainer');
   renderToggler({
-    name: 'Task will be looped', id: 'isRepeatable',
+    name: 'Period will be looped', id: 'isRepeatable',
     toggler: isEdit ? emjs[per.special == 'oneTime' ? 'blank' : 'sign'] : emjs.sign,
     page: containers[0], value: isEdit ? (per.special == 'oneTime' ? 0 : 1) : 1, disabled: isEdit
   });
   renderToggler({
-    name: 'Start on Mondays', id: 'getWeekStart',
+    name: 'Week linked period', id: 'getWeekStart',
     page: containers[1], value: isEdit ? (per.getWeekStart ? 1 : 0) : 0,
     buttons: [{
       emoji: isEdit ? emjs[per.getWeekStart ? 'sign' : 'blank'] : emjs.blank,
-      func: ({e, elem}) => toggleDays(toggleFunc({e, elem}))
+      func: ({e, elem}) => {
+        const value = toggleFunc({e, elem});
+        if (value) {
+          daysCount.value = maxDays;
+          daysCount.setAttribute('disabled', '');
+        } else {
+          daysCount.removeAttribute('disabled');
+        }
+        toggleDays(value);
+      }
     }], disabled: isEdit
   });
   renderToggler({
-    name: 'Period is selected by default', id: 'selected',
+    name: 'Default period', id: 'selected',
     toggler: isEdit ? emjs[per.selected ? 'sign' : 'blank'] : emjs.blank,
     page: containers[2], value: isEdit ? (per.selected ? 1 : 0) : 0
   });

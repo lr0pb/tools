@@ -10,7 +10,16 @@ const periodsCount = 5;
 
 export const settings = {
   get title() { return `${emjs.box} Settings`},
-  sections: ['periods', 'import'],
+  sections: ['periods', 'import', 'notifications'],
+  fillHeader: ({page}) => {
+    page.innerHTML = `
+      <h4>${settings.title}</h4>
+      <button id="closeSettings" class="emojiBtn" title="Close settings" aria-label="Close settings">
+        ${emjs.cross}
+      </button>
+    `;
+    qs('#closeSettings').addEventListener('click', () => history.back());
+  },
   paint: async ({globals, page}) => {
     page.innerHTML = `
       <h2 data-section="periods">Periods</h2>
@@ -48,10 +57,18 @@ export const settings = {
           <div id="reminder" class="first"></div>
         </div>
       </div>
+      <div id="notificationsC">
+      <h2 data-section="notifications">Notifications</h2>
+      <h3>You will get one time per day notifications about below listed things</h3>
+      <div id="notifications" class="first"></div>
+      <div id="notifTopics" class="doubleColumns" focusgroup>
+        <!-- Bruh -->
+      </div>
+      </div>
       <div id="experiments"></div>
       <button id="toDebug" class="secondary">${emjs.construction} Open debug page</button>
       <h2>About</h2>
-      <h3>${emjs.label} dailer app, version 1.3.2</h3>
+      <h3>${emjs.label} dailer app, version 1.3.3</h3>
       <h3>${emjs.sparkles} Emojis powered by <a href="https://github.com/googlefonts/noto-emoji/" target="_blank">Google</a></h3>
       <!--<h3>${emjs.magicBall} Codename: Sangria</h3>-->
       <h3>${emjs.microscope} Developed in 2022</h3>
@@ -96,6 +113,25 @@ export const settings = {
           toggleExperiments();
         }
       }], page: qs('#experiments'), value: dailerData.experiments
+    });
+    if (!dailerData.experiments) return;
+    qs('#notificationsC').display = 'flex';
+    const getNotifPerm = (value = Notification.permission) => value == 'granted' ? 1 : value == 'denied' ? 2 : 0;
+    const getEmoji = (notifPerm) => {
+      const value = getNotifPerm(notifPerm);
+      return emjs[value == 1 ? 'sign' : value == 2 ? 'cross' : 'blank'];
+    };
+    renderToggler({
+      name: `${emjs.bell} Enable notifications`, id: 'notifications', buttons: [{
+        emoji: getEmoji(),
+        func: ({e, elem}) => {
+          if (Notification.permission !== 'default') return;
+          const target = e.target.dataset.action ? e.target : e.target.parentElement;
+          target.innerHTML = emjs.loading;
+          const resp = await Notification.requestPermission();
+          target.innerHTML = getEmoji(resp);
+        }
+      }], page: qs('#notifications'), value: getNotifPerm()
     });
   },
   opening: async ({globals}) => {

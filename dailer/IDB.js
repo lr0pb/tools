@@ -1,8 +1,21 @@
+export const database = {
+  name: 'dailer',
+  version: 5,
+  stores: [
+    { name: 'settings', index: {keyPath: 'name'} },
+    { name: 'tasks', index: {keyPath: 'id'} },
+    { name: 'days', index: {keyPath: 'date'} },
+    { name: 'periods', index: {keyPath: 'id'} },
+    { name: 'labels', index: {keyPath: 'id'} },
+    { name: 'themes', index: {keyPath: 'id'} },
+  ]
+};
+
 /**
 * @objectStores - array e.g. [{name: 'name', index: {keyPath: 'title'}}]
 */
 
-export default class IDB {
+export class IDB {
   constructor(name, version, objectStores) {
     if (typeof name != 'string' || typeof version != 'number' || !Array.isArray(objectStores)) {
       return console.error(`[IDB] Wrong arguments data types, can't open database`);
