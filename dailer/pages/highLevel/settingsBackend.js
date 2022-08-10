@@ -1,4 +1,4 @@
-import { database } from './../IDB.js'
+import { database } from '../../IDB.js'
 
 export async function processSettings(globals) {
   await addNotifications(globals);
