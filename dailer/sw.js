@@ -1,4 +1,4 @@
-importScripts('./workers/IDB.js');
+importScripts('./workers/sharedFunctions.js');
 
 const APP_CACHE = 'app-24.07';
 const EMOJI_CACHE = 'emoji-24.07';
@@ -117,12 +117,12 @@ self.addEventListener('periodicsync', (e) => {
 });
 
 self.addEventListener('notificationclick', (e) => {
-  console.log(e.notification);
   e.notification.close();
+  e.waitUntil(openApp(e.notification.data));
 });
 
 async function checkNotifications() {
-  const db = new IDB(database.name, database.version, database.stores);
+  const db = new IDB(database.name, database.version, []);
   const notifications = await db.getItem('settings', 'notifications');
   const periodicSync = await db.getItem('settings', 'periodicSync');
   periodicSync.callsHistory.push({
@@ -130,10 +130,37 @@ async function checkNotifications() {
   });
   await db.setItem('settings', periodicSync);
   if (!notifications.enabled || !notifications.permission) return;
-  await registration.showNotification('Test notification', {
-    body: 'Notification description',
+  const day = await db.getItem('days', String(getToday()));
+  let bodyString = 'There are no tasks yet :(\n';
+  let isBodyStringChanged = false;
+  if (day) for (let priority of day.tasks) {
+    for (let taskId in priority) {
+      if (priority[taskId]) continue;
+      const task = await db.getItem('tasks', taskId);
+      if (!isBodyStringChanged) {
+        bodyString = '';
+        isBodyStringChanged = true;
+      }
+      bodyString += `- ${task.name}\n`
+    }
+  }
+  bodyString = bodyString.replace(/\\n$/, '');
+  await registration.showNotification(`Check remaining tasks for today:`, {
+    body: bodyString,
     //badge: './icons/badge.png',
     data: { showPage: 'main' },
     icon: './icons/apple-touch-icon.png',
   });
+}
+
+async function openApp(data) {
+  const allClients = await clients.matchAll({ type: 'window' });
+  if (allClients.length > 0) {
+    return allClients[0].focus();
+  }
+  const page = data.showPage || 'main';
+  const windowClient = await clients.open(
+    `${location.origin}/?from=notification&page=${page}`
+  );
+  if (windowClient) windowClient.focus();
 }

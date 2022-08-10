@@ -6,15 +6,19 @@ export async function processSettings(globals, periodicSync) {
   await addBackupReminder(globals);
 }
 
-async function checkRecord(globals, recordName) {
+async function checkRecord(globals, recordName, support) {
   const data = await globals.db.getItem('settings', recordName);
+  if (data && 'support' in data && support !== undefined) {
+    data.support = support;
+  }
+  await globals.db.setItem('settings', data);
   return data ? true : false;
 }
 
 async function addNotifications(globals) {
-  const resp = await checkRecord(globals, 'notifications');
-  if (resp) return;
   const isSupported = 'Notification' in window;
+  const resp = await checkRecord(globals, 'notifications', isSupported);
+  if (resp) return;
   await globals.db.setItem('settings', {
     name: 'notifications',
     support: isSupported,
@@ -29,9 +33,9 @@ async function addNotifications(globals) {
 }
 
 async function addPeriodicSync(globals, periodicSync) {
-  const resp = await checkRecord(globals, 'periodicSync');
-  if (resp) return;
   const isSupported = periodicSync.support;
+  const resp = await checkRecord(globals, 'periodicSync', isSupported);
+  if (resp) return;
   await globals.db.setItem('settings', {
     name: 'periodicSync',
     support: isSupported,

@@ -1,18 +1,26 @@
-const database = {
-  name: 'dailer',
-  version: 5,
-  stores: [
-    { name: 'settings', index: {keyPath: 'name'} },
-    { name: 'tasks', index: {keyPath: 'id'} },
-    { name: 'days', index: {keyPath: 'date'} },
-    { name: 'periods', index: {keyPath: 'id'} },
-    { name: 'labels', index: {keyPath: 'id'} },
-    { name: 'themes', index: {keyPath: 'id'} },
-  ],
-  settings: {
-    'notifications': 1,
-    'backupReminder': 1
-  }
+const database = { name: 'dailer', version: 5 };
+
+const getRawDay = (date) => {
+  return new Date(date).setHours(0, 0, 0, 0);
+};
+
+const isUnder3AM = (date) => {
+  if (!date) date = new Date();
+  return date.getTime() === getRawDay(date)
+  ? false : date.getHours() < 3;
+};
+
+const oneDay = 86400000; // 86 400 000 milliseconds in one day
+
+const normalizeDate = (date) => {
+  if (typeof date == 'string') date = Number(date);
+  date = new Date(date);
+  const rawDate = getRawDay(date);
+  return isUnder3AM(date) ? rawDate - oneDay : rawDate;
+};
+
+const getToday = () => { // date in milliseconds
+  return normalizeDate(Date.now());
 };
 
 /**

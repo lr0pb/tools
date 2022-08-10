@@ -15,10 +15,8 @@ async function deployWorkers() {
   const reg = await navigator.serviceWorker.register('./sw.js');
   if (!('permissions' in navigator)) return resp;
   const isPeriodicSyncSupported = 'periodicSync' in reg;
-  if (!isPeriodicSyncSupported) {
-    resp.support = isPeriodicSyncSupported;
-    return resp;
-  }
+  resp.support = isPeriodicSyncSupported;
+  if (!isPeriodicSyncSupported) return resp;
   const status = await navigator.permissions.query({
     name: 'periodic-background-sync',
   });
@@ -227,7 +225,8 @@ const globals = {
     });
   },
   checkPersist: async () => {
-    if (!navigator.storage || !navigator.storage.persist) return undefined;
+    if (!('storage' in navigator)) return undefined;
+    if (!('persist' in navigator.storage)) return undefined;
     const isPersisted = await navigator.storage.persisted();
     if (isPersisted) return isPersisted;
     const response = await navigator.storage.persist();
