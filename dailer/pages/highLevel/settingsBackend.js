@@ -10,8 +10,8 @@ async function checkRecord(globals, recordName, support) {
   const data = await globals.db.getItem('settings', recordName);
   if (data && 'support' in data && support !== undefined) {
     data.support = support;
+    await globals.db.setItem('settings', data);
   }
-  await globals.db.setItem('settings', data);
   return data ? true : false;
 }
 

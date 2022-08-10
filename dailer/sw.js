@@ -145,6 +145,7 @@ async function checkNotifications() {
     }
   }
   bodyString = bodyString.replace(/\\n$/, '');
+  console.log(`${location.origin}/?from=notification&page=${'main'}`);
   await registration.showNotification(`Check remaining tasks for today:`, {
     body: bodyString,
     //badge: './icons/badge.png',
@@ -160,7 +161,7 @@ async function openApp(data) {
   }
   const page = data.showPage || 'main';
   const windowClient = await clients.open(
-    `${location.origin}/?from=notification&page=${page}`
+    location.origin
   );
   if (windowClient) windowClient.focus();
 }
