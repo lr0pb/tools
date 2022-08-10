@@ -2,6 +2,7 @@ import { database } from '../../IDB.js'
 
 export async function processSettings(globals) {
   await addNotifications(globals);
+  await addBackupReminder(globals);
 }
 
 async function checkRecord(globals, recordName) {

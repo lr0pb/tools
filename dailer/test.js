@@ -12,7 +12,7 @@ class T4 {
   }
 }
 
-export function t7() {
+function t7() {
   console.log(t1());
 }
 

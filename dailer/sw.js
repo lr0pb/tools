@@ -121,4 +121,6 @@ async function checkNotifications() {
     database.name, database.version, database.stores
   );*/
   console.log(db);
+  console.log(t3);
+  if (t1) console.log(t1());
 }
