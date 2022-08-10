@@ -1,4 +1,4 @@
-importScripts('./test.js');
+importScripts('./workers/IDB.js');
 
 const APP_CACHE = 'app-24.07';
 const EMOJI_CACHE = 'emoji-24.07';
@@ -117,10 +117,10 @@ self.addEventListener('periodicsync', (e) => {
 });
 
 async function checkNotifications() {
-  const db = ['bruh'];/* new IDB(
+  const db = new IDB(
     database.name, database.version, database.stores
-  );*/
+  );
   console.log(db);
-  console.log(t3);
-  if (t1) console.log(t1());
+  /*console.log(t3);
+  if (t1) console.log(t1());*/
 }

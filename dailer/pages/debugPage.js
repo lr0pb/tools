@@ -38,6 +38,9 @@ async function renderPage({globals, page}) {
     'Persist attempts': localStorage.persistAttempts,
     'Persist granted': localStorage.persistGranted
       ? intlDate(Number(localStorage.persistGranted)) : 'no data',
+    'Is periodic sync support': localStorage.periodicSync || 'no data',
+    'Periodic sync status': localStorage.periodicSyncStatus || 'no data',
+    'Notification permission': Notification.permission,
     'Theoretical available memory': convertBytes(memory.quota, 'Mb'),
     'Used memory': convertBytes(memory.usage, 'kb'),
     'Used by Cache storage': convertBytes(memory.usageDetails.caches, 'kb'),

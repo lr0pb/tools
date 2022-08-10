@@ -9,22 +9,25 @@ import { checkInstall } from './pages/main.js'
 import { IDB, database } from './IDB.js'
 import { processSettings } from './pages/highLevel/settingsBackend.js'
 
-if (
-  'serviceWorker' in navigator && 'caches' in window && 'permissions' in navigator
-) {(async () => {
+if ('serviceWorker' in navigator && 'caches' in window) {(
+async () => {
   const reg = await navigator.serviceWorker.register('./sw.js');
+  if (!('permissions' in navigator)) return;
+  const isPeriodicSyncSupported = 'periodicSync' in reg;
+  localStorage.periodicSync = isPeriodicSyncSupported;
+  if (!isPeriodicSyncSupported) return;
   const status = await navigator.permissions.query({
     name: 'periodic-background-sync',
   });
-  if (status.state === 'granted' && 'periodicSync' in reg) {
-    try {
-      await reg.periodicSync.register('dailyNotification', {
-        minInterval: oneDay
-      });
-    } catch (err) {}
-    const tags = await reg.periodicSync.getTags();
-    console.log(tags);
-  }
+  localStorage.periodicSyncStatus = status;
+  if (status.state !== 'granted') return;
+  try {
+    await reg.periodicSync.register('dailyNotification', {
+      minInterval: oneDay
+    });
+  } catch (err) {}
+  const tags = await reg.periodicSync.getTags();
+  console.log(tags);
 })()}
 
 if (!window.dailerData) window.dailerData = {
