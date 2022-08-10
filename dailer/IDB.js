@@ -8,7 +8,11 @@ export const database = {
     { name: 'periods', index: {keyPath: 'id'} },
     { name: 'labels', index: {keyPath: 'id'} },
     { name: 'themes', index: {keyPath: 'id'} },
-  ]
+  ],
+  settings: {
+    'notifications': 1,
+    'backupReminder': 1
+  }
 };
 
 /**

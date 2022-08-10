@@ -7,6 +7,7 @@ import { getToday, oneDay } from './pages/highLevel/periods.js'
 import { paintPeriods, toggleExperiments } from './pages/settings.js'
 import { checkInstall } from './pages/main.js'
 import { IDB, database } from './IDB.js'
+import { processSettings } from './pages/highLevel/settingsBackend.js'
 
 if (
   'serviceWorker' in navigator && 'caches' in window && 'permissions' in navigator
@@ -278,6 +279,7 @@ window.addEventListener('pageshow', async (e) => {
   document.documentElement.lang = navigator.language;
   await loadEmojiList();
   toggleExperiments();
+  await processSettings(globals);
   pages.settings.fillHeader({page: qs('#settings > .header')});
   await pages.settings.paint({globals, page: qs('#settings > .content')});
   const params = getParams();
