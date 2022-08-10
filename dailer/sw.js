@@ -116,11 +116,24 @@ self.addEventListener('periodicsync', (e) => {
   e.waitUntil(checkNotifications());
 });
 
+self.addEventListener('notificationclick', (e) => {
+  console.log(e.notification);
+  e.notification.close();
+});
+
 async function checkNotifications() {
-  const db = new IDB(
-    database.name, database.version, database.stores
-  );
-  console.log(db);
-  /*console.log(t3);
-  if (t1) console.log(t1());*/
+  const db = new IDB(database.name, database.version, database.stores);
+  const notifications = await db.getItem('settings', 'notifications');
+  const periodicSync = await db.getItem('settings', 'periodicSync');
+  periodicSync.callsHistory.push({
+    timestamp: Date.now()
+  });
+  await db.setItem('settings', periodicSync);
+  if (!notifications.enabled || !notifications.permission) return;
+  await registration.showNotification('Test notification', {
+    body: 'Notification description',
+    //badge: './icons/badge.png',
+    data: { showPage: 'main' },
+    icon: './icons/apple-touch-icon.png',
+  });
 }

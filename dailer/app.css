@@ -565,7 +565,10 @@ a:visited { color: var(--secondary); }
   transition: opacity var(--normalAnim);
 }
 
-.dataLine { align-items: baseline; }
+.dataLine {
+  min-width: var(--fullWidth);
+  align-items: baseline;
+}
 .dataLine p { word-break: break-word; }
 
 #notificationsC { min-height: 35rem; }

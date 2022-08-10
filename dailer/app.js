@@ -9,18 +9,21 @@ import { checkInstall } from './pages/main.js'
 import { IDB, database } from './IDB.js'
 import { processSettings } from './pages/highLevel/settingsBackend.js'
 
-if ('serviceWorker' in navigator && 'caches' in window) {(
-async () => {
+async function deployWorkers() {
+  const resp = { support: false };
+  if (!('serviceWorker' in navigator && 'caches' in window)) return resp;
   const reg = await navigator.serviceWorker.register('./sw.js');
-  if (!('permissions' in navigator)) return;
+  if (!('permissions' in navigator)) return resp;
   const isPeriodicSyncSupported = 'periodicSync' in reg;
-  localStorage.periodicSync = isPeriodicSyncSupported;
-  if (!isPeriodicSyncSupported) return;
+  if (!isPeriodicSyncSupported) {
+    resp.support = isPeriodicSyncSupported;
+    return resp;
+  }
   const status = await navigator.permissions.query({
     name: 'periodic-background-sync',
   });
-  localStorage.periodicSyncStatus = status;
-  if (status.state !== 'granted') return;
+  resp.permission = status.state;
+  if (status.state !== 'granted') return resp;
   try {
     await reg.periodicSync.register('dailyNotification', {
       minInterval: oneDay
@@ -28,7 +31,8 @@ async () => {
   } catch (err) {}
   const tags = await reg.periodicSync.getTags();
   console.log(tags);
-})()}
+  return resp;
+}
 
 if (!window.dailerData) window.dailerData = {
   nav: 'navigation' in window ? true : false,
@@ -280,9 +284,10 @@ window.addEventListener('pageshow', async (e) => {
   createDb();
   if (e.persisted) return;
   document.documentElement.lang = navigator.language;
+  const periodicSync = await deployWorkers();
   await loadEmojiList();
   toggleExperiments();
-  await processSettings(globals);
+  if (dailerData.experiments) await processSettings(globals, periodicSync);
   pages.settings.fillHeader({page: qs('#settings > .header')});
   await pages.settings.paint({globals, page: qs('#settings > .content')});
   const params = getParams();

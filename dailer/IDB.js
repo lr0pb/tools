@@ -11,7 +11,8 @@ export const database = {
   ],
   settings: {
     'notifications': 1,
-    'backupReminder': 1
+    'periodicSync': 1,
+    'backupReminder': 1,
   }
 };
 
