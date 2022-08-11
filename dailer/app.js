@@ -24,7 +24,7 @@ async function deployWorkers() {
     }
     if (typeof call !== 'object') return;
     call._id = Date.now();
-    w.postMessage(call);
+    worker.postMessage(call);
     await new Promise((res, rej) => {
       const isReady = () => worker._callsList.has(call._id) ? res() : setTimeout(isReady, 10);
       isReady();

@@ -1,4 +1,4 @@
-importScripts('./workers/sharedFunctions.js');
+importScripts('./sharedFunctions.js');
 
 const db = new IDB(database.name, database.version, []);
 
