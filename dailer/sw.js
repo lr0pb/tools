@@ -1,4 +1,5 @@
-importScripts('./workers/mainWorker.js');
+importScripts('./workers/defaultFunctions.js');
+importScripts('./workers/sharedFunctions.js');
 
 const APP_CACHE = 'app-24.07';
 const EMOJI_CACHE = 'emoji-24.07';
