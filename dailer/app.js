@@ -22,7 +22,7 @@ async function deployWorkers() {
     for (let [key, value] of worker._callsList) {
       if (value.used) worker._callsList.delete(key);
     }
-    if (typeof call !== 'object'}) return;
+    if (typeof call !== 'object') return;
     call._id = Date.now();
     w.postMessage(call);
     await new Promise((res, rej) => {
