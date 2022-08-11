@@ -10,7 +10,7 @@ export const database = {
     { name: 'themes', index: {keyPath: 'id'} },
   ],
   settings: {
-    'notifications': 1,
+    'notifications': 2,
     'periodicSync': 1,
     'backupReminder': 1,
   }

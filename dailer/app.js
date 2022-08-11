@@ -10,17 +10,28 @@ import { IDB, database } from './IDB.js'
 import { processSettings } from './pages/highLevel/settingsBackend.js'
 
 async function deployWorkers() {
-  const resp = { support: false };
+  const resp = {
+    worker: null,
+    periodicSync: { support: false }
+  };
   if (!('serviceWorker' in navigator && 'caches' in window)) return resp;
   const reg = await navigator.serviceWorker.register('./sw.js');
+  try {
+    const worker = new Worker('./workers/mainWorker.js');
+    worker.onmessage = (e) => console.log(`Message from worker: ${e.data}`);
+    worker.postMessage({isWorkerReady: false});
+    resp.worker = worker;
+  } catch (err) {
+    console.error(err);
+  }
   if (!('permissions' in navigator)) return resp;
   const isPeriodicSyncSupported = 'periodicSync' in reg;
-  resp.support = isPeriodicSyncSupported;
+  resp.periodicSync.support = isPeriodicSyncSupported;
   if (!isPeriodicSyncSupported) return resp;
   const status = await navigator.permissions.query({
     name: 'periodic-background-sync',
   });
-  resp.permission = status.state;
+  resp.periodicSync.permission = status.state;
   if (status.state !== 'granted') return resp;
   try {
     await reg.periodicSync.register('dailyNotification', {
@@ -69,6 +80,7 @@ const getPageLink = (name) => {
 
 const globals = {
   db: null,
+  worker: null,
   pageName: null,
   pageInfo: null,
   settings: false,
@@ -111,6 +123,11 @@ const globals = {
       <div class="content">${page.page}</div>
       <div class="footer">${page.footer}</div>
     `;
+    container.addEventListener('transitionend', (e) => {
+      console.log(e.target);
+      if (!e.target.classList.contains('page')) return;
+      e.target.style.removeProperty('will-change');
+    });
     document.body.append(container);
     const content = container.querySelector('.content');
     content.className = `content ${page.styleClasses || ''}`;
@@ -283,7 +300,8 @@ window.addEventListener('pageshow', async (e) => {
   createDb();
   if (e.persisted) return;
   document.documentElement.lang = navigator.language;
-  const periodicSync = await deployWorkers();
+  const { worker, periodicSync } = await deployWorkers();
+  globals.worker = worker;
   await loadEmojiList();
   toggleExperiments();
   if (dailerData.experiments) await processSettings(globals, periodicSync);
@@ -312,6 +330,7 @@ const instantPromise = () => new Promise((res) => { res() });
 const callsList = ['paintPage', 'settings', 'additionalBack', 'traverseToStart'];
 
 if ('navigation' in window) navigation.addEventListener('navigate', (e) => {
+  console.log(e);
   if (!dailerData.nav) return;
   const info = e.info || {};
   if (info.call === 'hardReload') return e.transitionWhile(hardReload(info));
@@ -513,6 +532,8 @@ async function paintFirstPage(rndr) {
 }
 
 async function showPage(prev, current, noAnim, noCleaning) {
+  prev.style.willChange = 'transform';
+  current.style.willChange = 'transform';
   prev.classList.remove('showing', 'current');
   prev.classList.add('hidePrevPage');
   current.classList.remove('hided');
@@ -548,6 +569,8 @@ async function hidePage(current, prevName, noPageUpdate) {
     if (prevName !== 'main') await globals.paintPage(prevName, true, false);
     return;
   }
+  prev.style.willChange = 'transform';
+  current.style.willChange = 'transform';
   prev.classList.remove('hidePrevPage', 'hided');
   prev.classList.add('showing', 'current');
   inert.remove(prev);

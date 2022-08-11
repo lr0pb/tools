@@ -6,18 +6,31 @@ export async function processSettings(globals, periodicSync) {
   await addBackupReminder(globals);
 }
 
-async function checkRecord(globals, recordName, support) {
+async function checkRecord(globals, recordName, updateFields, onVersionUpgrade) {
   const data = await globals.db.getItem('settings', recordName);
-  if (data && 'support' in data && support !== undefined) {
-    data.support = support;
-    await globals.db.setItem('settings', data);
+  let shouldUpdateRecord = false;
+  if (data && updateFields && typeof updateFields == 'object') {
+    Object.assign(data, updateFields);
+    shouldUpdateRecord = true;
   }
+  if (data && data.version === database.settings[recordName] && onVersionUpgrade) {
+    data.version = database.settings[recordName];
+    onVersionUpgrade(data);
+    shouldUpdateRecord = true;
+  }
+  if (shouldUpdateRecord) await globals.db.setItem('settings', data);
   return data ? true : false;
 }
 
 async function addNotifications(globals) {
   const isSupported = 'Notification' in window;
-  const resp = await checkRecord(globals, 'notifications', isSupported);
+  const updateFields = {
+    support: isSupported,
+    permission: isSupported ? Notification.permission : null,
+  };
+  const resp = await checkRecord(globals, 'notifications', updateFields, (data) => {
+    if (!data.callsHistory) data.callsHistory = [];
+  });
   if (resp) return;
   await globals.db.setItem('settings', {
     name: 'notifications',
@@ -28,13 +41,14 @@ async function addNotifications(globals) {
       tasksForDay: true,
       backupReminder: true,
     },
+    callsHistory: [],
     version: database.settings.notifications
   });
 }
 
 async function addPeriodicSync(globals, periodicSync) {
   const isSupported = periodicSync.support;
-  const resp = await checkRecord(globals, 'periodicSync', isSupported);
+  const resp = await checkRecord(globals, 'periodicSync', periodicSync);
   if (resp) return;
   await globals.db.setItem('settings', {
     name: 'periodicSync',
@@ -48,7 +62,6 @@ async function addPeriodicSync(globals, periodicSync) {
 async function addBackupReminder(globals) {
   const resp = await checkRecord(globals, 'backupReminder');
   if (resp) return;
-  return console.log('set backupReminder');
   await globals.db.setItem('settings', {
     name: 'backupReminder',
     remindId: localStorage.remindId,

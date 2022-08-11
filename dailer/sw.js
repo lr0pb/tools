@@ -129,11 +129,12 @@ async function checkNotifications() {
     timestamp: Date.now()
   });
   await db.setItem('settings', periodicSync);
-  if (!notifications.enabled || !notifications.permission) return;
+  if (!notifications.enabled || notifications.permission !== 'granted') return;
   const day = await db.getItem('days', String(getToday()));
   let bodyString = 'There are no tasks yet :(\n';
   let isBodyStringChanged = false;
-  if (day) for (let priority of day.tasks) {
+  if (day) for (let i = day.tasks.length - 1; i > -1; i--) {
+    const priority = day.tasks[i];
     for (let taskId in priority) {
       if (priority[taskId]) continue;
       const task = await db.getItem('tasks', taskId);
@@ -145,8 +146,7 @@ async function checkNotifications() {
     }
   }
   bodyString = bodyString.replace(/\\n$/, '');
-  console.log(`${location.origin}/?from=notification&page=${'main'}`);
-  await registration.showNotification(`Check remaining tasks for today:`, {
+  await registration.showNotification(`&#x1f514; Check remaining tasks for today:`, {
     body: bodyString,
     //badge: './icons/badge.png',
     data: { showPage: 'main' },
@@ -160,8 +160,9 @@ async function openApp(data) {
     return allClients[0].focus();
   }
   const page = data.showPage || 'main';
+  const path = location.pathname.replace(/[\w.]+$/, '');
   const windowClient = await clients.open(
-    location.origin
+    `${location.origin}${path}?from=notification&page=${page}`
   );
   if (windowClient) windowClient.focus();
 }
