@@ -1,4 +1,4 @@
-importScripts('./workers/sharedFunctions.js');
+importScripts('./workers/mainWorker.js');
 
 const APP_CACHE = 'app-24.07';
 const EMOJI_CACHE = 'emoji-24.07';
@@ -122,7 +122,6 @@ self.addEventListener('notificationclick', (e) => {
 });
 
 async function checkNotifications() {
-  const db = new IDB(database.name, database.version, []);
   const notifications = await db.getItem('settings', 'notifications');
   const periodicSync = await db.getItem('settings', 'periodicSync');
   periodicSync.callsHistory.push({
@@ -146,8 +145,20 @@ async function checkNotifications() {
     }
   }
   bodyString = bodyString.replace(/\\n$/, '');
-  await registration.showNotification(`&#x1f514; Check remaining tasks for today:`, {
+  const page = 'main';
+  const path = location.pathname.replace(/[\w.]+$/, '');
+  console.log(
+    `${location.origin}${path}?from=notification&page=${page}`
+  );
+  await registration.showNotification(`\u{1f514} Check remaining tasks for today:`, {
     body: bodyString,
+    //badge: './icons/badge.png',
+    data: { showPage: 'main' },
+    icon: './icons/apple-touch-icon.png',
+  });
+  const { show } = await checkBackupReminder();
+  if (show) await registration.showNotification(`\u{1f4e5} Download a backup`, {
+    body: 'You have set reminders to create backups periodically, so today we have been backed up one for you \u{1f35e}',
     //badge: './icons/badge.png',
     data: { showPage: 'main' },
     icon: './icons/apple-touch-icon.png',

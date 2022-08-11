@@ -217,22 +217,17 @@ export async function checkInstall(globals) {
 }
 
 async function checkBackupReminder(globals) {
-  if (!localStorage.remindValue) return;
-  let nextRemind = Number(localStorage.nextRemind);
-  if (nextRemind === getToday() && localStorage.reminded === 'true') return;
-  while (nextRemind < getToday()) {
-    localStorage.reminded = 'false';
-    nextRemind += Number(localStorage.remindValue);
-  }
-  localStorage.nextRemind = nextRemind;
-  if (nextRemind !== getToday()) return;
+  const resp = await globals.worker.call({ process: 'backupReminder' });
+  if (!resp.show) return;
   globals.floatingMsg({
     text: `${emjs.bread} Your data has been backed up`,
     button: 'Download',
     pageName: 'main',
     onClick: async (e) => {
+      const data = await globals.db.getItem('settings', 'backupReminder');
+      data.reminded = true;
+      await globals.db.setItem('settings', data);
       const link = await downloadData(globals);
-      localStorage.reminded = 'true';
       e.target.parentElement.remove();
       link.click();
     }

@@ -193,12 +193,12 @@ function updatePeriodsList({e, globals, periodsCount, elem }) {
     const idx = list.indexOf(id);
     list.splice(idx, 1);
   } else {
-    list.length == periodsCount
-    ? globals.message({
+    const isFull = list.length == periodsCount;
+    isFull ? globals.message({
         state: 'fail', text: `You already choose ${periodsCount} periods`
       })
     : list.push(id);
-    if (list.length == periodsCount) return;
+    if (isFull) return;
   }
   list.sort((el1, el2) => {
     el1 = Number(el1);

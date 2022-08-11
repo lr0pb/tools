@@ -13,7 +13,7 @@ async function checkRecord(globals, recordName, updateFields, onVersionUpgrade) 
     Object.assign(data, updateFields);
     shouldUpdateRecord = true;
   }
-  if (data && data.version === database.settings[recordName] && onVersionUpgrade) {
+  if (data && data.version !== database.settings[recordName] && onVersionUpgrade) {
     data.version = database.settings[recordName];
     onVersionUpgrade(data);
     shouldUpdateRecord = true;

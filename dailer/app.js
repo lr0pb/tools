@@ -16,14 +16,31 @@ async function deployWorkers() {
   };
   if (!('serviceWorker' in navigator && 'caches' in window)) return resp;
   const reg = await navigator.serviceWorker.register('./sw.js');
-  try {
-    const worker = new Worker('./workers/mainWorker.js');
-    worker.onmessage = (e) => console.log(`Message from worker: ${e.data}`);
-    worker.postMessage({isWorkerReady: false});
-    resp.worker = worker;
-  } catch (err) {
-    console.error(err);
-  }
+  const worker = new Worker('./workers/mainWorker.js');
+  worker._callsList = new Map();
+  worker.call = async (call = {}) => {
+    for (let [key, value] of worker._callsList) {
+      if (value.used) worker._callsList.delete(key);
+    }
+    if (typeof call !== 'object'}) return;
+    call._id = Date.now();
+    w.postMessage(call);
+    await new Promise((res, rej) => {
+      const isReady = () => worker._callsList.has(call._id) ? res() : setTimeout(isReady, 10);
+      isReady();
+    });
+    const resp = worker._callsList.get(call._id);
+    resp.used = true;
+    return resp.data;
+  };
+  worker.onmessage = (e) => {
+    worker._callsList.set(e.data._id, {
+      data: e.data,
+      used: false
+    });
+  };
+  worker.postMessage({isWorkerReady: false});
+  resp.worker = worker;
   if (!('permissions' in navigator)) return resp;
   const isPeriodicSyncSupported = 'periodicSync' in reg;
   resp.periodicSync.support = isPeriodicSyncSupported;
@@ -124,7 +141,6 @@ const globals = {
       <div class="footer">${page.footer}</div>
     `;
     container.addEventListener('transitionend', (e) => {
-      console.log(e.target);
       if (!e.target.classList.contains('page')) return;
       e.target.style.removeProperty('will-change');
     });
