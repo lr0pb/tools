@@ -1,6 +1,6 @@
 import { isUnder3AM, getToday, oneDay, isCustomPeriod } from './highLevel/periods.js'
 import { qs, /*emjs*/ } from './highLevel/utils.js'
-import { renderTask, disable, setPeriodTitle } from './highLevel/taskThings.js'
+import { renderTask, setPeriodTitle } from './highLevel/taskThings.js'
 import { downloadData } from './settings.js'
 
 export const main = {

@@ -25,7 +25,7 @@ const getToday = () => { // date in milliseconds
 
 function isCustomPeriod(periodId) {
   if (!periodId) return undefined;
-  return Number(periodId) > Number(localStorage.defaultLastPeriodId);
+  return Number(periodId) > 50;
 }
 
 function intlDate(date) {
