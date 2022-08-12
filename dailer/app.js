@@ -260,13 +260,13 @@ const globals = {
     });
   },
   checkPersist: async () => {
-    if (!('storage' in navigator)) return undefined;
-    if (!('persist' in navigator.storage)) return undefined;
-    const isPersisted = await navigator.storage.persisted();
-    if (isPersisted) return isPersisted;
+    const data = await globals.db.getItem('settings', 'persistentStorage');
+    if (!data.support) return undefined;
+    if (data.isPersisted) return data.isPersisted;
     const response = await navigator.storage.persist();
-    localStorage.persistAttempts = Number(localStorage.persistAttempts) + 1;
-    if (response) localStorage.persistGranted = Date.now().toString();
+    data.attempts++;
+    if (response) data.grantedAt = Date.now();
+    await globals.db.setItem('settings', data);
     return response;
   }
 }
@@ -616,4 +616,3 @@ if (!localStorage.periodsList) {
 }
 if (!localStorage.defaultLastPeriodId) localStorage.defaultLastPeriodId = '50';
 if (!localStorage.lastPeriodId) localStorage.lastPeriodId = localStorage.defaultLastPeriodId;
-if (!localStorage.persistAttempts) localStorage.persistAttempts = '0';

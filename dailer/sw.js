@@ -6,8 +6,6 @@ const EMOJI_CACHE = 'emoji-24.07';
 const HTML_TIMEOUT = 670;
 const FILE_TIMEOUT = 340;
 
-let emojis = null;
-
 async function addToCache(cacheName, fileName, onFileReceived) {
   const cache = await caches.open(cacheName);
   const resp = await fetch(`./${fileName}.json`);
@@ -137,24 +135,18 @@ async function checkNotifications() {
   });
   await db.setItem('settings', periodicSync);
   if (!notifs.enabled || notifs.permission !== 'granted') return;
-  if (!emojis) {
-    const raw = await caches.match(`${getBaseLink()}emoji.json`);
-    emojis = await raw.json();
-  }
   if (notifs.byCategories.tasksForDay) {
     const { body } = await getDayRecap();
-    await showNotification({ title: `${emjs('bell')} Check remaining tasks for today:`, body });
+    await showNotification({ title: `\u{1f514} Check remaining tasks for today:`, body });
   }
   if (notifs.byCategories.backupReminder) {
     const { show } = await checkBackupReminder();
     if (show) await showNotification({
-      title: `${emjs('crateDown')} Download a backup`,
-      body: `You've set reminders to make backups periodically, so today we have been backed up one for you ${emjs('bread')}`
+      title: `\u{1f4e5} Download a backup`,
+      body: `You've set reminders to make backups periodically, so today we have been backed up one for you \u{1f35e}`
     });
   }
 }
-
-function emjs(name) { return '\u{' + emojis[name] + '}'; }
 
 async function showNotification(options) {
   if (!options || (options && !options.title)) return;

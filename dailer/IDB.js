@@ -12,8 +12,9 @@ export const database = {
   settings: {
     'notifications': 2,
     'periodicSync': 1,
+    'persistentStorage': 1,
     'backupReminder': 1,
-    'session': 1
+    'session': 1,
   }
 };
 
@@ -149,7 +150,7 @@ export class IDB {
     const resp = await this._dbCall('getAll', {
       store: { value: store, required: true, type: 'string' },
       onData: { value: onData, type: 'function' }
-    }, 'readonly', 'openCursor', , , async (result) => {
+    }, 'readonly', 'openCursor', null, null, async (result) => {
       if (result) {
         const value = result.value;
         const index = items.length;

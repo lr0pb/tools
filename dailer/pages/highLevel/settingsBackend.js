@@ -37,8 +37,7 @@ async function checkRecord(globals, recordName, updateFields, onVersionUpgrade) 
 async function addNotifications(globals) {
   const isSupported = 'Notification' in window;
   const updateFields = {
-    support: isSupported,
-    permission: isSupported ? Notification.permission : null,
+    support: isSupported, permission: isSupported ? Notification.permission : null,
   };
   const resp = await checkRecord(globals, 'notifications', updateFields, (data) => {
     if (!data.callsHistory) data.callsHistory = [];
@@ -50,8 +49,7 @@ async function addNotifications(globals) {
     permission: isSupported ? Notification.permission : null,
     enabled: true,
     byCategories: {
-      tasksForDay: true,
-      backupReminder: true,
+      tasksForDay: true, backupReminder: true,
     },
     callsHistory: [],
     version: database.settings.notifications
@@ -68,6 +66,20 @@ async function addPeriodicSync(globals, periodicSync) {
     permission: isSupported ? periodicSync.permission : null,
     callsHistory: [],
     version: database.settings.periodicSync
+  });
+}
+
+async function addPersistentStorage(globals) {
+  const isSupported = ('storage' in navigator) && ('persist' in navigator.storage);
+  const resp = await checkRecord(globals, 'persistentStorage', { support: isSupported });
+  if (resp) return;
+  await globals.db.setItem('settings', {
+    name: 'persistentStorage',
+    support: isSupported,
+    isPersisted: await navigator.storage.persisted(),
+    attempts: localStorage.persistAttempts ? Number(persistAttempts) : 0,
+    grantedAt: localStorage.persistGranted ? Number(localStorage.persistGranted) : null,
+    version: database.settings.persistentStorage
   });
 }
 
