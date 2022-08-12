@@ -88,7 +88,7 @@ export class IDB {
     return true;
   }
   async _dbCall(name, args, mode, action, actionArgument, onResult, onSuccess) {
-    if(!_argsCheck(name, args)) return;
+    if(!this._argsCheck(name, args)) return;
     const isReady = await this._isDbReady();
     if (!isReady) return;
     if(!this._checkStore(name, args.store)) return;
@@ -132,7 +132,7 @@ export class IDB {
 * @updateCallback(item) - async function that receive item and can change fields in them
 */
   async updateItem(store, title, updateCallback) {
-    if (!_argsCheck('updateItem', {
+    if (!this._argsCheck('updateItem', {
       store: { value: store, required: true, type: 'string' },
       title: { value: title, required: true },
       updateCallback: { value: updateCallback, required: true, type: 'function' }
@@ -185,7 +185,7 @@ export class IDB {
 * @callback(store, item) - async function that calls every time when some items updated in store
 */
   async onDataUpdate(store, callback) {
-    if (!_argsCheck('updateItem', {
+    if (!this._argsCheck('updateItem', {
       store: { value: store, required: true, type: 'string' },
       callback: { value: callback, required: true, type: 'function' }
     })) return;
