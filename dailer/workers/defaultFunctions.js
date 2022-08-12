@@ -145,7 +145,7 @@ class IDB {
       isComplete();
     });
     const resp = onResult ? onResult(actioner.result) : null;
-    return resp || this;
+    return onResult ? resp : this;
   }
 /**
 * @item - object e.g. {title: 'title', author: 'name', data: new ArrayBuffer(32)}
