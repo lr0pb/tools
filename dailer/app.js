@@ -63,7 +63,7 @@ async function deployWorkers() {
 if (!window.dailerData) window.dailerData = {
   nav: 'navigation' in window ? true : false,
   forcePeriodPromo: false,
-  experiments: Number(localStorage.experiments),
+  experiments: 0,
 };
 checkForFeatures(['inert', 'focusgroup']);
 dailerData.isDesktop = isDesktop();
@@ -321,8 +321,8 @@ window.addEventListener('pageshow', async (e) => {
   const { worker, periodicSync } = await deployWorkers();
   globals.worker = worker;
   await loadEmojiList();
+  await processSettings(globals, periodicSync);
   toggleExperiments();
-  if (dailerData.experiments) await processSettings(globals, periodicSync);
   pages.settings.fillHeader({page: qs('#settings > .header')});
   await pages.settings.paint({globals, page: qs('#settings > .content')});
   const params = getParams();
@@ -610,9 +610,3 @@ qs('#popup').addEventListener('click', (e) => {
 qs('#popup').addEventListener('keydown', (e) => {
   if (e.code == 'Escape') globals.closePopup();
 });
-
-if (!localStorage.periodsList) {
-  localStorage.periodsList = JSON.stringify(['01', '03', '07', '09']);
-}
-if (!localStorage.defaultLastPeriodId) localStorage.defaultLastPeriodId = '50';
-if (!localStorage.lastPeriodId) localStorage.lastPeriodId = localStorage.defaultLastPeriodId;

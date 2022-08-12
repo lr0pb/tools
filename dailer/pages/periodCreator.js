@@ -96,6 +96,7 @@ async function onPeriodCreator({globals, page}) {
         const value = toggleFunc({e, elem});
         if (value) {
           daysCount.value = maxDays;
+          onDaysCountChange({ target: daysCount });
           daysCount.setAttribute('disabled', '');
         } else {
           daysCount.removeAttribute('disabled');
@@ -124,7 +125,7 @@ async function onPeriodCreator({globals, page}) {
   `;*/
   safeDataInteractions(['periodName', 'periodDesc', /*'daysCount'*/]);
   qs('#savePeriod').addEventListener('click', async () => {
-    const period = createPeriod(per, isEdit);
+    const period = await createPeriod(globals, per, isEdit);
     if (period == 'error') return globals.message({
       state: 'fail', text: 'Fill all fields'
     });
@@ -194,9 +195,11 @@ function onDaysCountChange(e) {
   }
 }
 
-export function createPeriod(per = {}, isEdit) {
+export async function createPeriod(globals, per = {}, isEdit) {
+  let session;
+  if (!isEdit) session = await globals.db.getItem('settings', 'session');
   const period = {
-    id: isEdit ? per.id : String(Number(localStorage.lastPeriodId) + 1),
+    id: isEdit ? per.id : String(session.lastPeriodId + 1),
     title: qs('#periodName') ? qs('#periodName').value : per.title,
     days: per.days || [],
     selectTitle: 'Select day to start',
@@ -227,7 +230,10 @@ export function createPeriod(per = {}, isEdit) {
   }
   console.log(period);
   if (period.title == '' || !period.days.includes(1)) return 'error'
-  if (!isEdit) localStorage.lastPeriodId = period.id;
+  if (!isEdit) {
+    session.lastPeriodId++;
+    await globals.db.setItem('settings', session);
+  }
   return period;
 }
 

@@ -15,7 +15,7 @@ export async function uploading(globals, data) {
   session.lastTasksChange = Date.now();
   const periodsConvert = {};
   for (let per of data.dailer_periods) {
-    const period = createPeriod(per);
+    const period = await createPeriod(globals, per);
     periodsConvert[per.id] = period.id;
     await globals.db.setItem('periods', period);
   }

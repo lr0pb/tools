@@ -80,9 +80,9 @@ export const taskCreator = {
 
 async function getPeriods(globals) {
   const periods = await globals.getPeriods();
-  const list = JSON.parse(localStorage.periodsList);
+  const session = await globals.db.getItem('settings', 'session');
   const periodsList = [];
-  for (let per of list) {
+  for (let per of session.periodsList) {
     if (periods[per]) periodsList.push(periods[per]);
   }
   periodsList.push({

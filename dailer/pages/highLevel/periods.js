@@ -27,7 +27,7 @@ export const convertDate = (date) => {
 
 export function isCustomPeriod(periodId) {
   if (!periodId) return undefined;
-  return Number(periodId) > Number(localStorage.defaultLastPeriodId);
+  return Number(periodId) > 50;
 }
 
 export function getWeekStart() { // date in milliseconds

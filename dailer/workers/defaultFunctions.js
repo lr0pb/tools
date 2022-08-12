@@ -110,7 +110,7 @@ class IDB {
   _err(name) { return `[IDB] Error in db.${name}: `; }
   _checkStore(name, store) {
     if (!this.db.objectStoreNames.contains(store)) {
-      console.error(`${_err(name)}database haven't "${store}" store`);
+      console.error(`${this._err(name)}database haven't "${store}" store`);
       return false;
     }
     return true;
@@ -119,15 +119,15 @@ class IDB {
     for (let argName in args) {
       const arg = args[argName];
       if (!arg.required && !arg.value) continue;
-      if (arg.required && !arg.value) return console.error(`${_err(name)}waited for ${argName} argument but receives nothing`);
+      if (arg.required && !arg.value) return console.error(`${this._err(name)}waited for ${argName} argument but receives nothing`);
       if (arg.type && typeof arg.value !== arg.type) {
-        return console.error(`${_err(name)}waited for ${argName} argument type ${arg.type} but receives type ${typeof arg.value}`);
+        return console.error(`${this._err(name)}waited for ${argName} argument type ${arg.type} but receives type ${typeof arg.value}`);
       }
     }
     return true;
   }
   async _dbCall(name, args, mode, action, actionArgument, onResult, onSuccess) {
-    if(!_argsCheck(name, args)) return;
+    if(!this._argsCheck(name, args)) return;
     const isReady = await this._isDbReady();
     if (!isReady) return;
     if(!this._checkStore(name, args.store)) return;
@@ -171,7 +171,7 @@ class IDB {
 * @updateCallback(item) - async function that receive item and can change fields in them
 */
   async updateItem(store, title, updateCallback) {
-    if (!_argsCheck('updateItem', {
+    if (!this._argsCheck('updateItem', {
       store: { value: store, required: true, type: 'string' },
       title: { value: title, required: true },
       updateCallback: { value: updateCallback, required: true, type: 'function' }
@@ -224,7 +224,7 @@ class IDB {
 * @callback(store, item) - async function that calls every time when some items updated in store
 */
   async onDataUpdate(store, callback) {
-    if (!_argsCheck('updateItem', {
+    if (!this._argsCheck('updateItem', {
       store: { value: store, required: true, type: 'string' },
       callback: { value: callback, required: true, type: 'function' }
     })) return;

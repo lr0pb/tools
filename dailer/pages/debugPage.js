@@ -4,6 +4,8 @@ import { isCustomPeriod } from './highLevel/periods.js'
 export const debugPage = {
   get header() { return `${emjs.construction} Debug page`},
   get page() { return `
+    <h2>${emjs.fire} Warning</h2>
+    <h3>Data below is no more represantable due to move to using inside the app better structured place to save data. Debug page will be updated later</h3>
     <div id="dataContainer" class="doubleColumns"></div>
     <div class="doubleColumns">
       <div class="content">
@@ -11,8 +13,10 @@ export const debugPage = {
         <h3>It's actually delete all your tasks and other. Make sure you have backup</h3>
       </div>
       <div class="content">
-        <button id="toRecap" class="noEmoji">Show recap page</button>
-        <h3>Reload app and show Yesterday recap page</h3>
+        <!--<button id="toRecap" class="noEmoji">Show recap page</button>
+        <h3>Reload app and show Yesterday recap page</h3>-->
+        <button id="clearSettings" class="danger noEmoji">Clear settings</button>
+        <h3>If you have preferences stored in old way - you lose nothing</h3>
       </div>
     </div>
   `},
@@ -74,6 +78,10 @@ async function renderPage({globals, page}) {
     delete localStorage.recaped;
     await reloadApp(globals);
   });
+  qs('#clearSettings').addEventListener('click', async () => {
+    await globals.db.deleteAll('settings');
+    await reloadApp(globals);
+  });
 }
 
 function convertBytes(value, unit) {
@@ -85,11 +93,10 @@ function convertBytes(value, unit) {
 export async function clearDatabase(globals) {
   const stores = globals.db.db.objectStoreNames;
   for (let store of stores) {
-    if (store == 'settings') continue;
+    //if (store == 'settings') continue;
     globals.db.deleteAll(store);
   }
-  delete localStorage.lastPeriodId;
-  const list = JSON.parse(localStorage.periodsList);
+  /*const list = JSON.parse(localStorage.periodsList);
   const toDelete = []
   for (let item of list) {
     if (isCustomPeriod(item)) toDelete.push(item);
@@ -98,5 +105,5 @@ export async function clearDatabase(globals) {
     const idx = list.indexOf(item);
     list.splice(idx, 1);
   }
-  localStorage.periodsList = JSON.stringify(list);
+  localStorage.periodsList = JSON.stringify(list);*/
 }

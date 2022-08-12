@@ -37,6 +37,7 @@ export function renderToggler({
   elem.addEventListener('click', async (e) => {
     const target = e.target.dataset.action
     ? e.target : e.target.parentElement;
+    if (target.hasAttribute('disabled')) return;
     if (target.dataset.action) {
       const btn = buttons[target.dataset.action];
       if (!btn.args) btn.args = {};

@@ -10,7 +10,7 @@ export const database = {
     { name: 'themes', index: {keyPath: 'id'} },
   ],
   settings: {
-    'notifications': 2,
+    'notifications': 1,
     'periodicSync': 1,
     'persistentStorage': 1,
     'backupReminder': 1,
@@ -71,7 +71,7 @@ export class IDB {
   _err(name) { return `[IDB] Error in db.${name}: `; }
   _checkStore(name, store) {
     if (!this.db.objectStoreNames.contains(store)) {
-      console.error(`${_err(name)}database haven't "${store}" store`);
+      console.error(`${this._err(name)}database haven't "${store}" store`);
       return false;
     }
     return true;
@@ -80,9 +80,9 @@ export class IDB {
     for (let argName in args) {
       const arg = args[argName];
       if (!arg.required && !arg.value) continue;
-      if (arg.required && !arg.value) return console.error(`${_err(name)}waited for ${argName} argument but receives nothing`);
+      if (arg.required && !arg.value) return console.error(`${this._err(name)}waited for ${argName} argument but receives nothing`);
       if (arg.type && typeof arg.value !== arg.type) {
-        return console.error(`${_err(name)}waited for ${argName} argument type ${arg.type} but receives type ${typeof arg.value}`);
+        return console.error(`${this._err(name)}waited for ${argName} argument type ${arg.type} but receives type ${typeof arg.value}`);
       }
     }
     return true;

@@ -1,6 +1,8 @@
 import { database } from '../../IDB.js'
 
 export async function processSettings(globals, periodicSync) {
+  const session = await globals.db.getItem('settings', 'session');
+  if (session) dailerData.experiments = session.experiments;
   await Promise.all([
     setPeriods(globals),
     addNotifications(globals),
@@ -40,13 +42,12 @@ async function checkRecord(globals, recordName, updateFields, onVersionUpgrade) 
 }
 
 async function addNotifications(globals) {
+  if (!dailerData.experiments) return;
   const isSupported = 'Notification' in window;
   const updateFields = {
     support: isSupported, permission: isSupported ? Notification.permission : null,
   };
-  const resp = await checkRecord(globals, 'notifications', updateFields, (data) => {
-    if (!data.callsHistory) data.callsHistory = [];
-  });
+  const resp = await checkRecord(globals, 'notifications', updateFields);
   if (resp) return;
   await globals.db.setItem('settings', {
     name: 'notifications',
@@ -62,6 +63,7 @@ async function addNotifications(globals) {
 }
 
 async function addPeriodicSync(globals, periodicSync) {
+  if (!dailerData.experiments) return;
   const isSupported = periodicSync.support;
   const resp = await checkRecord(globals, 'periodicSync', periodicSync);
   if (resp) return;
@@ -102,6 +104,7 @@ async function addBackupReminder(globals) {
 }
 
 async function addSession(globals) {
+  const defaultLastPeriodId = 50;
   const resp = await checkRecord(globals, 'session');
   if (resp) {
     if (
@@ -118,8 +121,11 @@ async function addSession(globals) {
     onboarded: localStorage.onboarded ? (localStorage.onboarded == 'true' ? true : false) : false,
     installed: localStorage.installed ? (localStorage.installed == 'true' ? true : false) : false,
     recaped: localStorage.recaped ? Number(localStorage.recaped) : 0,
-    periodsList: localStorage.periodsList ? JSON.parse(localStorage.periodsList) : [],
+    periodsList: localStorage.periodsList ? JSON.parse(localStorage.periodsList) : ['01', '03', '07', '09'],
+    defaultLastPeriodId,
+    lastPeriodId: localStorage.lastPeriodId ? Number(localStorage.lastPeriodId) : defaultLastPeriodId,
     updateTasksList: localStorage.updateTasksList ? JSON.parse(localStorage.updateTasksList) : [],
+    experiments: localStorage.experiments ? Number(localStorage.experiments) : 0,
     version: database.settings.session
   });
 }

@@ -68,7 +68,7 @@ export const settings = {
       <div id="experiments"></div>
       <button id="toDebug" class="secondary">${emjs.construction} Open debug page</button>
       <h2>About</h2>
-      <h3>${emjs.label} dailer app, version 1.3.4</h3>
+      <h3>${emjs.label} dailer app, version 1.3.5</h3>
       <h3>${emjs.sparkles} Emojis powered by <a href="https://github.com/googlefonts/noto-emoji/" target="_blank">Google</a></h3>
       <!--<h3>${emjs.magicBall} Codename: Sangria</h3>-->
       <h3>${emjs.microscope} Developed in 2022</h3>
@@ -104,9 +104,11 @@ export const settings = {
     renderToggler({
       name: `${emjs.experiments} Enable experiments`, id: 'experiments', buttons: [{
         emoji: emjs[dailerData.experiments ? 'sign' : 'blank'],
-        func: ({e, elem}) => {
+        func: async ({e, elem}) => {
           dailerData.experiments = toggleFunc({e, elem});
-          localStorage.experiments = dailerData.experiments;
+          await globals.db.updateItem('settings', 'session', (session) => {
+            session.experiments = dailerData.experiments;
+          });
           globals.message({
             state: 'success', text: 'You probably need to reload app for all experiments will take effect'
           });
@@ -152,6 +154,7 @@ export const settings = {
 export async function paintPeriods(globals) {
   const pc = qs('#periodsContainer');
   const periods = await globals.getPeriods();
+  const session = await globals.db.getItem('settings', 'session');
   const editTitle = 'View or edit period';
   const markTitle = (per) => `Add period${per ? ` "${per}"` : ''} to drop down list`;
   pc.innerHTML = '';
@@ -171,7 +174,7 @@ export async function paintPeriods(globals) {
         }
       });
     }
-    const used = getPeriodUsed(per);
+    const used = getPeriodUsed(session.periodsList, per);
     buttons.push({
       emoji: emjs[used ? 'sign' : 'blank'], value: used,
       title: markTitle(), aria: markTitle(period.title),
@@ -182,7 +185,8 @@ export async function paintPeriods(globals) {
 }
 
 function updatePeriodsList({e, globals, periodsCount, elem }) {
-  const list = JSON.parse(localStorage.periodsList);
+  const session = await globals.db.getItem('settings', 'session');
+  const list = session.periodsList;
   const id = elem.dataset.id;
   if (list.includes(id)) {
     if (list.length == 1) {
@@ -207,12 +211,12 @@ function updatePeriodsList({e, globals, periodsCount, elem }) {
     if (el1 == el2) return 0;
     return -1;
   });
-  localStorage.periodsList = JSON.stringify(list);
+  await globals.db.setItem('settings', session);
   toggleFunc({e, elem});
 }
 
-function getPeriodUsed(id) {
-  return JSON.parse(localStorage.periodsList).includes(id) ? 1 : 0;
+function getPeriodUsed(periodsList, id) {
+  return periodsList.includes(id) ? 1 : 0;
 }
 
 async function uploadData(globals) {
