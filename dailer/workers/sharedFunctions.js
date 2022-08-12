@@ -4,9 +4,7 @@ let session = null;
 async function createDay(today = getToday()) {
   if (!periods) {
     periods = {};
-    await globals.db.getAll('periods', (per) => {
-      periods[per.id] = per;
-    });
+    await db.getAll('periods', (per) => { periods[per.id] = per; });
   }
   if (!session) session = await db.getItem('settings', 'session');
   if (!session.firstDayEver) session.firstDayEver = today;
