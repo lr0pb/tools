@@ -134,7 +134,7 @@ class IDB {
     const actioner = this.db
       .transaction(args.store, mode)
       .objectStore(args.store)
-      .[action](actionArgument);
+      [action](actionArgument);
     let complete = false;
     actioner.addEventListener('success', () => {
       complete = onSuccess ? onSuccess(actioner.result) : true;
@@ -189,7 +189,7 @@ class IDB {
     const resp = await this._dbCall('getAll', {
       store: { value: store, required: true, type: 'string' },
       onData: { value: onData, type: 'function' }
-    }, 'readonly', 'openCursor', , , async (result) => {
+    }, 'readonly', 'openCursor', null, null, async (result) => {
       if (result) {
         const value = result.value;
         const index = items.length;

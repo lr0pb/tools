@@ -5,12 +5,17 @@ export async function processSettings(globals, periodicSync) {
     setPeriods(globals),
     addNotifications(globals),
     addPeriodicSync(globals, periodicSync),
+    addPersistentStorage(globals),
     addBackupReminder(globals),
     addSession(globals)
   ]);
+  await globals.db.onDataUpdate('settings', async (store, item) => {
+    if (item.name !== 'session') return;
+    await globals.worker.call({ process: 'updateSession', args: item });
+  });
 }
 
-await function setPeriods(globals) {
+async function setPeriods(globals) {
   await globals._setCacheConfig();
   const periods = globals._cachedConfigFile.periods;
   for (let perId in periods) {
