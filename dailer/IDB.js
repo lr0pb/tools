@@ -192,7 +192,7 @@ export class IDB {
     })) return;
     const isReady = await this._isDbReady();
     if (!isReady) return;
-    if(!this._checkStore(store)) return;
+    if(!this._checkStore('onDataUpdate', store)) return;
     if (!(store in this._listeners)) this._listeners[store] = [];
     this._listeners[store].push(callback);
     return this;

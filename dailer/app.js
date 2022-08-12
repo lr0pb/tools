@@ -388,7 +388,8 @@ async function hardReload(info) {
   for (let page of qsa('.page')) {
     page.remove();
   }
-  await globals.paintPage(info.page || getFirstPage(), true, true);
+  const session = await globals.db.getItem('settings', 'session');
+  await globals.paintPage(info.page || getFirstPage(session), true, true);
 }
 
 async function onTraverseNavigation(e, silent) {
@@ -464,12 +465,13 @@ async function startApp() {
 }
 
 async function restoreApp(appHistory) {
+  const session = await globals.db.getItem('settings', 'session');
   for (let entry of appHistory) {
     dailerData.forcedStateEntry = entry;
     const params = getParams(entry.url);
     const ogPage = params.page;
     if (['main', 'recap'].includes(params.page)) {
-      params.page = getFirstPage();
+      params.page = getFirstPage(session);
     }
     if (ogPage !== params.page) {
       await globals.paintPage(params.page, true, true);
