@@ -93,10 +93,10 @@ export class IDB {
     if (!isReady) return;
     const store = args.store.value;
     if(!this._checkStore(name, store)) return;
-    const objectStore = this.db
+    const actioner = this.db
       .transaction(store, mode)
-      .objectStore(store);
-    const actioner = objectStore[action](actionArgument);
+      .objectStore(store)
+      [action](actionArgument);
     let complete = false;
     actioner.addEventListener('success', () => {
       complete = onSuccess ? onSuccess(actioner.result) : true;

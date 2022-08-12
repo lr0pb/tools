@@ -80,10 +80,11 @@ async function addPersistentStorage(globals) {
   const isSupported = ('storage' in navigator) && ('persist' in navigator.storage);
   const resp = await checkRecord(globals, 'persistentStorage', { support: isSupported });
   if (resp) return;
+  const isPersisted = await navigator.storage.persisted();
   await globals.db.setItem('settings', {
     name: 'persistentStorage',
     support: isSupported,
-    isPersisted: await navigator.storage.persisted(),
+    isPersisted,
     attempts: localStorage.persistAttempts ? Number(localStorage.persistAttempts) : 0,
     grantedAt: localStorage.persistGranted ? Number(localStorage.persistGranted) : null,
     version: database.settings.persistentStorage
