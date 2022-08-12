@@ -42,15 +42,14 @@ async function updatePage({globals, page}) {
 }
 
 async function renderDay({globals, page}) {
-  const periods = await globals.getPeriods();
-  const { day } = await createDay(globals, periods);
+  const { day } = await globals.worker.call({ process: 'createDay' });
   if (day == 'error') {
     page.innerHTML = `
       <h2 class="emoji">${emjs.magicBall}</h2>
       <h2>You have no tasks today!</h2>
     `;
     page.classList.add('center');
-    await checkInstall(globals);
+    await processChecks(globals);
     return;
   }
   page.classList.remove('center');
@@ -65,6 +64,10 @@ async function renderDay({globals, page}) {
       }});
     }
   }
+  await processChecks(globals);
+}
+
+async function processChecks(globals) {
   const existInstallPrompt = await checkInstall(globals);
   if (existInstallPrompt) return;
   const existDayNote = await checkDayNote(globals);
@@ -72,116 +75,6 @@ async function renderDay({globals, page}) {
   const existReminder = await checkBackupReminder(globals);
   if (existReminder) return;
   await checkNotifications(globals);
-}
-
-export async function createDay(globals, periods, today = getToday()) {
-  if (!localStorage.firstDayEver) {
-    localStorage.firstDayEver = today.toString();
-  }
-  const check = await checkLastDay(globals, today);
-  let tasks = null;
-  if (!check.check) {
-    const resp = await createDay(globals, periods, check.dayBefore);
-    tasks = resp.tasks;
-    delete resp.day;
-  }
-  let day = await globals.db.getItem('days', today.toString());
-  if (!day) {
-    const updateList = JSON.parse(localStorage.updateTasksList);
-    for (let taskId of updateList) {
-      const task = await globals.db.getItem('tasks', taskId);
-      setPeriodTitle(task);
-      await globals.db.setItem('tasks', task);
-    }
-    localStorage.updateTasksList = JSON.stringify([]);
-  }
-  if (!day || day.lastTasksChange != localStorage.lastTasksChange) {
-    day = getRawDay(today.toString(), !day);
-  } else {
-    return isEmpty(day) ? { day: 'error' } : { day };
-  }
-  if (!tasks) {
-    tasks = [];
-    await globals.db.getAll('tasks', (task) => {
-      if (task.disabled || task.deleted ? false : true) tasks.push(task);
-    });
-  }
-  for (let task of tasks) {
-    if (task.periodStart <= today) {
-      if (day.firstCreation || !task.history.length) {
-        updateTask(task, periods);
-        if (task.period[task.periodDay]) {
-          task.history.push(0);
-          day.tasks[task.priority][task.id] = 0;
-        }
-        await globals.db.setItem('tasks', task);
-      } else if (task.period[task.periodDay]) {
-        day.tasks[task.priority][task.id] = task.history.at(-1);
-      }
-    }
-  }
-  await globals.db.setItem('days', day);
-  return isEmpty(day) ? { day: 'error' } : { day, tasks };
-}
-
-export function getRawDay(date, firstCreation) {
-  return {
-    date: String(date), tasks: [{}, {}, {}], // 3 objects for 3 priorities
-    completed: false, lastTasksChange: localStorage.lastTasksChange,
-    firstCreation
-  };
-}
-
-async function checkLastDay(globals, day) {
-  const dayBefore = day - oneDay;
-  const check = localStorage.firstDayEver == day.toString()
-  ? true
-  : await globals.db.getItem('days', dayBefore.toString());
-  return { check, dayBefore };
-}
-
-function setDefaultPeriodTitle(task, periods) {
-  task.periodTitle = isCustomPeriod(task.periodId)
-  ? ''
-  : (task.periodId && periods[task.periodId].title) || task.ogTitle || task.periodTitle;
-}
-
-function updateTask(task, periods) {
-  if (task.special == 'oneTime') {
-    if (task.history.length == task.period.length) {
-      disable(task);
-    } else if (getToday() == task.periodStart) {
-      task.periodDay = 0;
-      setDefaultPeriodTitle(task, periods);
-      setPeriodTitle(task);
-    } else {
-      task.periodDay++;
-    }
-    return;
-  } else if (task.special == 'untilComplete') {
-    if (task.history[0] == 1) {
-      task.endDate = getToday() - oneDay; disable(task);
-    } else {
-      task.periodDay = 0; task.history.length = 0;
-      setPeriodTitle(task);
-    }
-    return;
-  }
-  setDefaultPeriodTitle(task, periods);
-  if (task.endDate && task.endDate == getToday()) {
-    disable(task);
-  }
-  task.periodDay++;
-  if (task.periodDay == task.period.length) {
-    task.periodDay = 0;
-  }
-}
-
-function isEmpty(day) {
-  for (let tasks of day.tasks) {
-    if (Object.keys(tasks).length > 0) return false;
-  }
-  return true;
 }
 
 async function checkDayNote(globals) {

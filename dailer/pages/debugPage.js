@@ -85,13 +85,8 @@ function convertBytes(value, unit) {
 export async function clearDatabase(globals) {
   const stores = globals.db.db.objectStoreNames;
   for (let store of stores) {
-    /*await globals.db.getAll(store, async (item) => {
-      await globals.db.deleteItem(store, item.id || item.date);
-    });*/
-    const items = await globals.db.getAll(store);
-    for (let item of items) {
-      await globals.db.deleteItem(store, item.id || item.date);
-    }
+    if (store == 'settings') continue;
+    globals.db.deleteAll(store);
   }
   delete localStorage.lastPeriodId;
   const list = JSON.parse(localStorage.periodsList);

@@ -1,9 +1,21 @@
 import { database } from '../../IDB.js'
 
 export async function processSettings(globals, periodicSync) {
-  await addNotifications(globals);
-  await addPeriodicSync(globals, periodicSync);
-  await addBackupReminder(globals);
+  await Promise.all([
+    setPeriods(globals),
+    addNotifications(globals),
+    addPeriodicSync(globals, periodicSync),
+    addBackupReminder(globals),
+    addSession(globals)
+  ]);
+}
+
+await function setPeriods(globals) {
+  await globals._setCacheConfig();
+  const periods = globals._cachedConfigFile.periods;
+  for (let perId in periods) {
+    await globals.db.setItem('periods', periods[perId]);
+  }
 }
 
 async function checkRecord(globals, recordName, updateFields, onVersionUpgrade) {
@@ -69,5 +81,21 @@ async function addBackupReminder(globals) {
     reminded: localStorage.reminded ? (localStorage.reminded == 'true' ? true : false) : false,
     nextRemind: localStorage.nextRemind ? Number(localStorage.nextRemind) : null,
     version: database.settings.backupReminder
+  });
+}
+
+async function addSession(globals) {
+  const resp = await checkRecord(globals, 'session');
+  if (resp) return;
+  await globals.db.setItem('settings', {
+    name: 'session',
+    firstDayEver: localStorage.firstDayEver ? Number(localStorage.firstDayEver) : null,
+    lastTasksChange: localStorage.lastTasksChange ? Number(localStorage.lastTasksChange) : null,
+    onboarded: localStorage.onboarded ? (localStorage.onboarded == 'true' ? true : false) : false,
+    installed: localStorage.installed ? (localStorage.installed == 'true' ? true : false) : false,
+    recaped: localStorage.recaped ? Number(localStorage.recaped) : 0,
+    periodsList: localStorage.periodsList ? JSON.parse(localStorage.periodsList) : [],
+    updateTasksList: localStorage.updateTasksList ? JSON.parse(localStorage.updateTasksList) : [],
+    version: database.settings.session
   });
 }

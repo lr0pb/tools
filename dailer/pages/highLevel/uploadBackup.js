@@ -2,7 +2,6 @@ import { globQs as qs, globQsa as qsa, intlDate } from './utils.js'
 import { getToday, oneDay, isCustomPeriod } from './periods.js'
 import { createPeriod } from '../periodCreator.js'
 import { createTask } from '../taskCreator.js'
-import { getRawDay } from '../main.js'
 import { isHistoryAvailable, getHistory } from '../taskInfo.js'
 
 export async function uploading(globals, data) {
@@ -43,7 +42,7 @@ export async function uploading(globals, data) {
   for (let i = 0; i < diff; i++) {
     const date = earliestDay + oneDay * i;
     if (days[date]) continue;
-    days[date] = getRawDay(date, true);
+    days[date] = await globals.worker.call({ process: 'getRawDay', args: [date, true] });
   }
   /*const prog = qs('progress.uploadUI');
   prog.max = tasks.length;

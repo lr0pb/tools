@@ -35,7 +35,7 @@ async function deployWorkers() {
   };
   worker.onmessage = (e) => {
     worker._callsList.set(e.data._id, {
-      data: e.data,
+      data: e.data.data,
       used: false
     });
   };
@@ -104,22 +104,24 @@ const globals = {
   additionalBack: 0,
   isPageReady: undefined,
   getPeriods: async () => {
-    const periods = await globals.getList('periods');
+    const periods = {};
     await globals.db.getAll('periods', (per) => {
       periods[per.id] = per;
     });
     return periods;
   },
   getList: async (listName) => {
-    if (!globals._cachedConfigFile) {
-      const raw = await fetch('./config.json');
-      globals._cachedConfigFile = await raw.json();
-    }
+    await globals._setCacheConfig();
     if (listName in globals._cachedConfigFile) {
       const list = globals._cachedConfigFile[listName];
       if (Array.isArray(list)) return copyArray(list);
       return copyObject(list);
     }
+  },
+  _setCacheConfig: async () => {
+    if (globals._cachedConfigFile) return;
+    const raw = await fetch('./config.json');
+    globals._cachedConfigFile = await raw.json();
   },
   _cachedConfigFile: null,
   paintPage: async (name, dontPushHistory, replaceState, noAnim) => {

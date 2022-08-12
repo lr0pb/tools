@@ -1,4 +1,4 @@
-import { getToday, normalizeDate } from './periods.js'
+import { getToday, normalizeDate, isCustomPeriod } from './periods.js'
 
 export async function getData(globals) {
   const data = {
@@ -26,6 +26,7 @@ export async function getData(globals) {
     data.dailer_tasks.push(task);
   });
   await globals.db.getAll('periods', (per) => {
+    if (!isCustomPeriod(per.id)) return;
     delete per.selectTitle;
     delete per.periodDay;
     data.dailer_periods.push(per);

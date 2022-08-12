@@ -6,6 +6,8 @@ const EMOJI_CACHE = 'emoji-24.07';
 const HTML_TIMEOUT = 670;
 const FILE_TIMEOUT = 340;
 
+let emojis = null;
+
 async function addToCache(cacheName, fileName, onFileReceived) {
   const cache = await caches.open(cacheName);
   const resp = await fetch(`./${fileName}.json`);
@@ -23,6 +25,11 @@ function getEmojiLink(emoji) {
   return `https://raw.githubusercontent.com/googlefonts/noto-emoji/main/svg/emoji_u${
     emoji
   }.svg`;
+}
+
+function getBaseLink() {
+  const path = location.pathname.replace(/[\w.]+$/, '');
+  return `${location.origin}${path}`;
 }
 
 async function saveCacheOnInstall() {
@@ -123,58 +130,58 @@ self.addEventListener('notificationclick', (e) => {
 });
 
 async function checkNotifications() {
-  const notifications = await db.getItem('settings', 'notifications');
+  const notifs = await db.getItem('settings', 'notifications');
   const periodicSync = await db.getItem('settings', 'periodicSync');
   periodicSync.callsHistory.push({
     timestamp: Date.now()
   });
   await db.setItem('settings', periodicSync);
-  if (!notifications.enabled || notifications.permission !== 'granted') return;
-  const day = await db.getItem('days', String(getToday()));
-  let bodyString = 'There are no tasks yet :(\n';
-  let isBodyStringChanged = false;
-  if (day) for (let i = day.tasks.length - 1; i > -1; i--) {
-    const priority = day.tasks[i];
-    for (let taskId in priority) {
-      if (priority[taskId]) continue;
-      const task = await db.getItem('tasks', taskId);
-      if (!isBodyStringChanged) {
-        bodyString = '';
-        isBodyStringChanged = true;
-      }
-      bodyString += `- ${task.name}\n`
-    }
+  if (!notifs.enabled || notifs.permission !== 'granted') return;
+  if (!emojis) {
+    const raw = await caches.match(`${getBaseLink()}emoji.json`);
+    emojis = await raw.json();
   }
-  bodyString = bodyString.replace(/\\n$/, '');
-  const page = 'main';
-  const path = location.pathname.replace(/[\w.]+$/, '');
-  console.log(
-    `${location.origin}${path}?from=notification&page=${page}`
-  );
-  await registration.showNotification(`\u{1f514} Check remaining tasks for today:`, {
-    body: bodyString,
+  if (notifs.byCategories.tasksForDay) {
+    const { body } = await getDayRecap();
+    await showNotification({ title: `${emjs('bell')} Check remaining tasks for today:`, body });
+  }
+  if (notifs.byCategories.backupReminder) {
+    const { show } = await checkBackupReminder();
+    if (show) await showNotification({
+      title: `${emjs('crateDown')} Download a backup`,
+      body: `You've set reminders to make backups periodically, so today we have been backed up one for you ${emjs('bread')}`
+    });
+  }
+}
+
+function emjs(name) { return `\u{${emojis[name]}}`; }
+
+async function showNotification(options) {
+  if (!options || (options && !options.title)) return;
+  const title = options.title;
+  delete options.title;
+  options = Object.assign({
     //badge: './icons/badge.png',
     data: { showPage: 'main' },
     icon: './icons/apple-touch-icon.png',
-  });
-  const { show } = await checkBackupReminder();
-  if (show) await registration.showNotification(`\u{1f4e5} Download a backup`, {
-    body: 'You have set reminders to create backups periodically, so today we have been backed up one for you \u{1f35e}',
-    //badge: './icons/badge.png',
-    data: { showPage: 'main' },
-    icon: './icons/apple-touch-icon.png',
-  });
+  }, options);
+  await registration.showNotification(title, options);
 }
 
 async function openApp(data) {
   const allClients = await clients.matchAll({ type: 'window' });
+  console.log(allClients);
   if (allClients.length > 0) {
     return allClients[0].focus();
   }
-  const page = data.showPage || 'main';
-  const path = location.pathname.replace(/[\w.]+$/, '');
-  const windowClient = await clients.open(
-    `${location.origin}${path}?from=notification&page=${page}`
-  );
-  if (windowClient) windowClient.focus();
+  try {
+    const windowClient = await clients.open(
+      `${getBaseLink()}?from=notification&page=${data.showPage || 'main'}`
+    );
+    console.log(windowClient);
+    if (windowClient) windowClient.focus();
+  } catch (err) {
+    const data = await db.getItem('settings', 'notifications');
+    data.callsHistory.push({ timestamp: Date.now(), error: err })
+  }
 }

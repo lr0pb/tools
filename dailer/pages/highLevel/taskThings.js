@@ -65,18 +65,15 @@ export function renderTask({
   const markTitle = (task) => `Mark task${task ? ` "${task}"` : ''} as completed`;
   if (type == 'day') return renderToggler({
     name: td.name, id: td.id, buttons: [{
-      emoji: getTaskComplete(td),
-      title: markTitle(), aria: markTitle(td.name),
+      emoji: getTaskComplete(td), title: markTitle(), aria: markTitle(td.name),
       func: onTaskCompleteClick, args: { globals, forcedDay, extraFunc }
     }], page, onBodyClick, value: td.history.at(-1)
   });
   const buttons = [{
-    emoji: emjs.pen,
-    title: 'Edit task', aria: `Edit task: ${td.name}`,
+    emoji: emjs.pen, title: 'Edit task', aria: `Edit task: ${td.name}`,
     func: onTaskEditClick, args: { globals }
   }, {
-    emoji: emjs.trashCan,
-    title: 'Delete task', aria: `Delete task: ${td.name}`,
+    emoji: emjs.trashCan, title: 'Delete task', aria: `Delete task: ${td.name}`,
     func: onTaskDeleteClick, args: { globals, page }
   }];
   const priority = priorities[td.priority];
@@ -95,10 +92,7 @@ export function renderTask({
 }
 
 function onTaskEditClick({elem, globals}) {
-  globals.pageInfo = {
-    taskAction: 'edit',
-    taskId: elem.dataset.id
-  };
+  globals.pageInfo = { taskAction: 'edit', taskId: elem.dataset.id };
   globals.paintPage('taskCreator');
 }
 
@@ -134,8 +128,8 @@ export async function editTask({globals, id, field, onConfirm}) {
     action: async () => {
       td[field] = true;
       td.endDate = getToday();
-      disable(td);
       await globals.db.setItem('tasks', td);
+      await globals.worker.call({ process: 'disable', args: td.id });
       localStorage.lastTasksChange = Date.now().toString();
       globals.closePopup();
       globals.message({
@@ -146,15 +140,6 @@ export async function editTask({globals, id, field, onConfirm}) {
       onConfirm();
     }
   });
-}
-
-export function disable(task) {
-  task.periodDay = -1;
-  task.disabled = true;
-  const updateList = JSON.parse(localStorage.updateTasksList);
-  updateList.push(task.id);
-  localStorage.updateTasksList = JSON.stringify(updateList);
-  setPeriodTitle(task);
 }
 
 export function getTextDate(date) {

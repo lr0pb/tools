@@ -1,7 +1,6 @@
 import { getToday, oneDay } from './highLevel/periods.js'
 import { qs, qsa, /*emjs*/ } from './highLevel/utils.js'
 import { renderTask } from './highLevel/taskThings.js'
-import { createDay } from './main.js'
 
 export const recap = {
   get header() { return `${emjs.newspaper} Yesterday recap`},
@@ -29,8 +28,8 @@ export const recap = {
     let day = await globals.db.getItem('days', date);
     if (!day) {
       if (!dailerData.experiments) return qs('#toMain').click();
-      const periods = await globals.getPeriods();
-      const resp = await createDay(globals, periods, Number(date));
+      const resp = await globals.worker.call({ process: 'createDay', args: Number(date) });
+      if (resp.day == 'error') return qs('#toMain').click();
       day = resp.day;
     }
     let tasksCount = 0;
