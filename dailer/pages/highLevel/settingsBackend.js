@@ -86,7 +86,14 @@ async function addBackupReminder(globals) {
 
 async function addSession(globals) {
   const resp = await checkRecord(globals, 'session');
-  if (resp) return;
+  if (resp) {
+    if (
+      window.matchMedia('(display-mode: standalone)').matches || navigator.standalone
+    ) await globals.db.updateItem('settings', 'session', (session) => {
+      session.installed = true;
+    });
+    return;
+  }
   await globals.db.setItem('settings', {
     name: 'session',
     firstDayEver: localStorage.firstDayEver ? Number(localStorage.firstDayEver) : null,

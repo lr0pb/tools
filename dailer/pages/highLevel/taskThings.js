@@ -130,7 +130,9 @@ export async function editTask({globals, id, field, onConfirm}) {
       td.endDate = getToday();
       await globals.db.setItem('tasks', td);
       await globals.worker.call({ process: 'disable', args: td.id });
-      localStorage.lastTasksChange = Date.now().toString();
+      await globals.db.updateItem('settings', 'session', (session) => {
+        session.lastTasksChange = Date.now();
+      });
       globals.closePopup();
       globals.message({
         state: 'success', text: `Task ${field}`

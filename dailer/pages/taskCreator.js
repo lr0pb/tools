@@ -94,7 +94,8 @@ async function getPeriods(globals) {
 
 async function onTaskCreator({globals}) {
   qs('#back').addEventListener('click', () => history.back());
-  if (!localStorage.firstDayEver) qs('#back').style.display = 'none';
+  const session = await globals.db.getItem('settings', 'session');
+  if (!session.firstDayEver) qs('#back').style.display = 'none';
   const priorities = await globals.getList('priorities');
   createOptionsList(qs('#priority'), priorities);
   const startDateOptions = await globals.getList('startDateOptions');
@@ -144,7 +145,7 @@ async function onTaskCreator({globals}) {
     });
   }
   qs('#saveTask').addEventListener('click', async () => {
-    await onSaveTaskClick(globals, td, isEdit);
+    await onSaveTaskClick(globals, session, td, isEdit);
   });
 }
 
@@ -165,13 +166,15 @@ async function asyncDataReceiving({globals, tasks = 1, periods = 1}) {
   return { tasksCount, periodsCount };
 }
 
-async function onSaveTaskClick(globals, td, isEdit) {
+async function onSaveTaskClick(globals, session, td, isEdit) {
   const periods = await globals.getPeriods();
   const task = createTask(periods, td);
   if (task == 'error') return globals.message({
     state: 'fail', text: 'Fill all fields'
   });
-  localStorage.lastTasksChange = Date.now().toString();
+  await globals.db.updateItem('settings', 'session', (session) => {
+    session.lastTasksChange = Date.now();
+  });
   globals.db.setItem('tasks', task);
   globals.message({
     state: 'success', text: isEdit ? 'Task saved' : 'Task added'
@@ -179,7 +182,7 @@ async function onSaveTaskClick(globals, td, isEdit) {
   if (!globals.pageInfo) globals.pageInfo = {};
   globals.pageInfo.dataChangedTaskId = task.id;
   await globals.checkPersist();
-  if (!localStorage.firstDayEver) {
+  if (!session.firstDayEver) {
     return globals.paintPage('main', true, true);
   }
   history.back();

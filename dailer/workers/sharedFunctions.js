@@ -14,7 +14,7 @@ async function createDay(today = getToday()) {
   }
   let day = await db.getItem('days', today.toString());
   if (!day) {
-    const updateList = session.updateList.map((taskId) => new Promise((res) => {
+    const updateList = session.updateTasksList.map((taskId) => new Promise((res) => {
       db.updateItem('tasks', taskId, setPeriodTitle).then(res);
     }));
     await Promise.all(updateList);
@@ -75,7 +75,7 @@ function setDefaultPeriodTitle(task) {
 function disable(task) {
   task.periodDay = -1;
   task.disabled = true;
-  session.updateList.push(task.id);
+  session.updateTasksList.push(task.id);
   setPeriodTitle(task);
 }
 

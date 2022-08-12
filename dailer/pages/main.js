@@ -32,8 +32,9 @@ export const main = {
 
 async function updatePage({globals, page}) {
   const day = await globals.db.getItem('days', getToday().toString());
+  const session = await globals.db.getItem('settings', 'session');
   if (
-    !day || day.lastTasksChange != localStorage.lastTasksChange ||
+    !day || day.lastTasksChange != session.lastTasksChange ||
     (globals.pageInfo && globals.pageInfo.backupUploaded)
   ) {
     await renderDay({globals, page});
@@ -90,7 +91,8 @@ async function checkDayNote(globals) {
 export async function checkInstall(globals) {
   if (navigator.standalone === undefined && !globals.installPrompt) return;
   const persist = await globals.checkPersist();
-  if (persist === false || localStorage.installed !== 'true') {
+  const session = await globals.db.getItem('settings', 'session');
+  if (persist === false || !session.installed) {
     if (persist && dailerData.isDesktop) return;
     globals.floatingMsg({
       text: `${emjs.crateDown} To protect your data, install dailer app on your home screen${
@@ -132,7 +134,6 @@ async function checkNotifications(globals) {
   if (!dailerData.experiments) return;
   if (!('Notification' in window)) return;
   if (Notification.permission !== 'default') return;
-  //if (Number(localStorage.firstDayEver) == getToday()) return;
   globals.floatingMsg({
     text: `${emjs.bell} Get a daily recap of the tasks through notifications`,
     button: 'Turn&nbsp;on',

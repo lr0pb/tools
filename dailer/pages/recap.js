@@ -20,9 +20,11 @@ export const recap = {
     <button id="toMain">${emjs.forward} Proceed to today</button>
   `},
   script: async ({globals, page}) => {
-    qs('#toMain').addEventListener('click', () => {
-      localStorage.recaped = getToday();
-      globals.paintPage('main', true, true);
+    qs('#toMain').addEventListener('click', async () => {
+      await globals.db.updateItem('settings', 'session', (session) => {
+        session.recaped = getToday();
+      });
+      await globals.paintPage('main', true, true);
     });
     const date = String(getToday() - oneDay);
     let day = await globals.db.getItem('days', date);

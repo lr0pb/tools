@@ -433,15 +433,19 @@ async function onTraverseNavigation(e, silent) {
   }
 }
 
-window.addEventListener('appinstalled', () => {
-  localStorage.installed = 'true';
+window.addEventListener('appinstalled', async () => {
+  await globals.db.updateItem('settings', 'session', (session) => {
+    session.installed = true;
+  });
   const elem = qs('#main .floatingMsg');
   if (elem) elem.remove();
 });
 
 window.addEventListener('beforeinstallprompt', async (e) => {
   e.preventDefault();
-  localStorage.installed = 'false';
+  await globals.db.updateItem('settings', 'session', (session) => {
+    session.installed = false;
+  });
   globals.installPrompt = e;
   if (qs('#main')) await checkInstall(globals);
 });
@@ -450,8 +454,9 @@ async function startApp() {
   const appHistory = navigation.entries();
   if (appHistory.length <= 1) {
     const params = getParams();
-    const rndr = getRenderPage(params);
-    await paintFirstPage(rndr);
+    const session = await globals.db.getItem('settings', 'session');
+    const rndr = getRenderPage(params, session);
+    await paintFirstPage(rndr, session);
     if (params.settings) await globals.openSettings();
   } else {
     await restoreApp(appHistory);
@@ -507,9 +512,10 @@ async function renderPage(e, back) {
     await globals.closeSettings(back, false);
     return;
   }
-  const rndr = getRenderPage(params);
+  const session = await globals.db.getItem('settings', 'session');
+  const rndr = getRenderPage(params, session);
   globals.closePopup();
-  back ? await hidePage(qs('.current'), rndr) : await paintFirstPage(rndr);
+  back ? await hidePage(qs('.current'), rndr) : await paintFirstPage(rndr, session);
 }
 
 function getParams(url) {
@@ -524,28 +530,27 @@ function getParams(url) {
   return params;
 }
 
-function getFirstPage() {
-  if (!localStorage.firstDayEver) return 'main';
-  if (localStorage.firstDayEver == getToday()) return 'main';
-  return !localStorage.recaped || Number(localStorage.recaped) < getToday()
-  ? 'recap' : 'main';
+function getFirstPage(session) {
+  if (!session.firstDayEver) return 'main';
+  if (session.firstDayEver == getToday()) return 'main';
+  return session.recaped < getToday() ? 'recap' : 'main';
 }
 
-function getRenderPage(params) {
-  const onbrd = localStorage.onboarded == 'true';
+function getRenderPage(params, session) {
+  const onbrd = session.onboarded;
   if (!onbrd) return 'onboarding';
-  let page = (params.page && pages[params.page]) ? params.page : getFirstPage();
-  if (onbrd && page == 'onboarding') page = getFirstPage();
-  if (page == 'recap' && localStorage.recaped == getToday()) page = 'main';
-  if (page == 'main') page = getFirstPage();
+  let page = (params.page && pages[params.page]) ? params.page : getFirstPage(session);
+  if (onbrd && page == 'onboarding') page = getFirstPage(session);
+  if (page == 'recap' && session.recaped == getToday()) page = 'main';
+  if (page == 'main') page = getFirstPage(session);
   return page;
 }
 
-async function paintFirstPage(rndr) {
+async function paintFirstPage(rndr, session) {
   if (['main', 'recap', 'onboarding'].includes(rndr)) {
     return globals.paintPage(rndr, true, true);
   }
-  await globals.paintPage(getFirstPage(), true, true, true);
+  await globals.paintPage(getFirstPage(session), true, true, true);
   await globals.paintPage(rndr);
 }
 
@@ -609,14 +614,6 @@ qs('#popup').addEventListener('keydown', (e) => {
 if (!localStorage.periodsList) {
   localStorage.periodsList = JSON.stringify(['01', '03', '07', '09']);
 }
-if (!localStorage.updateTasksList) {
-  localStorage.updateTasksList = JSON.stringify([]);
-}
 if (!localStorage.defaultLastPeriodId) localStorage.defaultLastPeriodId = '50';
 if (!localStorage.lastPeriodId) localStorage.lastPeriodId = localStorage.defaultLastPeriodId;
 if (!localStorage.persistAttempts) localStorage.persistAttempts = '0';
-if (
-  window.matchMedia('(display-mode: standalone)').matches || navigator.standalone
-) {
-  localStorage.installed = 'true';
-}

@@ -12,9 +12,11 @@ export const onboarding = {
   noSettings: true,
   get footer() { return `<button id="create">${emjs.paperList} Create now</button>`},
   script: ({globals, page}) => {
-    qs('#create').addEventListener('click', () => {
-      localStorage.onboarded = 'true';
-      globals.paintPage('taskCreator', true);
+    qs('#create').addEventListener('click', async () => {
+      await globals.db.updateItem('settings', 'session', (session) => {
+        session.onboarded = true;
+      });
+      await globals.paintPage('taskCreator', true);
     });
   }
 };

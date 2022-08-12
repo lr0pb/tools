@@ -154,7 +154,7 @@ async function checkNotifications() {
   }
 }
 
-function emjs(name) { return `\u{${emojis[name]}}`; }
+function emjs(name) { return '\u{' + emojis[name] + '}'; }
 
 async function showNotification(options) {
   if (!options || (options && !options.title)) return;

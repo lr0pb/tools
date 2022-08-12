@@ -11,7 +11,8 @@ export async function uploading(globals, data) {
   for (let elem of qsa('.uploadUI')) {
     elem.style.display = 'block';
   }
-  if (!localStorage.lastTasksChange) localStorage.lastTasksChange = Date.now().toString();
+  const session = await globals.db.getItem('settings', 'session');
+  session.lastTasksChange = Date.now();
   const periodsConvert = {};
   for (let per of data.dailer_periods) {
     const period = createPeriod(per);
@@ -25,7 +26,6 @@ export async function uploading(globals, data) {
   });
   let earliestDay = getToday();
   const tasks = [];
-  const updateList = JSON.parse(localStorage.updateTasksList);
   for (let td of data.dailer_tasks) {
     if (td.periodStart < earliestDay) earliestDay = td.periodStart;
     td.id = Date.now().toString();
@@ -34,10 +34,10 @@ export async function uploading(globals, data) {
     tasks.push(task);
     if (
       (task.special == 'oneTime' ? task.periodStart : task.endDate) == getToday() - oneDay
-    ) updateList.push(task.id);
+    ) session.updateTasksList.push(task.id);
     await globals.db.setItem('tasks', task);
   }
-  localStorage.updateTasksList = JSON.stringify(updateList);
+  await globals.db.setItem('settings', session);
   const diff = (getToday() - earliestDay + oneDay) / oneDay;
   for (let i = 0; i < diff; i++) {
     const date = earliestDay + oneDay * i;
