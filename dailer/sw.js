@@ -173,7 +173,8 @@ async function openApp(data) {
     console.log(windowClient);
     if (windowClient) windowClient.focus();
   } catch (err) {
-    const data = await db.getItem('settings', 'notifications');
-    data.callsHistory.push({ timestamp: Date.now(), error: err })
+    await db.updateItem('settings', 'notifications', (data) => {
+      data.callsHistory.push({ timestamp: Date.now(), error: err })
+    });
   }
 }

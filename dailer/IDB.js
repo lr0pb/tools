@@ -101,8 +101,9 @@ export class IDB {
     actioner.addEventListener('success', () => {
       complete = onSuccess ? onSuccess(actioner.result) : true;
     });
+    const coef = action == 'openCursor' ? 3 : 1;
     await new Promise((resolve) => {
-      const isComplete = () => complete ? resolve() : setTimeout(isComplete, this._timeToWait);
+      const isComplete = () => complete ? resolve() : setTimeout(isComplete, this._timeToWait * coef);
       isComplete();
     });
     const resp = onResult ? onResult(actioner.result) : null;

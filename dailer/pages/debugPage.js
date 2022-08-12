@@ -74,10 +74,10 @@ async function renderPage({globals, page}) {
     await clearDatabase(globals);
     await reloadApp(globals);
   });
-  qs('#toRecap').addEventListener('click', async () => {
+  /*qs('#toRecap').addEventListener('click', async () => {
     delete localStorage.recaped;
     await reloadApp(globals);
-  });
+  });*/
   qs('#clearSettings').addEventListener('click', async () => {
     await globals.db.deleteAll('settings');
     await reloadApp(globals);
