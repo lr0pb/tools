@@ -184,7 +184,7 @@ export async function paintPeriods(globals) {
   }
 }
 
-function updatePeriodsList({e, globals, periodsCount, elem }) {
+async function updatePeriodsList({e, globals, periodsCount, elem }) {
   const session = await globals.db.getItem('settings', 'session');
   const list = session.periodsList;
   const id = elem.dataset.id;
