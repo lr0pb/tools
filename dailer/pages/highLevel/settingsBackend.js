@@ -84,7 +84,7 @@ async function addPersistentStorage(globals) {
     name: 'persistentStorage',
     support: isSupported,
     isPersisted: await navigator.storage.persisted(),
-    attempts: localStorage.persistAttempts ? Number(persistAttempts) : 0,
+    attempts: localStorage.persistAttempts ? Number(localStorage.persistAttempts) : 0,
     grantedAt: localStorage.persistGranted ? Number(localStorage.persistGranted) : null,
     version: database.settings.persistentStorage
   });
