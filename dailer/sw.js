@@ -162,19 +162,11 @@ async function showNotification(options) {
 
 async function openApp(data) {
   const allClients = await clients.matchAll({ type: 'window' });
-  console.log(allClients);
   if (allClients.length > 0) {
     return allClients[0].focus();
   }
-  try {
-    const windowClient = await clients.open(
-      `${getBaseLink()}?from=notification&page=${data.showPage || 'main'}`
-    );
-    console.log(windowClient);
-    if (windowClient) windowClient.focus();
-  } catch (err) {
-    await db.updateItem('settings', 'notifications', (data) => {
-      data.callsHistory.push({ timestamp: Date.now(), error: err })
-    });
-  }
+  const windowClient = await clients.openWindow(
+    `${getBaseLink()}?from=notification&page=${data.showPage || 'main'}`
+  );
+  if (windowClient) windowClient.focus();
 }

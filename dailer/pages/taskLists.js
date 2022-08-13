@@ -88,11 +88,12 @@ async function renderProgressiveTasksList({globals, page, isBadTask}) {
   page.innerHTML = '';
   const periods = await globals.getPeriods();
   const priorities = await globals.getList('priorities');
-  await globals.db.getAll('tasks', (td) => {
+  globals.db.getAll('tasks', (td) => {
     if (isBadTask(td)) return;
     renderTask({type: 'edit', globals, td, page, periods, priorities});
+  }).then(() => {
+    if (!page.children.length) showNoTasks(page);
   });
-  if (!page.children.length) showNoTasks(page);
 }
 
 async function renderSortedTasksList({globals, page, isBadTask, sort}) {

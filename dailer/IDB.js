@@ -98,10 +98,10 @@ export class IDB {
       .objectStore(store)
       [action](actionArgument);
     let complete = false;
-    actioner.addEventListener('success', () => {
-      complete = onSuccess ? onSuccess(actioner.result) : true;
+    actioner.addEventListener('success', async () => {
+      complete = onSuccess ? await onSuccess(actioner.result) : true;
     });
-    const coef = action == 'openCursor' ? 3 : 1;
+    const coef = action == 'openCursor' ? 2 : 1;
     await new Promise((resolve) => {
       const isComplete = () => complete ? resolve() : setTimeout(isComplete, this._timeToWait * coef);
       isComplete();

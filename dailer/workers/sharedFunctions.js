@@ -121,10 +121,15 @@ function isEmpty(day) {
 }
 
 async function getDayRecap() {
-  const day = await db.getItem('days', getToday().toString());
+  let day = await db.getItem('days', getToday().toString());
   let body = 'There are no tasks yet :(\n';
   let isBodyStringChanged = false;
-  if (day) for (let i = day.tasks.length - 1; i > -1; i--) {
+  if (!day) {
+    const resp = await createDay();
+    day = resp.day;
+  }
+  if (day == 'error') return { body };
+  for (let i = day.tasks.length - 1; i > -1; i--) {
     const priority = day.tasks[i];
     for (let taskId in priority) {
       if (priority[taskId]) continue;
