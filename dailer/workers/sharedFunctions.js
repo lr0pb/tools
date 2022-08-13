@@ -140,9 +140,11 @@ async function enumerateDay(day, onTask) {
 async function afterDayEnded(day) {
   if (day.afterDayEndedProccessed) return;
   let completedTasks = 0;
+  let tasksAmount = 0;
   const forgottenTasks = [];
   const tasksToDelete = [];
   await enumerateDay(day, async (id, value, priority) => {
+    tasksAmount++;
     if (value === 1) completedTasks++;
     else forgottenTasks.push(id);
     if (day.cleared) return;
@@ -155,6 +157,7 @@ async function afterDayEnded(day) {
     delete day.tasks[adress.priority][adress.id];
   }
   day.cleared = true;
+  day.tasksAmount = tasksAmount;
   day.completedTasks = completedTasks;
   day.afterDayEndedProccessed = true;
   await db.setItem('days', day);
@@ -176,7 +179,7 @@ async function getYesterdayRecap() {
   }
   let forgottenTasks = null;
   if (day.forgottenTasks) forgottenTasks = day.forgottenTasks;
-  else {
+  if (!day.forgottenTasks || !day.tasksAmount) {
     forgottenTasks = await afterDayEnded(day);
     if (!forgottenTasks) return noShowResp;
     day.forgottenTasks = forgottenTasks;
@@ -199,8 +202,7 @@ async function getDayRecap() {
   if (recap.recaped) {
     const day = await db.getItem('days', getToday().toString());
     if (day.tasksAmount === 0) return;
-    let body = day.tasks[2].length === 0
-    ? null : `Don't forget to complete this extra important tasks:\n`;
+    let body = day.tasks[2].length === 0 ? null : '';
     if (!body) return;
     await enumerateDay(day, async (id, value, priority) => {
       if (priority !== 2) return;
