@@ -20,46 +20,34 @@ export const recap = {
     <button id="toMain">${emjs.forward} Proceed to today</button>
   `},
   script: async ({globals, page}) => {
+    const { response, day } = await globals.worker.call({ process: 'getYesterdayRecap' });
+    const date = String(getToday() - oneDay);
     qs('#toMain').addEventListener('click', async () => {
       await globals.db.updateItem('settings', 'session', (session) => {
         session.recaped = getToday();
       });
+      await globals.db.updateItem('days', date, (day) => {
+        delete day.forgottenTasks;
+        day.afterDayEndedProccessed = true;
+      });
       await globals.paintPage('main', true, true);
     });
-    const date = String(getToday() - oneDay);
-    let day = await globals.db.getItem('days', date);
-    if (!day) {
-      if (!dailerData.experiments) return qs('#toMain').click();
-      const resp = await globals.worker.call({ process: 'createDay', args: Number(date) });
-      if (resp.day == 'error') return qs('#toMain').click();
-      day = resp.day;
-    }
-    let tasksCount = 0;
-    let completedTasks = 0;
-    let forgottenTasks = [];
-    for (let tasksByPriority of day.tasks) {
-      for (let taskId in tasksByPriority) {
-        tasksCount++;
-        if (tasksByPriority[taskId] == 1) completedTasks++;
-        else forgottenTasks.push(taskId);
-      }
-    }
-    if (tasksCount === 0) return qs('#toMain').click();
+    if (!response.show) return qs('#toMain').click();
     const counter = qs('#tasksCount');
     const prog = qs('#dayProgress');
-    prog.max = tasksCount;
+    prog.max = response.all;
+    let completedTasks = response.count;
     const updateUI = () => {
-      counter.innerHTML = `${completedTasks}/${tasksCount}`;
+      counter.innerHTML = `${completedTasks}/${response.all}`;
       prog.value = completedTasks;
-      prog.max = tasksCount;
     };
-    const completeDay = async (actualDay, completed) => {
-      actualDay.completed = completed;
+    const completeDay = async (actualDay) => {
+      actualDay.completed = completedTasks == response.all;
+      actualDay.completedTasks = completedTasks;
       await globals.db.setItem('days', actualDay);
     };
-    const showCompletedDay = async () => {
-      updateUI();
-      await completeDay(day, true);
+    updateUI();
+    if (response.completed) {
       for (let elem of qsa('.completed')) {
         elem.style.display = 'block';
       }
@@ -68,33 +56,21 @@ export const recap = {
       }
       page.classList.add('center', 'doubleColumns');
       qs('#congrats').innerHTML += counter.parentElement.innerHTML;
-    };
-    const container = qs('#tasks.forgotten');
-    if (tasksCount == completedTasks) {
-      await showCompletedDay();
       return;
-    } else {
-      for (let elem of qsa('.forgotten')) {
-        elem.style.display = 'flex';
-      }
-      for (let taskId of forgottenTasks) {
-        const td = await globals.db.getItem('tasks', taskId);
-        if (td.special == 'untilComplete') {
-          tasksCount--;
-          continue;
-        }
-        renderTask({
-          type: 'day', globals, td, page: container, extraFunc: async (actualDay, value) => {
-            completedTasks += 1 * (value ? 1 : -1);
-            await completeDay(actualDay, tasksCount == completedTasks);
-            updateUI();
-          }, forcedDay: date
-        });
-      }
-      updateUI();
     }
-    if (
-      !container.children.length || tasksCount == completedTasks
-    ) await showCompletedDay();
+    const container = qs('#tasks.forgotten');
+    for (let elem of qsa('.forgotten')) {
+      elem.style.display = 'flex';
+    }
+    for (let id of day.forgottenTasks) {
+      const td = await globals.db.getItem('tasks', id);
+      renderTask({
+        type: 'day', globals, td, page: container, extraFunc: async (actualDay, value) => {
+          completedTasks += 1 * (value ? 1 : -1);
+          await completeDay(actualDay);
+          updateUI();
+        }, forcedDay: date
+      });
+    }
   }
 };

@@ -61,9 +61,6 @@ export async function uploading(globals, data) {
       await onActiveDay(task.periodStart, task.history[0]);
     } else if (iha === false && task.special == 'untilComplete') {
       const endDate = task.endDate ? Math.min(getToday(), task.endDate) : getToday();
-      for (let i = task.periodStart; i < endDate; i += oneDay) {
-        await onActiveDay(i, 0);
-      }
       await onActiveDay(endDate, task.history[0]);
     }
     //prog.value = i + 1;

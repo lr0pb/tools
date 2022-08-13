@@ -11,19 +11,20 @@ export const main = {
     <h2>Tasks loading...</h2>
   `},
   get footer() { return `
-    <!--<button id="toHistory" class="secondary">${emjs.fileBox} History</button>-->
+    <button id="toHistory" class="secondary">${emjs.fileBox} History</button>
     <button id="toPlan" class="secondary">${emjs.notes} Edit tasks</button>
   `},
   script: async ({globals, page}) => {
     qs('#toPlan').addEventListener(
       'click', () => globals.paintPage('planCreator')
     );
-    if (dailerData.experiments) globals.pageButton({
-      emoji: emjs.star, title: 'Open wishlist',
-      onClick: () => globals.message({
-        state: 'success', text: 'There are will be wishlist page that currently in development'
-      })
-    });
+    if (dailerData.experiments) {
+      globals.pageButton({
+        emoji: emjs.star, title: 'Open wishlist', onClick: () => {}
+      });
+    } else {
+      qs('#toHistory').style.display = 'none';
+    }
     await renderDay({globals, page});
   },
   onPageShow: updatePage,

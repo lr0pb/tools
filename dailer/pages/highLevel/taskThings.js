@@ -182,6 +182,7 @@ export async function onTaskCompleteClick({ e, globals, elem, forcedDay, extraFu
   td.history.pop();
   td.history.push(value);
   day.tasks[td.priority][td.id] = value;
+  day.afterDayEndedProccessed = false;
   await globals.db.setItem('tasks', td);
   await globals.db.setItem('days', day);
   if (extraFunc) await extraFunc(day, value);

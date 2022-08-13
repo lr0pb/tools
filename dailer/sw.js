@@ -128,6 +128,8 @@ self.addEventListener('notificationclick', (e) => {
 });
 
 async function checkNotifications() {
+  const session = await db.getItem('settings', 'session');
+  if (!session.experiments) return;
   const notifs = await db.getItem('settings', 'notifications');
   const periodicSync = await db.getItem('settings', 'periodicSync');
   periodicSync.callsHistory.push({
@@ -136,14 +138,14 @@ async function checkNotifications() {
   await db.setItem('settings', periodicSync);
   if (!notifs.enabled || notifs.permission !== 'granted') return;
   if (notifs.byCategories.tasksForDay) {
-    const { body } = await getDayRecap();
-    await showNotification({ title: `\u{1f514} Check remaining tasks for today:`, body });
+    const recap = await getDayRecap();
+    if (recap) await showNotification(recap);
   }
   if (notifs.byCategories.backupReminder) {
     const { show } = await checkBackupReminder();
     if (show) await showNotification({
       title: `\u{1f4e5} Download a backup`,
-      body: `You've set reminders to make backups periodically, so today we have been backed up one for you \u{1f35e}`
+      body: `You've set reminders to make periodic backups, so today we have been backed up one for you \u{1f35e}`
     });
   }
 }

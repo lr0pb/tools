@@ -39,25 +39,25 @@ async function renderPage({globals, page}) {
   const periods = await globals.db.getAll('periods');
   const data = {
     'Is storage persisted': isPersisted.toString(),
-    'Persist attempts': localStorage.persistAttempts,
+    /*'Persist attempts': localStorage.persistAttempts,
     'Persist granted': localStorage.persistGranted
       ? intlDate(Number(localStorage.persistGranted)) : 'no data',
-    /*'Is periodic sync support': localStorage.periodicSync || 'no data',
-    'Periodic sync status': localStorage.periodicSyncStatus || 'no data',
-    'Notification permission': Notification.permission,*/
+    'Is periodic sync support': localStorage.periodicSync || 'no data',
+    'Periodic sync status': localStorage.periodicSyncStatus || 'no data',*/
+    'Notification permission': Notification.permission,
     'Theoretical available memory': convertBytes(memory.quota, 'Mb'),
     'Used memory': convertBytes(memory.usage, 'kb'),
     'Used by Cache storage': convertBytes(memory.usageDetails.caches, 'kb'),
     'Used by IndexedDb': convertBytes(memory.usageDetails.indexedDB, 'kb'),
-    'First day ever': intlDate(Number(localStorage.firstDayEver)),
+    /*'First day ever': intlDate(Number(localStorage.firstDayEver)),
     'Was reminder used': localStorage.reminded,
     'Periods list': localStorage.periodsList,
-    'Tasks to additional update': JSON.parse(localStorage.updateTasksList).length,
+    'Tasks to additional update': JSON.parse(localStorage.updateTasksList).length,*/
     'Days amount': days.length,
     'Tasks amount': tasks.length,
     'Periods amount': periods.length,
-    'Last period id': localStorage.lastPeriodId,
-    'Is app installed': localStorage.installed,
+    /*'Last period id': localStorage.lastPeriodId,
+    'Is app installed': localStorage.installed,*/
     'Network connection type': navigator.connection
     ? navigator.connection.effectiveType : 'no data',
     'Is online': navigator.onLine,
