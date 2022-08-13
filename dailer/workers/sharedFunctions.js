@@ -162,7 +162,7 @@ async function afterDayEnded(day) {
 }
 
 async function getYesterdayRecap() {
-  const session = db.getItem('settings', 'session');
+  const session = await db.getItem('settings', 'session');
   if (session.recaped == getToday()) return { recaped: true };
   const noShowResp = { show: false };
   const date = getToday() - oneDay;
