@@ -147,7 +147,7 @@ async function afterDayEnded(day) {
     tasksAmount++;
     if (value === 1) completedTasks++;
     else forgottenTasks.push(id);
-    if (day.cleared) return;
+    //if (day.cleared) return;
     const task = await db.getItem('tasks', id);
     if (task.special && task.special == 'untilComplete' && value === 0) {
       tasksToDelete.push({ priority, id });
@@ -196,38 +196,6 @@ async function getYesterdayRecap() {
     await db.setItem('days', day);
   }
   return { response, day };
-}
-
-async function getDayRecap() {
-  const { response: recap } = await getYesterdayRecap();
-  if (recap.recaped) {
-    const day = await db.getItem('days', getToday().toString());
-    if (day.tasksAmount === 0) return;
-    let body = day.tasks[2].length === 0 ? null : '';
-    if (!body) return;
-    await enumerateDay(day, async (id, value, priority) => {
-      if (priority !== 2) return;
-      if (value === 1) return;
-      const task = await db.getItem('tasks', id);
-      body += `- ${task.name}\n`;
-    });
-    body = body.replace(/\n$/, '');
-    return { title: `\u{1f5e1} Don't forget about today's important tasks`, body };
-  }
-  if (!recap.show) return {
-    title: '\u{1f5e1} Explore tasks for today',
-    body: `You have no tasks yesterday, but its time to add some new ones\nDon't miss the dailer! \u{23f0}`
-  };
-  return {
-    title: '\u{1f4f0} Recap of yesterday',
-    body: `${
-      recap.completed ? 'You are awesome! Congratulations \u{1f389}\n' : ''
-    }You done ${recap.count} out of ${recap.all} tasks${
-      !recap.completed
-      ? '\nOpen app to mark forgottens and check newly arrived tasks'
-      : '\nCan you repeat this result today?'
-    }`
-  };
 }
 
 async function checkBackupReminder() {
