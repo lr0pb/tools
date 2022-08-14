@@ -9,7 +9,7 @@ export function getFirstPage(session) {
   return session.recaped < getToday() ? 'recap' : 'main';
 }
 
-function getRenderPage(params, firstPage) {
+function getRenderPage(params, session, firstPage) {
   const onbrd = session.onboarded;
   if (!onbrd) return 'onboarding';
   let page = (params.page && pages[params.page]) ? params.page : firstPage;
@@ -23,7 +23,7 @@ export async function renderFirstPage(globals) {
   const params = getParams();
   const session = await globals.db.getItem('settings', 'session');
   const firstPage = getFirstPage(session);
-  const rndr = getRenderPage(params, firstPage);
+  const rndr = getRenderPage(params, session, firstPage);
   if (['main', 'recap', 'onboarding'].includes(rndr)) {
     await globals.paintPage(rndr, true, true);
   } else {
