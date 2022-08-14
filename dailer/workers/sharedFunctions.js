@@ -180,7 +180,7 @@ async function getYesterdayRecap() {
   let forgottenTasks = null;
   if (day.forgottenTasks) forgottenTasks = day.forgottenTasks;
   if (!day.tasksAmount) day.afterDayEndedProccessed = false;
-  if (!day.forgottenTasks || !day.tasksAmount) {
+  if (!day.forgottenTasks || !day.tasksAmount || !day.afterDayEndedProccessed) {
     forgottenTasks = await afterDayEnded(day);
     if (!forgottenTasks) return noShowResp;
     day.forgottenTasks = forgottenTasks;
