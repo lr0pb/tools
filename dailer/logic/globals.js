@@ -1,9 +1,7 @@
 import { pages } from './pages.js'
 import {
-  /*emjs,*/ qs as localQs, globQs as qs, globQsa as qsa, copyObject, copyArray, checkForFeatures,
-  isDesktop, inert, convertEmoji
-} from './pages/highLevel/utils.js'
-import { getToday, oneDay } from './pages/highLevel/periods.js'
+  qs as localQs, globQs as qs, globQsa as qsa, copyArray
+} from '../pages/highLevel/utils.js'
 
 const getUrl = () => location.href.toString();
 
@@ -17,9 +15,8 @@ const getPageLink = (name) => {
   : getLink('?');
   link = link.replace(/\&settings=\w+/, '');
   const url = new URL(link);
-  return dailerData.nav
-  ? url.pathname + url.search : link;
-}
+  return dailerData.nav ? url.pathname + url.search : link;
+};
 
 export function getGlobals() {
   const globals = {
@@ -41,8 +38,7 @@ export function getGlobals() {
       await globals._setCacheConfig();
       if (listName in globals._cachedConfigFile) {
         const list = globals._cachedConfigFile[listName];
-        if (Array.isArray(list)) return copyArray(list);
-        return copyObject(list);
+        return copyArray(list);
       }
     },
     _setCacheConfig: async () => {

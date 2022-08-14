@@ -43,6 +43,18 @@ export const convertEmoji = (str) => {
     .replace(/<\/span>/g, '');
 };
 
+export function getParams(url) {
+  const params = {};
+  (url ? new URL(url) : location).search
+    .replace('?', '')
+    .split('&')
+    .forEach((elem) => {
+      const splitted = elem.split('=');
+      params[splitted[0]] = splitted[1];
+    });
+  return params;
+}
+
 export function safeDataInteractions(elems) {
   const state = dailerData.nav
   ? navigation.currentEntry.getState()

@@ -1,7 +1,7 @@
 [
-  "./", "./app.css", "./config.json", ".emoji.json", "./icons/favicon.ico",
+  "./", "./app.js", "./app.css", "./config.json", ".emoji.json", "./icons/favicon.ico",
   "./icons/apple-touch-icon.png", "./icons/addTask.png", "./icons/downloadBackup.png", "./icons/statsUp.png",
-  "./app.js", "./IDB.js", "./pages.js", "./globals.js",
+  "./logic/IDB.js", "./logic/pages.js", "./logic/globals.js", "./logic/navigation.js",
   "./workers/mainWorker.js", "./workers/defaultFunctions.js", "./workers/sharedFunctions.js",
   "./pages/highLevel/utils.js", "./pages/highLevel/periods.js", "./pages/highLevel/taskThings.js",
   "./pages/highLevel/createBackup.js", "./pages/highLevel/uploadBackup.js", "./pages/highLevel/settingsBackend.js",

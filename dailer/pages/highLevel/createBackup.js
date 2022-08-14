@@ -1,6 +1,20 @@
 import { getToday, normalizeDate, isCustomPeriod } from './periods.js'
+import { globQs as qs } from './utils.js'
 
-export async function getData(globals) {
+export async function downloadData(globals) {
+  const prog = qs('.downloadUI');
+  prog.style.display = 'block';
+  const data = await getData(globals);
+  const blob = new Blob([JSON.stringify(data)], {type: 'application/vnd.dailer+json'});
+  const link = qs('#downloadData');
+  const name = String(data.dailer_created).match(/(?:\d\d)(\d{6})/)[1];
+  link.download = `${name}.dailer`;
+  link.href = URL.createObjectURL(blob);
+  prog.style.display = 'none';
+  return link;
+}
+
+async function getData(globals) {
   const data = {
     dailer_about: `User's data backup from dailer app`,
     dailer_link: location.origin + location.pathname,

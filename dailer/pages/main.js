@@ -1,7 +1,7 @@
 import { isUnder3AM, getToday, oneDay, isCustomPeriod } from './highLevel/periods.js'
 import { qs, /*emjs*/ } from './highLevel/utils.js'
 import { renderTask, setPeriodTitle } from './highLevel/taskThings.js'
-import { downloadData } from './settings.js'
+import { downloadData } from './highLevel/createBackup.js'
 
 export const main = {
   get header() { return `${emjs.sword} Today's tasks`},

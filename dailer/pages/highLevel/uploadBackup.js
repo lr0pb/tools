@@ -4,6 +4,34 @@ import { createPeriod } from '../periodCreator.js'
 import { createTask } from '../taskCreator.js'
 import { isHistoryAvailable, getHistory } from '../taskInfo.js'
 
+export async function uploadData(globals, paintPeriods) {
+  const chooser = qs('#chooseFile');
+  chooser.disabled = false;
+  chooser.addEventListener('change', () => {
+    chooser.disabled = true;
+    const file = chooser.files[0];
+    if (!file.name.includes('.dailer')) return globals.message({
+      state: 'fail', text: 'Wrong file choosed'
+    });
+    const reader = new FileReader();
+    reader.readAsText(file);
+    reader.onload = async () => {
+      const data = JSON.parse(reader.result);
+      if (typeof data !== 'object') return globals.message({
+        state: 'fail', text: 'Unknown file content'
+      });
+      const cr = data.dailer_created;
+      if ( !cr || (cr !== getToday()) ) return globals.message({
+        state: 'fail', text: `You must upload today's created backup`
+      });
+      await uploading(globals, data);
+      await paintPeriods(globals);
+      qs(`[data-section="import"]`).scrollIntoView();
+    };
+  });
+  chooser.click();
+}
+
 export async function uploading(globals, data) {
   for (let elem of qsa('.beforeUpload')) {
     elem.style.display = 'none';

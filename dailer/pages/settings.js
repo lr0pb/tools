@@ -3,8 +3,9 @@ import {
   /*emjs,*/ globQs as qs, globQsa as qsa, createOptionsList, togglableElement
 } from './highLevel/utils.js'
 import { getToday, oneDay, isCustomPeriod } from './highLevel/periods.js'
-import { uploading } from './highLevel/uploadBackup.js'
-import { getData } from './highLevel/createBackup.js'
+import { uploadData } from './highLevel/uploadBackup.js'
+import { downloadData } from './highLevel/createBackup.js'
+import { toggleExperiments } from './highLevel/settingsBackend.js'
 
 const periodsCount = 5;
 
@@ -219,47 +220,6 @@ function getPeriodUsed(periodsList, id) {
   return periodsList.includes(id) ? 1 : 0;
 }
 
-async function uploadData(globals) {
-  const chooser = qs('#chooseFile');
-  chooser.disabled = false;
-  chooser.addEventListener('change', () => {
-    chooser.disabled = true;
-    const file = chooser.files[0];
-    if (!file.name.includes('.dailer')) return globals.message({
-      state: 'fail', text: 'Wrong file choosed'
-    });
-    const reader = new FileReader();
-    reader.readAsText(file);
-    reader.onload = async () => {
-      const data = JSON.parse(reader.result);
-      if (typeof data !== 'object') return globals.message({
-        state: 'fail', text: 'Unknown file content'
-      });
-      const cr = data.dailer_created;
-      if ( !cr || (cr !== getToday()) ) return globals.message({
-        state: 'fail', text: `You must upload today's created backup`
-      });
-      await uploading(globals, data);
-      await paintPeriods(globals);
-      qs(`[data-section="import"]`).scrollIntoView();
-    };
-  });
-  chooser.click();
-}
-
-export async function downloadData(globals) {
-  const prog = qs('.downloadUI');
-  prog.style.display = 'block';
-  const data = await getData(globals);
-  const blob = new Blob([JSON.stringify(data)], {type: 'application/vnd.dailer+json'});
-  const link = qs('#downloadData');
-  const name = String(data.dailer_created).match(/(?:\d\d)(\d{6})/)[1];
-  link.download = `${name}.dailer`;
-  link.href = URL.createObjectURL(blob);
-  prog.style.display = 'none';
-  return link;
-}
-
 async function onReminderClick({e, elem, globals}) {
   const value = toggleFunc({e, elem});
   if (value) {
@@ -292,19 +252,4 @@ export function getNextRemindText() {
     return `You got reminder today`;
   }
   return `Next reminder will be ${getTextDate(localStorage.nextRemind)}`;
-}
-
-export function toggleExperiments() {
-  if (dailerData.experiments) {
-    //document.documentElement.classList.add('compress');
-    const color = getComputedStyle(document.documentElement).accentColor;
-    for (let elem of qsa('meta[name="theme-color"]')) {
-      elem.content = color;
-    }
-  } else {
-    //document.documentElement.classList.remove('compress');
-    const metas = qsa('meta[name="theme-color"]');
-    metas[0].content = '#f2f2f2';
-    metas[1].content = '#000000';
-  }
 }

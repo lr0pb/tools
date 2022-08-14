@@ -1,6 +1,8 @@
 importScripts('./defaultFunctions.js');
 importScripts('./sharedFunctions.js');
 
+db = new IDB(database.name, database.version, database.stores);
+
 self.onmessage = async (e) => { // safari never call message event setted via listener
   if (typeof e.data !== 'object') return;
   const d = e.data;

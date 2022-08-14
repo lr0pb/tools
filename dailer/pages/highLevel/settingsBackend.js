@@ -1,4 +1,4 @@
-import { database } from '../../IDB.js'
+import { database } from '../../logic/IDB.js'
 
 export async function processSettings(globals, periodicSync) {
   const session = await globals.db.getItem('settings', 'session');
@@ -15,6 +15,21 @@ export async function processSettings(globals, periodicSync) {
     if (item.name !== 'session') return;
     await globals.worker.call({ process: 'updateSession', args: item });
   });
+}
+
+export function toggleExperiments() {
+  if (dailerData.experiments) {
+    //document.documentElement.classList.add('compress');
+    const color = getComputedStyle(document.documentElement).accentColor;
+    for (let elem of qsa('meta[name="theme-color"]')) {
+      elem.content = color;
+    }
+  } else {
+    //document.documentElement.classList.remove('compress');
+    const metas = qsa('meta[name="theme-color"]');
+    metas[0].content = '#f2f2f2';
+    metas[1].content = '#000000';
+  }
 }
 
 async function setPeriods(globals) {

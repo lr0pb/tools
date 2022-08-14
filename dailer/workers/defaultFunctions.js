@@ -250,4 +250,4 @@ class IDB {
   }
 };
 
-const db = new IDB(database.name, database.version, database.stores);
+let db = null;

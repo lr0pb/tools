@@ -1,7 +1,7 @@
 importScripts('./workers/defaultFunctions.js');
 importScripts('./workers/sharedFunctions.js');
 
-const APP_CACHE = 'app-24.07';
+const APP_CACHE = 'app-14.08';
 const EMOJI_CACHE = 'emoji-24.07';
 const HTML_TIMEOUT = 670;
 const FILE_TIMEOUT = 340;
@@ -119,6 +119,7 @@ async function addCache(request, cacheName) {
 
 self.addEventListener('periodicsync', (e) => {
   console.log(e.tag);
+  db = new IDB(database.name, database.version, database.stores);
   e.waitUntil(checkNotifications());
 });
 
