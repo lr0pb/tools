@@ -1,7 +1,10 @@
 [
-  "./", "./app.css", "./config.json", ".emoji.json",
-  "./app.js", "./IDB.js", "./pages.js",
+  "./", "./app.css", "./config.json", ".emoji.json", "./icons/favicon.ico",
+  "./icons/apple-touch-icon.png", "./icons/addTask.png", "./icons/downloadBackup.png", "./icons/statsUp.png",
+  "./app.js", "./IDB.js", "./pages.js", "./globals.js",
+  "./workers/mainWorker.js", "./workers/defaultFunctions.js", "./workers/sharedFunctions.js",
   "./pages/highLevel/utils.js", "./pages/highLevel/periods.js", "./pages/highLevel/taskThings.js",
+  "./pages/highLevel/createBackup.js", "./pages/highLevel/uploadBackup.js", "./pages/highLevel/settingsBackend.js",
   "./pages/onboarding.js", "./pages/main.js", "./pages/recap.js", "./pages/settings.js", "./pages/taskLists.js", "./pages/taskCreator.js",
   "./pages/taskInfo.js", "./pages/periodCreator.js", "./pages/debugPage.js"
 ]

@@ -163,7 +163,7 @@ const callsList = ['paintPage', 'settings', 'additionalBack', 'traverseToStart']
 
 if ('navigation' in window) navigation.addEventListener('navigate', onAppNavigation);
 
-function onAppNavigation() {
+function onAppNavigation(e) {
   console.log(e);
   if (!dailerData.nav) return;
   const info = e.info || {};
