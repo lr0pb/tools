@@ -10,7 +10,7 @@ const periodsCount = 5;
 
 export const settings = {
   get title() { return `${emjs.box} Settings`},
-  sections: ['periods', 'import', 'notifications'],
+  sections: ['periods', 'manageData', 'notifications'],
   fillHeader: ({page}) => {
     page.innerHTML = `
       <h4>${settings.title}</h4>
@@ -30,7 +30,7 @@ export const settings = {
       <!--<h2 data-section="storage">Protect your data</h2>
       <h3>We store your data on your device and have no remote access to it</h3>
       <h3>Install app to the home screen to show your browser importance of the site's data to activate site's data protection</h3>-->
-      <h2 data-section="import">Data management</h2>
+      <h2 data-section="manageData">Data management</h2>
       <div class="floatingMsg notFixed">
         <h3>${emjs.lockWKey} Your data is stored only on your device and have no remote access</h3>
       </div>
@@ -68,7 +68,7 @@ export const settings = {
       <div id="experiments"></div>
       <button id="toDebug" class="secondary">${emjs.construction} Open debug page</button>
       <h2>About</h2>
-      <h3>${emjs.label} dailer app, version 1.3.6</h3>
+      <h3>${emjs.label} dailer app, version 1.3.7</h3>
       <h3>${emjs.sparkles} Emojis powered by <a href="https://github.com/googlefonts/noto-emoji/" target="_blank">Google</a></h3>
       <!--<h3>${emjs.magicBall} Codename: Sangria</h3>-->
       <h3>${emjs.microscope} Developed in 2022</h3>

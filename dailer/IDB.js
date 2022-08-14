@@ -1,6 +1,6 @@
 export const database = {
   name: 'dailer',
-  version: 5,
+  version: 6,
   stores: [
     { name: 'settings', index: {keyPath: 'name'} },
     { name: 'tasks', index: {keyPath: 'id'} },

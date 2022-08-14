@@ -1,3 +1,4 @@
+import { getGlobals, showPage, hidePage } from './globals.js'
 import { pages } from './pages.js'
 import {
   /*emjs,*/ qs as localQs, globQs as qs, globQsa as qsa, copyObject, copyArray, checkForFeatures,
@@ -56,7 +57,6 @@ async function deployWorkers() {
     });
   } catch (err) {}
   const tags = await reg.periodicSync.getTags();
-  console.log(tags);
   return resp;
 }
 
@@ -79,197 +79,33 @@ if (!('at' in Array.prototype)) {
   });
 }
 
-const getUrl = () => location.href.toString();
+const globals = getGlobals();
 
-const getPageLink = (name) => {
-  const getLink = (sign) => getUrl() + sign + `page=${name}`;
-  const matcher = getUrl().match(/(?:page=)(\w+)/);
-  let link = getUrl().includes('?')
-  ? (getUrl().includes('page')
-     ? getUrl().replace(matcher[1], name)
-     : getLink('&'))
-  : getLink('?');
-  link = link.replace(/\&settings=\w+/, '');
-  const url = new URL(link);
-  return dailerData.nav
-  ? url.pathname + url.search : link;
+window.addEventListener('pageshow', appEntryPoint);
+
+async function appEntryPoint(e) {
+  createDb();
+  if (e.persisted) return;
+  document.documentElement.lang = navigator.language;
+  const { worker, periodicSync } = await deployWorkers();
+  globals.worker = worker;
+  await loadEmojiList();
+  await processSettings(globals, periodicSync);
+  toggleExperiments();
+  pages.settings.fillHeader({page: qs('#settings > .header')});
+  await pages.settings.paint({globals, page: qs('#settings > .content')});
+  const params = getParams();
+  if (!params.settings) inert.set(qs('#settings'), true);
+  inert.set(qs('#popup'), true);
+  dailerData.nav ? await startApp() : await renderPage(e, false);
 }
 
-const globals = {
-  db: null,
-  worker: null,
-  pageName: null,
-  pageInfo: null,
-  settings: false,
-  additionalBack: 0,
-  isPageReady: undefined,
-  getPeriods: async () => {
-    const periods = {};
-    await globals.db.getAll('periods', (per) => {
-      periods[per.id] = per;
-    });
-    return periods;
-  },
-  getList: async (listName) => {
-    await globals._setCacheConfig();
-    if (listName in globals._cachedConfigFile) {
-      const list = globals._cachedConfigFile[listName];
-      if (Array.isArray(list)) return copyArray(list);
-      return copyObject(list);
-    }
-  },
-  _setCacheConfig: async () => {
-    if (globals._cachedConfigFile) return;
-    const raw = await fetch('./config.json');
-    globals._cachedConfigFile = await raw.json();
-  },
-  _cachedConfigFile: null,
-  paintPage: async (name, dontPushHistory, replaceState, noAnim) => {
-    globals.pageName = name;
-    globals.isPageReady = false;
-    const page = pages[name];
-    const container = document.createElement('div');
-    container.className = 'page current';
-    container.id = name;
-    container.innerHTML = `
-      <div class="header">
-        <h1>${page.header}</h1>
-        <button class="pageBtn emojiBtn" title="Page button" disabled aria-hidden="true"></button>
-        <button class="openSettings emojiBtn" title="Open settings" aria-label="Open settings">
-          ${emjs.settings}
-        </button>
-      </div>
-      <div class="content">${page.page}</div>
-      <div class="footer">${page.footer}</div>
-    `;
-    container.addEventListener('transitionend', (e) => {
-      if (!e.target.classList.contains('page')) return;
-      e.target.style.removeProperty('will-change');
-    });
-    document.body.append(container);
-    const content = container.querySelector('.content');
-    content.className = `content ${page.styleClasses || ''}`;
-    if (page.styleClasses && page.styleClasses.includes('doubleColumns')) {
-      content.setAttribute('focusgroup', 'horizontal');
-    }
-    await showPage(qs('.current'), container, noAnim);
-    if (page.noSettings) {
-      localQs('.openSettings').remove();
-    } else {
-      localQs('.openSettings').addEventListener('click', () => globals.openSettings());
-    }
-    const link = getPageLink(name);
-    if (dailerData.nav) {
-      let historyAction = null;
-      if (!dontPushHistory) historyAction = 'push';
-      if (replaceState) historyAction = 'replace';
-      if (historyAction) navigation.navigate(link, {
-        state: globals.pageInfo || navigation.currentEntry.getState() || {},
-        history: historyAction, info: {call: 'paintPage'}
-      });
-    } else {
-      if (replaceState) history.replaceState(history.state || {}, '', link);
-      else if (!dontPushHistory) history.pushState(globals.pageInfo || history.state || {}, '', link);
-    }
-    await page.script({ globals, page: content });
-    globals.isPageReady = true;
-  },
-  message: ({state, text}) => {
-    const msg = qs('#message');
-    msg.classList.add('animate');
-    msg.style.setProperty('--color', state == 'fail' ? '#a30000' : '#008000');
-    msg.innerHTML = `${emjs[state == 'fail' ? 'cross' : 'sign']} ${text}`;
-    setTimeout( () => { msg.classList.remove('animate') }, 3000);
-  },
-  openPopup: ({text, action}) => {
-    const popup = qs('#popup');
-    popup.style.display = 'flex';
-    inert.set(qs(globals.settings ? '#settings' : '.current'));
-    inert.remove(popup, popup.querySelector('[data-action="cancel"]'));
-    qs('#popup h2').innerHTML = text;
-    popup.querySelector('[data-action="confirm"]').onclick = action;
-  },
-  closePopup: () => {
-    inert.remove(qs(globals.settings ? '#settings' : '.current'));
-    inert.set(qs('#popup'));
-    qs('#popup').style.display = 'none';
-    qs('[data-action="confirm"]').onclick = null;
-  },
-  pageButton: ({emoji, title, onClick}) => {
-    const pageBtn = localQs('.pageBtn');
-    Object.assign(pageBtn, {
-      innerHTML: emoji, title, ariaLabel: title, onclick: onClick
-    });
-    pageBtn.removeAttribute('disabled');
-    pageBtn.setAttribute('aria-hidden', 'false');
-    pageBtn.style.display = 'block';
-  },
-  floatingMsg: ({text, button, onClick, pageName, notFixed}) => {
-    const prevElem = localQs('.floatingMsg', pageName);
-    if (prevElem) prevElem.remove();
-    const elem = document.createElement('div');
-    elem.className = `floatingMsg ${notFixed ? 'notFixed' : ''}`;
-    elem.innerHTML = `
-      <h3>${text}</h3>
-      ${button ? `<button class="noEmoji">${button}</button>` : ''}
-    `;
-    const content = localQs('.content', pageName);
-    content.append(elem);
-    if (button && onClick) {
-      localQs('.floatingMsg button', pageName).addEventListener('click', onClick);
-    }
-    if (!content.classList.contains('center')) {
-      const div = document.createElement('div');
-      div.style.cssText = `
-        min-height: ${elem.getBoundingClientRect().height}px;
-        min-width: 1px;
-        margin-top: 2.5rem;
-      `;
-      content.append(div);
-    }
-    return elem;
-  },
-  openSettings: async (section, dontPushHistory) => {
-    globals.isPageReady = false;
-    qs('#settings').style.transform = 'none';
-    inert.set(qs('.current'));
-    inert.remove(qs('#settings'));
-    globals.settings = true;
-    if (!dontPushHistory) {
-      dailerData.nav
-      ? navigation.navigate(getUrl() + '&settings=open', {
-          state: {settings: true}, history: 'push', info: {call: 'settings'}
-        })
-      : history.pushState({settings: true}, '', getUrl() + '&settings=open');
-    }
-    await pages.settings.opening({globals});
-    if (section && pages.settings.sections.includes(section)) {
-      qs(`[data-section="${section}"]`).scrollIntoView();
-    }
-    globals.isPageReady = true;
-  },
-  closeSettings: async (callSettingsUpdate, backInHistory) => {
-    qs('#settings').removeAttribute('style');
-    inert.remove(qs('.current'));
-    inert.set(qs('#settings'));
-    if (backInHistory) history.back();
-    if (!callSettingsUpdate) return;
-    if (!pages[globals.pageName].onSettingsUpdate) return;
-    await pages[globals.pageName].onSettingsUpdate({
-      globals, page: qs('.current .content')
-    });
-  },
-  checkPersist: async () => {
-    const data = await globals.db.getItem('settings', 'persistentStorage');
-    if (!data.support) return undefined;
-    if (data.isPersisted) return data.isPersisted;
-    const response = await navigator.storage.persist();
-    data.attempts++;
-    if (response) data.grantedAt = Date.now();
-    await globals.db.setItem('settings', data);
-    return response;
+window.addEventListener('pagehide', () => {
+  if (globals.db) {
+    globals.db.db.close();
+    globals.db = null;
   }
-}
+});
 
 function createDb() {
   if (!globals.db) globals.db = new IDB(
@@ -307,31 +143,9 @@ async function loadEmojiList() {
   };
 }
 
-window.addEventListener('pagehide', () => {
-  if (globals.db) {
-    globals.db.db.close();
-    globals.db = null;
-  }
-});
+window.addEventListener('popstate', onHistoryAPIBack);
 
-window.addEventListener('pageshow', async (e) => {
-  createDb();
-  if (e.persisted) return;
-  document.documentElement.lang = navigator.language;
-  const { worker, periodicSync } = await deployWorkers();
-  globals.worker = worker;
-  await loadEmojiList();
-  await processSettings(globals, periodicSync);
-  toggleExperiments();
-  pages.settings.fillHeader({page: qs('#settings > .header')});
-  await pages.settings.paint({globals, page: qs('#settings > .content')});
-  const params = getParams();
-  if (!params.settings) inert.set(qs('#settings'), true);
-  inert.set(qs('#popup'), true);
-  dailerData.nav ? await startApp() : await renderPage(e, false);
-});
-
-window.addEventListener('popstate', async (e) => {
+async function onHistoryAPIBack(e) {
   if (dailerData.nav) return;
   if (pages[globals.pageName].onBack) {
     pages[globals.pageName].onBack(globals);
@@ -342,12 +156,14 @@ window.addEventListener('popstate', async (e) => {
     globals.additionalBack = 0;
     for (let i = 0; i < backs; i++) { history.back() }
   }
-});
+}
 
 const instantPromise = () => new Promise((res) => { res() });
 const callsList = ['paintPage', 'settings', 'additionalBack', 'traverseToStart'];
 
-if ('navigation' in window) navigation.addEventListener('navigate', (e) => {
+if ('navigation' in window) navigation.addEventListener('navigate', onAppNavigation);
+
+function onAppNavigation() {
   console.log(e);
   if (!dailerData.nav) return;
   const info = e.info || {};
@@ -359,9 +175,11 @@ if ('navigation' in window) navigation.addEventListener('navigate', (e) => {
     return e.transitionWhile(instantPromise());
   }
   return e.transitionWhile(onTraverseNavigation(e));
-});
+}
 
-if ('navigation' in window) navigation.addEventListener('navigatesuccess', async () => {
+if ('navigation' in window) navigation.addEventListener('navigatesuccess', updatePageTitle);
+
+async function updatePageTitle() {
   const params = getParams();
   const page = pages[params.settings ? 'settings' : params.page];
   if (page.dynamicTitle) {
@@ -377,7 +195,7 @@ if ('navigation' in window) navigation.addEventListener('navigatesuccess', async
   qs('title').innerHTML = convertEmoji(`${page.title || page.header}${
     te == 'text' ? ' in' + def : (te == 'line' ? ' |' + def : '')
   }`);
-});
+}
 
 async function hardReload(info) {
   const appHistory = navigation.entries();
@@ -412,16 +230,16 @@ async function onTraverseNavigation(e, silent) {
     if (settings) {
       if (differentPages) {
         dir === -1
-        ? await globals.openSettings(null, true) : await globals.closeSettings();
+        ? await globals.openSettings(currentParams.section, true) : await globals.closeSettings();
       } else {
         dir === -1
-        ? await globals.closeSettings(!silent) : await globals.openSettings(null, true);
+        ? await globals.closeSettings(!silent) : await globals.openSettings(nextParams.section, true);
       }
     }
     if (!settings || (settings && differentPages)) {
       dir === -1
-      ? await hidePage(qs('.current'), nextParams.page, silent)
-      : await showPage(qs('.current'), qs(`#${nextParams.page}`), false, true);
+      ? await hidePage(globals, qs('.current'), nextParams.page, silent)
+      : await showPage(globals, qs('.current'), qs(`#${nextParams.page}`), false, true);
     }
     if (!silent && i === 0 && delta === 1 && dir === -1 && globals.additionalBack) {
       delta += globals.additionalBack;
@@ -434,23 +252,6 @@ async function onTraverseNavigation(e, silent) {
   }
 }
 
-window.addEventListener('appinstalled', async () => {
-  await globals.db.updateItem('settings', 'session', (session) => {
-    session.installed = true;
-  });
-  const elem = qs('#main .floatingMsg');
-  if (elem) elem.remove();
-});
-
-window.addEventListener('beforeinstallprompt', async (e) => {
-  e.preventDefault();
-  await globals.db.updateItem('settings', 'session', (session) => {
-    session.installed = false;
-  });
-  globals.installPrompt = e;
-  if (qs('#main')) await checkInstall(globals);
-});
-
 async function startApp() {
   const appHistory = navigation.entries();
   if (appHistory.length <= 1) {
@@ -458,7 +259,11 @@ async function startApp() {
     const session = await globals.db.getItem('settings', 'session');
     const rndr = getRenderPage(params, session);
     await paintFirstPage(rndr, session);
-    if (params.settings) await globals.openSettings();
+    if (params.settings) await globals.openSettings(params.section);
+    if (params.popup/* && params.popup in popups*/) {
+      console.log('Render popup: ' + params.popup);
+      //globals.openPopup(params.popup);
+    }
   } else {
     await restoreApp(appHistory);
   }
@@ -482,7 +287,7 @@ async function restoreApp(appHistory) {
       return;
     }
     if (params.settings) {
-      await globals.openSettings(null, true);
+      await globals.openSettings(params.section, true);
     } else {
       if (globals.settings) await globals.closeSettings();
       await globals.paintPage(params.page, true, false, true);
@@ -503,7 +308,7 @@ async function renderPage(e, back) {
   const params = getParams();
   if (params.settings == 'open') {
     if (globals.pageName !== params.page) {
-      await hidePage(qs('.current'), params.page);
+      await hidePage(globals, qs('.current'), params.page);
       globals.pageName = params.page;
     }
     await globals.openSettings(null, true);
@@ -517,7 +322,7 @@ async function renderPage(e, back) {
   const session = await globals.db.getItem('settings', 'session');
   const rndr = getRenderPage(params, session);
   globals.closePopup();
-  back ? await hidePage(qs('.current'), rndr) : await paintFirstPage(rndr, session);
+  back ? await hidePage(globals, qs('.current'), rndr) : await paintFirstPage(rndr, session);
 }
 
 function getParams(url) {
@@ -556,57 +361,26 @@ async function paintFirstPage(rndr, session) {
   await globals.paintPage(rndr);
 }
 
-async function showPage(prev, current, noAnim, noCleaning) {
-  prev.style.willChange = 'transform';
-  current.style.willChange = 'transform';
-  prev.classList.remove('showing', 'current');
-  prev.classList.add('hidePrevPage');
-  current.classList.remove('hided');
-  inert.set(prev);
-  inert.remove(current);
-  let done = false;
-  setTimeout(() => {
-    current.classList.add('showing');
-    done = true;
-  }, noAnim ? 0 : 10);
-  if (!noCleaning) {
-    for (let elem of qsa('.hided')) {
-      elem.remove();
-      inert.clearCache(elem);
-    }
-  } else {
-    current.classList.add('current');
-    if (pages[current.id].onPageShow) {
-      await pages[current.id].onPageShow({globals, page: qs(`#${current.id} .content`)});
-    }
-  }
-  return new Promise((res) => {
-    const isDone = () => {done ? res() : setTimeout(isDone, 10)};
-    isDone();
+window.addEventListener('appinstalled', async () => {
+  await globals.db.updateItem('settings', 'session', (session) => {
+    session.installed = true;
   });
-}
+  const elem = qs('#main .floatingMsg');
+  if (elem) elem.remove();
+});
 
-async function hidePage(current, prevName, noPageUpdate) {
-  inert.set(current);
-  const prev = qs(`#${prevName}`);
-  if (!prev) {
-    if (!qs('#main')) await globals.paintPage('main', false, true);
-    if (prevName !== 'main') await globals.paintPage(prevName, true, false);
-    return;
-  }
-  prev.style.willChange = 'transform';
-  current.style.willChange = 'transform';
-  prev.classList.remove('hidePrevPage', 'hided');
-  prev.classList.add('showing', 'current');
-  inert.remove(prev);
-  current.classList.remove('showing', 'current');
-  current.classList.add('hided');
-  if (!noPageUpdate && pages[prev.id].onPageShow) {
-    await pages[prev.id].onPageShow({globals, page: qs(`#${prev.id} .content`)});
-  }
-}
+window.addEventListener('beforeinstallprompt', async (e) => {
+  e.preventDefault();
+  await globals.db.updateItem('settings', 'session', (session) => {
+    session.installed = false;
+  });
+  globals.installPrompt = e;
+  if (qs('#main')) await checkInstall(globals);
+});
 
 qs('#popup').addEventListener('click', (e) => {
+  const popup = qs('#popup');
+  if (popup.classList.contains('strictClosing') && e.target === popup) return;
   if (e.target.dataset.action == 'cancel') globals.closePopup();
 });
 qs('#popup').addEventListener('keydown', (e) => {

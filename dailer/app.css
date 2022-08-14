@@ -531,10 +531,13 @@ a:visited { color: var(--secondary); }
   background-color: rgba(0, 0, 0, 0.4);
 }
 #popup > div {
-  width: calc(var(--fullWidth) - 5rem);
-  height: 39rem;
+  width: calc(var(--fullWidth) - 7rem);
   background-color: var(--popupBg);
   margin: 0;
+}
+#popup h2:not(.emoji) {
+  margin-top: 0;
+  margin-bottom: 1rem;
 }
 
 #history {

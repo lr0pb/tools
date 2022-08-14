@@ -144,8 +144,10 @@ async function checkNotifications() {
   if (notifs.byCategories.backupReminder) {
     const { show } = await checkBackupReminder();
     if (show) await showNotification({
-      title: `\u{1f4e5} Download a backup`,
-      body: `You've set reminders to make periodic backups, so today we have been backed up one for you \u{1f35e}`
+      title: `\u{1f4e5} It's time to back up your data`,
+      body: `You've set reminders to make backups, so today we made one for you \u{1f4e6}`,
+      icon: './icons/downloadBackup.png',
+      data: { showPage: 'main&popup=downloadBackup' }
     });
   }
 }
@@ -187,20 +189,23 @@ async function getDayRecap() {
       body += `- ${task.name}\n`;
     });
     body = body.replace(/\n$/, '');
-    return { title: `\u{1f5e1} Don't forget about today's important tasks`, body };
+    return { title: `\u{1f5e1} Don't forget about today's important tasks:`, body };
   }
   if (!recap.show) return {
-    title: '\u{1f5e1} Explore tasks for today',
+    title: '\u{1f4d1} Explore tasks for today',
     body: `You have no tasks yesterday, but its time to add some new ones\nDon't miss the dailer! \u{23f0}`
   };
-  return {
+  const resp = {
     title: '\u{1f4f0} Recap of yesterday',
     body: `${
-      recap.completed ? 'Congratulations \u{1f389}\n' : ''
+      recap.completed ? 'Congratulations! \u{1f389} ' : ''
     }You done ${recap.count} out of ${recap.all} tasks${
       !recap.completed
       ? '\nOpen app to mark forgottens and check newly arrived tasks'
-      : '\nCan you repeat this result today?'
-    }`
+      : '\nTry to make a streak?'
+    }`,
+    data: { showPage: 'recap' }
   };
+  if (recap.completed) resp.icon = './icons/statsUp.png';
+  return resp;
 }

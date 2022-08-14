@@ -1,4 +1,15 @@
-const database = { name: 'dailer', version: 5 };
+const database = {
+  name: 'dailer',
+  version: 6,
+  stores: [
+    { name: 'settings', index: {keyPath: 'name'} },
+    { name: 'tasks', index: {keyPath: 'id'} },
+    { name: 'days', index: {keyPath: 'date'} },
+    { name: 'periods', index: {keyPath: 'id'} },
+    { name: 'labels', index: {keyPath: 'id'} },
+    { name: 'themes', index: {keyPath: 'id'} },
+  ]
+};
 
 const getRawDate = (date) => {
   return new Date(date).setHours(0, 0, 0, 0);
@@ -239,4 +250,4 @@ class IDB {
   }
 };
 
-const db = new IDB(database.name, database.version, []);
+const db = new IDB(database.name, database.version, database.stores);
