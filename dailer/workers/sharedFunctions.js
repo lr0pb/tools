@@ -129,6 +129,7 @@ function isEmpty(day) {
 * @onTask(id, value, priority) - async function calls for every task in day
 */
 async function enumerateDay(day, onTask) {
+  if (!day.tasks) return;
   for (let i = day.tasks.length - 1; i > -1; i--) {
     const priority = day.tasks[i];
     for (let taskId in priority) {
