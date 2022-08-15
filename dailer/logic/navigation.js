@@ -1,4 +1,5 @@
 import { pages } from './pages.js'
+import { popups } from '../pages/popups.js'
 import { showPage, hidePage } from './globals.js'
 import { globQs as qs, globQsa as qsa, getParams } from '../pages/highLevel/utils.js'
 import { getToday } from '../pages/highLevel/periods.js'

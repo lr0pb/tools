@@ -1,5 +1,4 @@
 import { pages } from './pages.js'
-import { popups } from '../pages/popups.js'
 import {
   qs as localQs, globQs as qs, globQsa as qsa, copyArray, inert
 } from '../pages/highLevel/utils.js'
