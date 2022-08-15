@@ -141,7 +141,7 @@ async function onPeriodCreator({globals, page}) {
     }
     globals.additionalBack = 0;
     if (globals.pageInfo && globals.pageInfo.periodPromo) {
-      globQs(globals.pageInfo.periodPromo).remove();
+      globQs('.floatingMsg[data-id="periodPromo"]').remove();
       delete globals.pageInfo.periodPromo;
     }
     history.back();
@@ -196,10 +196,10 @@ function onDaysCountChange(e) {
 }
 
 export async function createPeriod(globals, per = {}, isEdit) {
-  let session;
-  if (!isEdit) session = await globals.db.getItem('settings', 'session');
+  let periodData;
+  if (!isEdit) periodData = await globals.db.getItem('settings', 'periods');
   const period = {
-    id: isEdit ? per.id : String(session.lastPeriodId + 1),
+    id: isEdit ? per.id : String(periodData.lastId + 1),
     title: qs('#periodName') ? qs('#periodName').value : per.title,
     days: per.days || [],
     selectTitle: 'Select day to start',
@@ -231,8 +231,8 @@ export async function createPeriod(globals, per = {}, isEdit) {
   console.log(period);
   if (period.title == '' || !period.days.includes(1)) return 'error'
   if (!isEdit) {
-    session.lastPeriodId++;
-    await globals.db.setItem('settings', session);
+    periodData.lastId++;
+    await globals.db.setItem('settings', periodData);
   }
   return period;
 }

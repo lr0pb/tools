@@ -10,7 +10,7 @@ import {
 } from './pages/highLevel/utils.js'
 import { getToday, oneDay } from './pages/highLevel/periods.js'
 import { processSettings, toggleExperiments } from './pages/highLevel/settingsBackend.js'
-import { checkInstall } from './pages/main.js'
+import { checkInstall, onAppInstalled } from './pages/main.js'
 
 if (!('at' in Array.prototype)) {
   function at(n) {
@@ -27,6 +27,7 @@ if (!('at' in Array.prototype)) {
 if (!window.dailerData) window.dailerData = {
   nav: 'navigation' in window ? true : false,
   forcePeriodPromo: false,
+  forceReminderPromo: false,
   experiments: 0,
 };
 checkForFeatures(['inert', 'focusgroup']);
@@ -214,14 +215,6 @@ if ('navigation' in window) {
   navigation.addEventListener('navigate', (e) => onAppNavigation(e, globals));
 }
 
-window.addEventListener('appinstalled', async () => {
-  await globals.db.updateItem('settings', 'session', (session) => {
-    session.installed = true;
-  });
-  const elem = qs('#main .floatingMsg');
-  if (elem) elem.remove();
-});
-
 window.addEventListener('beforeinstallprompt', async (e) => {
   e.preventDefault();
   await globals.db.updateItem('settings', 'session', (session) => {
@@ -230,6 +223,8 @@ window.addEventListener('beforeinstallprompt', async (e) => {
   globals.installPrompt = e;
   if (qs('#main')) await checkInstall(globals);
 });
+
+window.addEventListener('appinstalled', async () => await onAppInstalled(globals));
 
 qs('#popup').addEventListener('click', (e) => {
   const popup = qs('#popup');

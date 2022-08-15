@@ -173,25 +173,25 @@ class IDB {
     });
     return resp;
   }
-  async getItem(store, title) {
+  async getItem(store, itemKey) {
     const resp = await this._dbCall('getItem', {
       store: { value: store, required: true, type: 'string' },
-      title: { value: title, required: true }
-    }, 'readonly', 'get', title, (result) => result);
+      itemKey: { value: itemKey, required: true }
+    }, 'readonly', 'get', itemKey, (result) => result);
     return resp;
   }
 /**
 * @updateCallback(item) - async function that receive item and can change fields in them
 */
-  async updateItem(store, title, updateCallback) {
+  async updateItem(store, itemKey, updateCallback) {
     if (!this._argsCheck('updateItem', {
       store: { value: store, required: true, type: 'string' },
-      title: { value: title, required: true },
+      itemKey: { value: itemKey, required: true },
       updateCallback: { value: updateCallback, required: true, type: 'function' }
     })) return;
-    const data = await this.getItem(store, title);
+    const data = await this.getItem(store, itemKey);
     await updateCallback(data);
-    await this.setItem(store, data);
+    await this.setItem(store, itemKey);
     return data;
   }
 /**
@@ -213,11 +213,11 @@ class IDB {
     });
     return resp ? items : resp;
   }
-  async deleteItem(store, title) {
+  async deleteItem(store, itemKey) {
     const resp = await this._dbCall('deleteItem', {
       store: { value: store, required: true, type: 'string' },
-      title: { value: title, required: true }
-    }, 'readwrite', 'delete', title);
+      itemKey: { value: itemKey, required: true }
+    }, 'readwrite', 'delete', itemKey);
     return resp;
   }
   async deleteAll(store) {
@@ -226,11 +226,13 @@ class IDB {
     }, 'readwrite', 'clear');
     return resp;
   }
-  async hasItem(store, title) {
+/**
+* @hasItem(store, itemKey?) - if no itemKey provided - return items count in this store
+*/
+  async hasItem(store, itemKey) {
     const resp = await this._dbCall('hasItem', {
-      store: { value: store, required: true, type: 'string' },
-      title: { value: title, required: true }
-    }, 'readonly', 'count', title, (result) => result == 1 ? true : false);
+      store: { value: store, required: true, type: 'string' }
+    }, 'readonly', 'count', itemKey, (result) => itemKey ? (result == 1 ? true : false) : result);
     return resp;
   }
 /**

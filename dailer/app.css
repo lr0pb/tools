@@ -299,6 +299,11 @@ p {
 p > .emojiSymbol {
   margin-top: 0; margin-bottom: 0;
 }
+strong {
+  background-color: var(--darkShadow);
+  padding: 0.4rem 1.2rem;
+  border-radius: 2.5rem;
+}
 
 button, .task, #message, input, select, #infoBackground,
 .infoRect, #popup > div, .floatingMsg, .historyMonth > * {

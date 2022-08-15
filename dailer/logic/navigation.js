@@ -31,9 +31,9 @@ export async function renderFirstPage(globals) {
     await globals.paintPage(rndr);
   }
   if (params.settings) await globals.openSettings(params.section);
-  if (params.popup/* && params.popup in popups*/) {
-    console.log('Render popup: ' + params.popup);
-    //globals.openPopup(params.popup);
+  if (params.popup && params.popup in popups) {
+    const popupData = popups[params.popup](globals);
+    globals.openPopup(popupData);
   }
 }
 
@@ -95,7 +95,7 @@ async function hardReload(globals, info) {
     info: {call: 'traverseToStart'}
   }).finished;
   qs('.hidePrevPage').classList.add('current');
-  for (let page of qsa('.page')) {
+  for (let page of qsa('.page:not(.basic)')) {
     page.remove();
   }
   const session = await globals.db.getItem('settings', 'session');

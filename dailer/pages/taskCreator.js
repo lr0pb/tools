@@ -80,9 +80,9 @@ export const taskCreator = {
 
 async function getPeriods(globals) {
   const periods = await globals.getPeriods();
-  const session = await globals.db.getItem('settings', 'session');
+  const periodData = await globals.db.getItem('settings', 'periods');
   const periodsList = [];
-  for (let per of session.periodsList) {
+  for (let per of periodData.list) {
     if (periods[per]) periodsList.push(periods[per]);
   }
   periodsList.push({
@@ -127,43 +127,44 @@ async function onTaskCreator({globals}) {
     enableEditButtons(globals, td);
     taskTitle = td.name;
   } else {
-    const { tasksCount, periodsCount } = await asyncDataReceiving({globals, tasks: 3});
-    if (
-      dailerData.forcePeriodPromo || (tasksCount >= 3 && periodsCount == 0)
-    ) globals.floatingMsg({
-      text: `${emjs.light} Tip: you can create your own periods e.g. Every saturday`,
-      button: 'Try&nbsp;it',
-      onClick: async (e) => {
-        globals.openSettings('periods');
-        globals.closeSettings();
-        if (!globals.pageInfo) globals.pageInfo = {};
-        globals.pageInfo.periodPromo = '#taskCreator .floatingMsg';
-        globals.additionalBack = 1;
-        await globals.paintPage('periodCreator');
-      },
-      pageName: 'taskCreator'
-    });
+    await checkPeriodPromo(globals);
   }
   qs('#saveTask').addEventListener('click', async () => {
     await onSaveTaskClick(globals, session, td, isEdit);
   });
 }
 
-async function asyncDataReceiving({globals, tasks = 1, periods = 1}) {
-  let tasksCount = 0, periodsCount = 0, tasksOver = false, periodsOver = false;
-  globals.db.getAll('tasks', () => tasksCount++)
-    .then(() => tasksOver = true);
-  globals.db.getAll('periods', () => periodsCount++)
-    .then(() => periodsOver = true);
-  while (
-    tasksOver && periodsOver ? false : (
-      (tasksCount < tasks || !tasksOver) &&
-      (periodsCount < periods || !periodsOver)
-    )
-  ) {
-    await new Promise((res) => { setTimeout(res, 10) });
+async function checkPeriodPromo(globals) {
+  const periodData = await globals.db.getItem('settings', 'periods');
+  const setKnowTrue = async () => {
+    periodData.knowAboutFeature = true;
+    await globals.db.setItem('settings', periodData);
+  };
+  if (!dailerData.forcePeriodPromo) {
+    if (periodData.knowAboutFeature) return;
+    const tasksCount = await globals.db.hasItem('tasks');
+    if (tasksCount < periodData.tasksToShowPromo) return;
+    const periodsCount = await globals.db.hasItem('periods');
+    if (periodsCount > periodData.standartPeriodsAmount) {
+      await setKnowTrue();
+      return;
+    }
   }
-  return { tasksCount, periodsCount };
+  globals.floatingMsg({
+    id: 'periodPromo',
+    text: `${emjs.light} Tip: you can create your own periods e.g. "Every saturday"`,
+    button: 'Try&nbsp;it',
+    onClick: async (e) => {
+      globals.openSettings('periods');
+      globals.closeSettings();
+      if (!globals.pageInfo) globals.pageInfo = {};
+      globals.pageInfo.periodPromo = true;
+      globals.additionalBack = 1;
+      await setKnowTrue();
+      await globals.paintPage('periodCreator');
+    },
+    pageName: 'taskCreator'
+  });
 }
 
 async function onSaveTaskClick(globals, session, td, isEdit) {

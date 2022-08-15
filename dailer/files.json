@@ -6,5 +6,5 @@
   "./pages/highLevel/utils.js", "./pages/highLevel/periods.js", "./pages/highLevel/taskThings.js",
   "./pages/highLevel/createBackup.js", "./pages/highLevel/uploadBackup.js", "./pages/highLevel/settingsBackend.js",
   "./pages/onboarding.js", "./pages/main.js", "./pages/recap.js", "./pages/settings.js", "./pages/taskLists.js", "./pages/taskCreator.js",
-  "./pages/taskInfo.js", "./pages/periodCreator.js", "./pages/debugPage.js"
+  "./pages/taskInfo.js", "./pages/periodCreator.js", "./pages/debugPage.js", "./pages/popups.js"
 ]

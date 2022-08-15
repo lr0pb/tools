@@ -1,4 +1,5 @@
 import { pages } from './pages.js'
+import { popups } from '../pages/popups.js'
 import {
   qs as localQs, globQs as qs, globQsa as qsa, copyArray, inert
 } from '../pages/highLevel/utils.js'
@@ -91,7 +92,7 @@ export function getGlobals() {
           history: historyAction, info: {call: 'paintPage'}
         });
       } else {
-        if (replaceState) history.replaceState(history.state || {}, '', link);
+        if (replaceState) history.replaceState(globals.pageInfo || history.state || {}, '', link);
         else if (!dontPushHistory) history.pushState(globals.pageInfo || history.state || {}, '', link);
       }
       await page.script({ globals, page: content });
@@ -112,7 +113,10 @@ export function getGlobals() {
       inert.remove(popup, popup.querySelector('[data-action="cancel"]'));
       qs('#popup h2.emoji').innerHTML = emoji;
       qs('#popup h2:not(.emoji)').innerHTML = text;
-      popup.querySelector('[data-action="confirm"]').onclick = action;
+      popup.querySelector('[data-action="confirm"]').onclick = async () => {
+        await action();
+        globals.closePopup();
+      }
     },
     closePopup: () => {
       const popup = qs('#popup');
@@ -121,6 +125,13 @@ export function getGlobals() {
       popup.classList.remove('strictClosing');
       popup.style.display = 'none';
       qs('[data-action="confirm"]').onclick = null;
+      const link = location.href.replace(/&popup=\w+/, '');
+      dailerData.nav
+      ? navigation.navigate(link, {
+          state: globals.pageInfo || navigation.currentEntry.getState() || {},
+          history: 'replace', info: {call: 'popupClosing'}
+        })
+      : history.replaceState(globals.pageInfo || history.state || {}, '', link);
     },
     pageButton: ({emoji, title, onClick}) => {
       const pageBtn = localQs('.pageBtn');
@@ -131,10 +142,11 @@ export function getGlobals() {
       pageBtn.setAttribute('aria-hidden', 'false');
       pageBtn.style.display = 'block';
     },
-    floatingMsg: ({text, button, onClick, pageName, notFixed}) => {
+    floatingMsg: ({id, text, button, onClick, pageName, notFixed}) => {
       const prevElem = localQs('.floatingMsg', pageName);
       if (prevElem) prevElem.remove();
       const elem = document.createElement('div');
+      if (id) elem.dataset.id = id;
       elem.className = `floatingMsg ${notFixed ? 'notFixed' : ''}`;
       elem.innerHTML = `
         <h3>${text}</h3>
@@ -162,17 +174,17 @@ export function getGlobals() {
       inert.set(qs('.current'));
       inert.remove(qs('#settings'));
       globals.settings = true;
+      const useSection = section && pages.settings.sections.includes(section);
       if (!dontPushHistory) {
+        const link = `${getUrl()}&settings=open${useSection ? `&section=${section}` : ''}`
         dailerData.nav
-        ? navigation.navigate(getUrl() + '&settings=open', {
+        ? navigation.navigate(link, {
             state: {settings: true}, history: 'push', info: {call: 'settings'}
           })
-        : history.pushState({settings: true}, '', getUrl() + '&settings=open');
+        : history.pushState({settings: true}, '', link);
       }
       await pages.settings.opening({globals});
-      if (section && pages.settings.sections.includes(section)) {
-        qs(`[data-section="${section}"]`).scrollIntoView();
-      }
+      if (useSection) qs(`[data-section="${section}"]`).scrollIntoView();
       globals.isPageReady = true;
     },
     closeSettings: async (callSettingsUpdate, backInHistory) => {

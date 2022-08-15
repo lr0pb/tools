@@ -10,7 +10,8 @@ export async function processSettings(globals, periodicSync) {
     addPeriodicSync(globals, periodicSync),
     addPersistentStorage(globals),
     addBackupReminder(globals),
-    addSession(globals)
+    addSession(globals),
+    addPeriodsSettings(globals)
   ]);
   await globals.db.onDataUpdate('settings', async (store, item) => {
     if (item.name !== 'session') return;
@@ -49,8 +50,8 @@ async function checkRecord(globals, recordName, updateFields, onVersionUpgrade) 
     shouldUpdateRecord = true;
   }
   if (data && data.version !== database.settings[recordName] && onVersionUpgrade) {
-    data.version = database.settings[recordName];
     onVersionUpgrade(data);
+    data.version = database.settings[recordName];
     shouldUpdateRecord = true;
   }
   if (shouldUpdateRecord) await globals.db.setItem('settings', data);
@@ -108,20 +109,32 @@ async function addPersistentStorage(globals) {
 }
 
 async function addBackupReminder(globals) {
-  const resp = await checkRecord(globals, 'backupReminder');
+  const resp = await checkRecord(globals, 'backupReminder', null, (data) => {
+    if (data.version === 1) {
+      data.id = data.remindId;
+      data.value = data.remindValue;
+      data.isDownloaded = data.reminded;
+      delete data.remindId; delete data.remindValue; delete data.reminded;
+      data.knowAboutFeature = data.id ? true : false;
+      data.firstPromoDay = null;
+      data.daysToShowPromo = 4;
+    }
+  });
   if (resp) return;
   await globals.db.setItem('settings', {
     name: 'backupReminder',
-    remindId: localStorage.remindId,
-    remindValue: localStorage.remindValue ? Number(localStorage.remindValue) : null,
-    reminded: localStorage.reminded ? (localStorage.reminded == 'true' ? true : false) : false,
+    id: localStorage.remindId ? localStorage.remindId : null,
+    value: localStorage.remindValue ? Number(localStorage.remindValue) : null,
+    isDownloaded: localStorage.reminded ? (localStorage.reminded == 'true' ? true : false) : false,
     nextRemind: localStorage.nextRemind ? Number(localStorage.nextRemind) : null,
+    knowAboutFeature: localStorage.remindId ? true : false,
+    firstPromoDay: null,
+    daysToShowPromo: 4,
     version: database.settings.backupReminder
   });
 }
 
 async function addSession(globals) {
-  const defaultLastPeriodId = 50;
   const resp = await checkRecord(globals, 'session');
   if (resp) {
     if (
@@ -138,11 +151,36 @@ async function addSession(globals) {
     onboarded: localStorage.onboarded ? (localStorage.onboarded == 'true' ? true : false) : false,
     installed: localStorage.installed ? (localStorage.installed == 'true' ? true : false) : false,
     recaped: localStorage.recaped ? Number(localStorage.recaped) : 0,
-    periodsList: localStorage.periodsList ? JSON.parse(localStorage.periodsList) : ['01', '03', '07', '09'],
-    defaultLastPeriodId,
-    lastPeriodId: localStorage.lastPeriodId ? Number(localStorage.lastPeriodId) : defaultLastPeriodId,
     updateTasksList: localStorage.updateTasksList ? JSON.parse(localStorage.updateTasksList) : [],
     experiments: localStorage.experiments ? Number(localStorage.experiments) : 0,
     version: database.settings.session
+  });
+}
+
+async function addPeriodsSettings(globals) {
+  const resp = await checkRecord(globals, 'periods');
+  if (resp) return;
+  const defaultList = ['01', '03', '07', '09'];
+  const defaultLastId = 50;
+  const periodsCount = await globals.db.hasItem('periods');
+  const standartCount = 9;
+  let list = null, lastId = null;
+  await globals.db.updateItem('settings', 'session', (session) => {
+    if (!session.periodsList || !session.lastPeriodId) return;
+    list = session.periodsList;
+    lastId = session.lastPeriodId;
+    delete session.periodsList;
+    delete session.lastPeriodId;
+    delete session.defaultLastPeriodId;
+  });
+  await globals.db.setItem('settings', {
+    name: 'periods',
+    defaultList, defaultLastId,
+    list: list || localStorage.periodsList ? JSON.parse(localStorage.periodsList) : defaultList,
+    lastId: lastId || localStorage.lastPeriodId ? Number(localStorage.lastPeriodId) : defaultLastId,
+    standartPeriodsAmount: standartCount,
+    tasksToShowPromo: 3,
+    knowAboutFeature: periodsCount > standartCount ? true : false,
+    version: database.settings.periods
   });
 }

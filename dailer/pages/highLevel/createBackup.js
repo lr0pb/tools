@@ -11,6 +11,13 @@ export async function downloadData(globals) {
   link.download = `${name}.dailer`;
   link.href = URL.createObjectURL(blob);
   prog.style.display = 'none';
+  globals.db.updateItem('settings', 'backupReminder', (remind) => {
+    if (remind.nextRemind === getToday() && !remind.isDownloaded) {
+      remind.isDownloaded = true;
+      const elem = qs('.floatingMsg[data-id="backupReminder"]');
+      if (elem) elem.remove();
+    }
+  });
   return link;
 }
 

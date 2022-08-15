@@ -24,11 +24,13 @@ async function createDay(today = getToday()) {
     await Promise.all(updateList);
     session.updateTasksList = [];
   }
+  const cleared = day.cleared;
   if (!day || day.lastTasksChange !== session.lastTasksChange) {
     day = getRawDay(today, !day);
   } else {
     return isEmpty(day) ? { day: 'error' } : { day };
   }
+  day.cleared = cleared;
   if (!tasks) {
     tasks = [];
     await db.getAll('tasks', (task) => {
@@ -200,15 +202,15 @@ async function getYesterdayRecap() {
 }
 
 async function checkBackupReminder() {
-  const data = await db.getItem('settings', 'backupReminder');
+  const remind = await db.getItem('settings', 'backupReminder');
   const resp = { show: false };
-  if (!data.remindValue) return resp;
-  if (data.nextRemind === getToday() && data.reminded) return resp;
-  while (data.nextRemind < getToday()) {
-    data.reminded = false;
-    data.nextRemind += data.remindValue;
+  if (!remind.value) return resp;
+  if (remind.nextRemind === getToday() && remind.isDownloaded) return resp;
+  while (remind.nextRemind < getToday()) {
+    remind.nextRemind += remind.value;
   }
-  if (data.nextRemind === getToday()) resp.show = true;
-  await db.setItem('settings', data);
+  remind.isDownloaded = false;
+  if (remind.nextRemind === getToday()) resp.show = true;
+  await db.setItem('settings', remind);
   return resp;
 };

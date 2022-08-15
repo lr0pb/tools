@@ -135,10 +135,7 @@ export async function editTask({globals, id, field, onConfirm}) {
       await globals.db.updateItem('settings', 'session', (session) => {
         session.lastTasksChange = Date.now();
       });
-      globals.closePopup();
-      globals.message({
-        state: 'success', text: `Task ${field}`
-      });
+      globals.message({ state: 'success', text: `Task ${field}` });
       if (!globals.pageInfo) globals.pageInfo = {};
       globals.pageInfo.stateChangedTaskId = id;
       onConfirm();

@@ -1,5 +1,5 @@
 import { isUnder3AM, getToday, oneDay, isCustomPeriod } from './highLevel/periods.js'
-import { qs, /*emjs*/ } from './highLevel/utils.js'
+import { qs, globQs } from './highLevel/utils.js'
 import { renderTask, setPeriodTitle } from './highLevel/taskThings.js'
 import { downloadData } from './highLevel/createBackup.js'
 
@@ -70,18 +70,20 @@ async function renderDay({globals, page}) {
 }
 
 async function processChecks(globals) {
-  const existInstallPrompt = await checkInstall(globals);
-  if (existInstallPrompt) return;
-  const existDayNote = await checkDayNote(globals);
-  if (existDayNote) return;
-  const existReminder = await checkBackupReminder(globals);
-  if (existReminder) return;
-  await checkNotifications(globals);
+  const checks = [
+    checkInstall, checkDayNote, checkBackupReminder, checkReminderPromo,
+    checkNotifications
+  ];
+  for (let checkFunction of checks) {
+    const check = await checkFunction(globals);
+    if (check) return;
+  }
 }
 
 async function checkDayNote(globals) {
   if (!isUnder3AM()) return;
   globals.floatingMsg({
+    id: 'dayNote',
     text: `${emjs.alarmClock} Tasks for new day will arrive at 3:00 AM`,
     onClick: async (e) => { e.target.parentElement.remove(); },
     button: 'Okay', pageName: 'main'
@@ -94,17 +96,20 @@ export async function checkInstall(globals) {
   const persist = await globals.checkPersist();
   const session = await globals.db.getItem('settings', 'session');
   if (persist === false || !session.installed) {
-    if (persist && dailerData.isDesktop) return;
     globals.floatingMsg({
+      id: 'install',
       text: `${emjs.crateDown} To protect your data, install dailer app on your home screen${
         navigator.standalone === false ? ': click Share > Add to home screen' : ''
       }`,
       button: globals.installPrompt ? 'Install' : null,
       onClick: async (e) => {
-        globals.installPrompt.prompt();
-        await globals.installPrompt.userChoice;
-        delete globals.installPrompt;
         e.target.parentElement.remove();
+        globals.installPrompt.prompt();
+        const choice = await globals.installPrompt.userChoice;
+        delete globals.installPrompt;
+        if (choice.outcome === 'accepted' && !('onappinstalled' in window)) {
+          await onAppInstalled(globals);
+        }
       },
       pageName: 'main'
     });
@@ -112,20 +117,52 @@ export async function checkInstall(globals) {
   }
 }
 
+export async function onAppInstalled(globals) {
+  await globals.db.updateItem('settings', 'session', (session) => {
+    session.installed = true;
+  });
+  const elem = globQs('.floatingMsg[data-id="install"]');
+  if (elem) elem.remove();
+  await processChecks(globals);
+}
+
 async function checkBackupReminder(globals) {
   const resp = await globals.worker.call({ process: 'backupReminder' });
   if (!resp.show) return;
   globals.floatingMsg({
+    id: 'backupReminder',
     text: `${emjs.bread} Your data has been backed up`,
     button: 'Download',
     pageName: 'main',
     onClick: async (e) => {
-      const data = await globals.db.getItem('settings', 'backupReminder');
-      data.reminded = true;
-      await globals.db.setItem('settings', data);
       const link = await downloadData(globals);
-      e.target.parentElement.remove();
       link.click();
+    }
+  });
+  return true;
+}
+
+async function checkReminderPromo(globals) {
+  const remind = await globals.db.getItem('settings', 'backupReminder');
+  if (!dailerData.forceReminderPromo) {
+    if (remind.knowAboutFeature) return;
+    if (!remind.firstPromoDay) {
+      remind.firstPromoDay = getToday();
+      await globals.db.setItem('settings', remind);
+    }
+    if (remind.firstPromoDay + oneDay * remind.daysToShowPromo <= getToday()) return;
+  }
+  globals.floatingMsg({
+    id: 'reminderPromo',
+    text: `${emjs.light} Tip: you can set reminders to create data backups periodically`,
+    button: 'View',
+    pageName: 'main',
+    onClick: async (e) => {
+      await globals.openSettings('manageData');
+      e.target.parentElement.remove();
+      await globals.db.updateItem('settings', 'backupReminder', (data) => {
+        data.knowAboutFeature = true;
+      });
     }
   });
   return true;
@@ -136,6 +173,7 @@ async function checkNotifications(globals) {
   if (!('Notification' in window)) return;
   if (Notification.permission !== 'default') return;
   globals.floatingMsg({
+    id: 'notifications',
     text: `${emjs.bell} Get a daily recap of the tasks through notifications`,
     button: 'Turn&nbsp;on',
     pageName: 'main',
