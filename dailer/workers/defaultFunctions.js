@@ -193,7 +193,7 @@ class IDB {
     })) return;
     const data = await this.getItem(store, itemKey);
     await updateCallback(data);
-    await this.setItem(store, itemKey);
+    await this.setItem(store, data);
     return data;
   }
 /**
