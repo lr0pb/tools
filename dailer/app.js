@@ -28,10 +28,11 @@ if (!window.dailerData) window.dailerData = {
   nav: 'navigation' in window ? true : false,
   forcePeriodPromo: false,
   forceReminderPromo: false,
+  isDesktop: isDesktop(),
+  isWideInterface: isWideInterface(),
   experiments: 0,
 };
 checkForFeatures(['inert', 'focusgroup']);
-dailerData.isDesktop = isDesktop();
 
 const globals = getGlobals();
 

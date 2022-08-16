@@ -132,6 +132,10 @@ export function isDesktop() {
   return window.matchMedia('(pointer: fine) and (hover: hover)').matches;
 }
 
+export function isWideInterface() {
+  return window.matchMedia('(min-width: 470px)').matches;
+}
+
 const focusables = [
   'button:not(:disabled)', 'input:not(:disabled)', '[role="button"]:not([disabled])'
 ].join(', ');

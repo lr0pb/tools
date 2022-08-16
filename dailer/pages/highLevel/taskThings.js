@@ -174,7 +174,8 @@ export async function onTaskCompleteClick({ e, globals, elem, forcedDay, extraFu
   if (!day) return globals.floatingMsg({
     text: `${emjs.alarmClock} Day is expired! So you need to reload tasks for today`,
     onClick: async () => await reloadApp(globals),
-    button: 'Reload', pageName: 'main'
+    button: 'Reload', longButton: `${emjs.reload} Reload app`,
+    pageName: 'main'
   });
   const value = toggleFunc({e, elem});
   td.history.pop();

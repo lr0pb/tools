@@ -153,7 +153,7 @@ async function checkPeriodPromo(globals) {
   globals.floatingMsg({
     id: 'periodPromo',
     text: `${emjs.light} Tip: you can create your own periods e.g. "Every saturday"`,
-    button: 'Try&nbsp;it',
+    button: 'Try&nbsp;it', longButton: `${emjs.calendar}&nbsp;Create&nbsp;one`,
     onClick: async (e) => {
       globals.openSettings('periods');
       globals.closeSettings();

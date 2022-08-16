@@ -141,7 +141,7 @@ export function getGlobals() {
       pageBtn.setAttribute('aria-hidden', 'false');
       pageBtn.style.display = 'block';
     },
-    floatingMsg: ({id, text, button, onClick, pageName, notFixed}) => {
+    floatingMsg: ({id, text, button, longButton, onClick, pageName, notFixed}) => {
       const prevElem = localQs('.floatingMsg', pageName);
       if (prevElem) prevElem.remove();
       const elem = document.createElement('div');
@@ -149,7 +149,11 @@ export function getGlobals() {
       elem.className = `floatingMsg ${notFixed ? 'notFixed' : ''}`;
       elem.innerHTML = `
         <h3>${text}</h3>
-        ${button ? `<button class="noEmoji">${button}</button>` : ''}
+        ${button
+          ? `<button class="${
+            longButton && dailerData.isWideInterface ? '' : 'noEmoji'
+          }">${longButton && dailerData.isWideInterface ? longButton : button}</button>`
+          : ''}
       `;
       const content = localQs('.content', pageName);
       content.append(elem);

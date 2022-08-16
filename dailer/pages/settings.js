@@ -61,14 +61,14 @@ export const settings = {
           <div id="reminder" class="first"></div>
         </div>
       </div>
-      <div id="notificationsC">
-      <h2 data-section="notifications">Notifications</h2>
-      <h3>You will get one time per day notifications about below listed things</h3>
-      <div id="notifications" class="first"></div>
-      <div id="notifTopics" class="doubleColumns" focusgroup>
-        <!-- Bruh -->
+      <h2 data-section="notifications" class="notif">Notifications</h2>
+      <h3 class="notif">You can turn on notifications about some things in app. They will arrive in a bundle only once a day</h3>
+      <div class="doubleColumns first notif">
+        <div id="notifications"></div>
+        <button id="install" class="notifNotAllowed">${emjs.crateDown} Install dailer</button>
       </div>
-      </div>
+      <h3 id="notifReason" class="notifNotAllowed notif"></h3>
+      <div id="notifTopics" class="doubleColumns first notif" focusgroup></div>
       <div id="experiments"></div>
       <button id="toDebug" class="secondary">${emjs.construction} Open debug page</button>
       <h2>About</h2>
@@ -120,22 +120,56 @@ export const settings = {
         }
       }], page: qs('#experiments'), value: dailerData.experiments
     });
-    if (!dailerData.experiments) return;
-    qs('#notificationsC').style.display = 'flex';
-    const getNotifPerm = (value = Notification.permission) => value == 'granted' ? 1 : value == 'denied' ? 2 : 0;
+    const session = await globals.db.getItem('settings', 'session');
+    const getNotifPerm = (value = Notification.permission) => {
+      return session.installed ? 3 : value == 'granted' ? 1 : value == 'denied' ? 2 : 0;
+    };
     const getEmoji = (notifPerm) => {
       const value = getNotifPerm(notifPerm);
-      return emjs[value == 1 ? 'sign' : value == 2 ? 'cross' : 'blank'];
+      return emjs[value == 1 ? 'sign' : value == 2 ? 'cross' : value == 3 ? 'lock' : 'blank'];
     };
+    const currentValue = getNotifPerm();
+    if ([2, 3].includes(currentValue)) {
+      qs('#notifReason').style.display = 'block';
+      qs('#notifReason').innerHTML = currentValue == 2
+      ? `${emjs.warning} You denied in notifications permission, so enable it via site settings in browser`
+      : `${emjs.warning} Notifications are available only as you install app on your home screen`;
+    }
     renderToggler({
       name: `${emjs.bell} Enable notifications`, id: 'notifications', buttons: [{
         emoji: getEmoji(),
         func: async ({e, elem}) => {
-          if (Notification.permission !== 'default') return;
+          const actualSession = await globals.db.getItem('settings', 'session');
           const target = e.target.dataset.action ? e.target : e.target.parentElement;
-          target.innerHTML = emjs.loading;
-          const resp = await Notification.requestPermission();
-          target.innerHTML = getEmoji(resp);
+          if (!actualSession.installed) {
+            target.dataset.value = '3';
+            target.innerHTML = emjs.lock;
+            return globals.message({
+              state: 'success', text: 'Install dailer on your home screen to unlock notifications'
+            });
+          }
+          if (Notification.permission == 'denied') {
+            target.dataset.value = '2';
+            target.innerHTML = emjs.cross;
+            return globals.message({
+              state: 'fail', text: 'Enable notifications via site settings in browser'
+            });
+          }
+          if (Notification.permission == 'default') {
+            target.innerHTML = emjs.loading;
+            const resp = await Notification.requestPermission();
+            await globals.db.updateItem('settings', 'notifications', (data) => {
+              data.permission = resp;
+              data.enabled = resp == 'granted' ? true : false;
+            });
+            if (resp == 'granted') qs('#notifReason').style.display = 'none';
+            target.innerHTML = getEmoji(resp);
+          }
+          const value = toggleFunc({e, elem});
+          await globals.db.updateItem('settings', 'notifications', (data) => {
+            data.enabled = value ? true : false;
+          });
+          target.innerHTML = getEmoji(value);
         }
       }], page: qs('#notifications'), value: getNotifPerm()
     });

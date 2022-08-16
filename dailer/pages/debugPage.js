@@ -9,14 +9,14 @@ export const debugPage = {
     <div id="dataContainer" class="doubleColumns"></div>
     <div class="doubleColumns">
       <div class="content">
-        <button id="clear" class="danger noEmoji">Clear database</button>
+        <button id="clear" class="danger noEmoji">Clear your data</button>
         <h3>It's actually delete all your tasks and other. Make sure you have backup</h3>
       </div>
       <div class="content">
         <!--<button id="toRecap" class="noEmoji">Show recap page</button>
         <h3>Reload app and show Yesterday recap page</h3>-->
-        <button id="clearSettings" class="danger noEmoji">Clear settings</button>
-        <h3>If you have preferences stored in old way - you lose nothing</h3>
+        <button id="clearSettings" class="danger noEmoji">Clear some settings</button>
+        <h3>You probably can loose everything</h3>
       </div>
     </div>
   `},
@@ -39,25 +39,14 @@ async function renderPage({globals, page}) {
   const periods = await globals.db.getAll('periods');
   const data = {
     'Is storage persisted': isPersisted.toString(),
-    /*'Persist attempts': localStorage.persistAttempts,
-    'Persist granted': localStorage.persistGranted
-      ? intlDate(Number(localStorage.persistGranted)) : 'no data',
-    'Is periodic sync support': localStorage.periodicSync || 'no data',
-    'Periodic sync status': localStorage.periodicSyncStatus || 'no data',*/
     'Notification permission': Notification.permission,
     'Theoretical available memory': convertBytes(memory.quota, 'Mb'),
     'Used memory': convertBytes(memory.usage, 'kb'),
     'Used by Cache storage': convertBytes(memory.usageDetails.caches, 'kb'),
     'Used by IndexedDb': convertBytes(memory.usageDetails.indexedDB, 'kb'),
-    /*'First day ever': intlDate(Number(localStorage.firstDayEver)),
-    'Was reminder used': localStorage.reminded,
-    'Periods list': localStorage.periodsList,
-    'Tasks to additional update': JSON.parse(localStorage.updateTasksList).length,*/
     'Days amount': days.length,
     'Tasks amount': tasks.length,
     'Periods amount': periods.length,
-    /*'Last period id': localStorage.lastPeriodId,
-    'Is app installed': localStorage.installed,*/
     'Network connection type': navigator.connection
     ? navigator.connection.effectiveType : 'no data',
     'Is online': navigator.onLine,
@@ -79,7 +68,9 @@ async function renderPage({globals, page}) {
     await reloadApp(globals);
   });*/
   qs('#clearSettings').addEventListener('click', async () => {
-    await globals.db.deleteAll('settings');
+    //await globals.db.deleteAll('settings');
+    await globals.db.deleteItem('settings', 'notifications');
+    await globals.db.deleteItem('settings', 'periods');
     await reloadApp(globals);
   });
 }
@@ -93,17 +84,11 @@ function convertBytes(value, unit) {
 export async function clearDatabase(globals) {
   const stores = globals.db.db.objectStoreNames;
   for (let store of stores) {
-    //if (store == 'settings') continue;
+    if (store == 'settings') continue;
     globals.db.deleteAll(store);
   }
-  /*const list = JSON.parse(localStorage.periodsList);
-  const toDelete = []
-  for (let item of list) {
-    if (isCustomPeriod(item)) toDelete.push(item);
-  }
-  for (let item of toDelete) {
-    const idx = list.indexOf(item);
-    list.splice(idx, 1);
-  }
-  localStorage.periodsList = JSON.stringify(list);*/
+  await globals.db.updateItem('settings', 'periods', (periodData) => {
+    periodData.list = periodData.defaultList;
+    periodData.lastId = periodData.defaultLastId;
+  });
 }

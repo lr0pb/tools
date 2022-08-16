@@ -115,5 +115,14 @@
   }, {
     "title": "Every year",
     "offset": 365
+  }],
+  "notifications": [{
+    "name": "tasksForDay",
+    "title": "Recap of the day",
+    "enabled": true
+  }, {
+    "name": "backupReminder",
+    "title": "Backup reminders",
+    "enabled": true
   }]
 }

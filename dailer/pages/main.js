@@ -82,10 +82,15 @@ async function processChecks(globals) {
 
 async function checkDayNote(globals) {
   if (!isUnder3AM()) return;
+  if (sessionStorage.dayNoteClosed == 'true') return;
   globals.floatingMsg({
     id: 'dayNote',
     text: `${emjs.alarmClock} Tasks for new day will arrive at 3:00 AM`,
-    onClick: async (e) => { e.target.parentElement.remove(); },
+    onClick: async (e) => {
+      sessionStorage.dayNoteClosed = 'true';
+      e.target.parentElement.remove();
+      await processChecks(globals);
+    },
     button: 'Okay', pageName: 'main'
   });
   return true;
@@ -102,6 +107,7 @@ export async function checkInstall(globals) {
         navigator.standalone === false ? ': click Share > Add to home screen' : ''
       }`,
       button: globals.installPrompt ? 'Install' : null,
+      longButton: globals.installPrompt ? `${emjs.crateDown}&nbsp;Install&nbsp;dailer` : null,
       onClick: async (e) => {
         e.target.parentElement.remove();
         globals.installPrompt.prompt();
@@ -132,7 +138,7 @@ async function checkBackupReminder(globals) {
   globals.floatingMsg({
     id: 'backupReminder',
     text: `${emjs.bread} Your data has been backed up`,
-    button: 'Download',
+    button: 'Download', longButton: `${emjs.box}&nbsp;Download&nbsp;backup`,
     pageName: 'main',
     onClick: async (e) => {
       const link = await downloadData(globals);
@@ -146,6 +152,8 @@ async function checkReminderPromo(globals) {
   const remind = await globals.db.getItem('settings', 'backupReminder');
   if (!dailerData.forceReminderPromo) {
     if (remind.knowAboutFeature) return;
+    const session = await globals.db.getItem('settings', 'session');
+    if (getToday() < session.firstDayEver + oneDay * remind.dayToStartShowPromo) return;
     if (!remind.firstPromoDay) {
       remind.firstPromoDay = getToday();
       await globals.db.setItem('settings', remind);
@@ -155,7 +163,7 @@ async function checkReminderPromo(globals) {
   globals.floatingMsg({
     id: 'reminderPromo',
     text: `${emjs.light} Tip: you can set reminders to create data backups periodically`,
-    button: 'View',
+    button: 'View', longButton: `${emjs.settings}&nbsp;View&nbsp;settings`,
     pageName: 'main',
     onClick: async (e) => {
       await globals.openSettings('manageData');
@@ -175,7 +183,7 @@ async function checkNotifications(globals) {
   globals.floatingMsg({
     id: 'notifications',
     text: `${emjs.bell} Get a daily recap of the tasks through notifications`,
-    button: 'Turn&nbsp;on',
+    button: 'Turn&nbsp;on', longButton: `${emjs.alarmClock}&nbsp;Turn&nbsp;it&nbsp;on`,
     pageName: 'main',
     onClick: async (e) => {
       e.target.parentElement.remove();

@@ -26,6 +26,9 @@ export function toggleExperiments() {
     for (let elem of qsa('meta[name="theme-color"]')) {
       elem.content = color;
     }
+    for (let elem of qsa('notif')) {
+      elem.classList.remove('notif');
+    }
   } else {
     //document.documentElement.classList.remove('compress');
     const metas = qsa('meta[name="theme-color"]');
@@ -64,16 +67,20 @@ async function addNotifications(globals) {
   const updateFields = {
     support: isSupported, permission: isSupported ? Notification.permission : null,
   };
-  const resp = await checkRecord(globals, 'notifications', updateFields);
+  const byCategories = {};
+  const list = await globals.getList('notifications');
+  for (let categorie of list) {
+    byCategories[categorie.name] = categorie.enabled;
+  }
+  const resp = await checkRecord(globals, 'notifications', updateFields, (data) => {
+    Object.assign(byCategories, data.byCategories);
+  });
   if (resp) return;
   await globals.db.setItem('settings', {
     name: 'notifications',
     support: isSupported,
     permission: isSupported ? Notification.permission : null,
-    enabled: true,
-    byCategories: {
-      tasksForDay: true, backupReminder: true,
-    },
+    enabled: false, byCategories,
     callsHistory: [],
     version: database.settings.notifications
   });
@@ -118,7 +125,7 @@ async function addBackupReminder(globals) {
       data.knowAboutFeature = data.id ? true : false;
       data.firstPromoDay = null;
       data.daysToShowPromo = 4;
-    }
+    } else data.dayToStartShowPromo = 7;
   });
   if (resp) return;
   await globals.db.setItem('settings', {
@@ -128,6 +135,7 @@ async function addBackupReminder(globals) {
     isDownloaded: localStorage.reminded ? (localStorage.reminded == 'true' ? true : false) : false,
     nextRemind: localStorage.nextRemind ? Number(localStorage.nextRemind) : null,
     knowAboutFeature: localStorage.remindId ? true : false,
+    dayToStartShowPromo: 7,
     firstPromoDay: null,
     daysToShowPromo: 4,
     version: database.settings.backupReminder
