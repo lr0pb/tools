@@ -6,7 +6,8 @@ import {
   onTraverseNavigation
 } from './logic/navigation.js'
 import {
-  globQs as qs, checkForFeatures, isDesktop, inert, convertEmoji, getParams
+  globQs as qs, checkForFeatures, isDesktop, inert, convertEmoji, getParams,
+  isWideInterface
 } from './pages/highLevel/utils.js'
 import { getToday, oneDay } from './pages/highLevel/periods.js'
 import { processSettings, toggleExperiments } from './pages/highLevel/settingsBackend.js'
