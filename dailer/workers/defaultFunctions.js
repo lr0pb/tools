@@ -118,7 +118,7 @@ class IDB {
     });
     return true;
   }
-  _err(name) { return `[IDB] Error in db.${name}: `; }
+  _err(name, store) { return `[IDB] Error in db.${name}(${store || ' '}): `; }
   _checkStore(name, store) {
     if (!this.db.objectStoreNames.contains(store)) {
       console.error(`${this._err(name)}database haven't "${store}" store`);
@@ -127,12 +127,17 @@ class IDB {
     return true;
   }
   _argsCheck(name, args) {
+    let store = null;
     for (let argName in args) {
       const arg = args[argName];
+      if (argName == 'store') {
+        store = arg.value;
+        Object.assign(arg, { required: true, type: 'string' });
+      }
       if (!arg.required && !arg.value) continue;
-      if (arg.required && !arg.value) return console.error(`${this._err(name)}waited for ${argName} argument but receives nothing`);
+      if (arg.required && !arg.value) return console.error(`${this._err(name, store)}waited for ${argName} argument but receives nothing`);
       if (arg.type && typeof arg.value !== arg.type) {
-        return console.error(`${this._err(name)}waited for ${argName} argument type ${arg.type} but receives type ${typeof arg.value}`);
+        return console.error(`${this._err(name, store)}waited for ${argName} argument type ${arg.type} but receives type ${typeof arg.value}`);
       }
     }
     return true;
@@ -164,8 +169,7 @@ class IDB {
 */
   async setItem(store, item) {
     const resp = await this._dbCall('setItem', {
-      store: { value: store, required: true, type: 'string' },
-      item: { value: item, required: true, type: 'object' }
+      store: { value: store }, item: { value: item, required: true, type: 'object' }
     }, 'readwrite', 'put', item, () => {
       if (store in this._listeners) {
         this._listeners[store].map((callback) => callback(store, item));
@@ -175,8 +179,7 @@ class IDB {
   }
   async getItem(store, itemKey) {
     const resp = await this._dbCall('getItem', {
-      store: { value: store, required: true, type: 'string' },
-      itemKey: { value: itemKey, required: true }
+      store: { value: store }, itemKey: { value: itemKey, required: true }
     }, 'readonly', 'get', itemKey, (result) => result);
     return resp;
   }
@@ -185,8 +188,7 @@ class IDB {
 */
   async updateItem(store, itemKey, updateCallback) {
     if (!this._argsCheck('updateItem', {
-      store: { value: store, required: true, type: 'string' },
-      itemKey: { value: itemKey, required: true },
+      store: { value: store }, itemKey: { value: itemKey, required: true },
       updateCallback: { value: updateCallback, required: true, type: 'function' }
     })) return;
     const data = await this.getItem(store, itemKey);
@@ -200,8 +202,7 @@ class IDB {
   async getAll(store, onData) {
     const items = [];
     const resp = await this._dbCall('getAll', {
-      store: { value: store, required: true, type: 'string' },
-      onData: { value: onData, type: 'function' }
+      store: { value: store }, onData: { value: onData, type: 'function' }
     }, 'readonly', 'openCursor', null, null, async (result) => {
       if (result) {
         const value = result.value;
@@ -215,14 +216,13 @@ class IDB {
   }
   async deleteItem(store, itemKey) {
     const resp = await this._dbCall('deleteItem', {
-      store: { value: store, required: true, type: 'string' },
-      itemKey: { value: itemKey, required: true }
+      store: { value: store }, itemKey: { value: itemKey, required: true }
     }, 'readwrite', 'delete', itemKey);
     return resp;
   }
   async deleteAll(store) {
     const resp = await this._dbCall('deleteAll', {
-      store: { value: store, required: true, type: 'string' }
+      store: { value: store }
     }, 'readwrite', 'clear');
     return resp;
   }
@@ -231,7 +231,7 @@ class IDB {
 */
   async hasItem(store, itemKey) {
     const resp = await this._dbCall('hasItem', {
-      store: { value: store, required: true, type: 'string' }
+      store: { value: store }
     }, 'readonly', 'count', itemKey, (result) => itemKey ? (result == 1 ? true : false) : result);
     return resp;
   }
@@ -240,12 +240,11 @@ class IDB {
 */
   async onDataUpdate(store, callback) {
     if (!this._argsCheck('updateItem', {
-      store: { value: store, required: true, type: 'string' },
-      callback: { value: callback, required: true, type: 'function' }
+      store: { value: store }, callback: { value: callback, required: true, type: 'function' }
     })) return;
     const isReady = await this._isDbReady();
     if (!isReady) return;
-    if(!this._checkStore(store)) return;
+    if(!this._checkStore('onDataUpdate', store)) return;
     if (!(store in this._listeners)) this._listeners[store] = [];
     this._listeners[store].push(callback);
     return this;

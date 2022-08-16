@@ -6,7 +6,10 @@ export const popups = {
       emoji: emjs.box,
       text: 'Download your data backup?',
       strictClosing: true,
-      action: async () => await downloadData(globals)
+      action: async () => {
+        const link = await downloadData(globals);
+        link.click();
+      }
     };
   }
 };

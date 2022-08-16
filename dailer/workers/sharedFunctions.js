@@ -24,13 +24,13 @@ async function createDay(today = getToday()) {
     await Promise.all(updateList);
     session.updateTasksList = [];
   }
-  const cleared = day.cleared;
+  const cleared = day ? day.cleared : null;
   if (!day || day.lastTasksChange !== session.lastTasksChange) {
     day = getRawDay(today, !day);
   } else {
     return isEmpty(day) ? { day: 'error' } : { day };
   }
-  day.cleared = cleared;
+  if (cleared) day.cleared = cleared;
   if (!tasks) {
     tasks = [];
     await db.getAll('tasks', (task) => {
@@ -148,13 +148,17 @@ async function afterDayEnded(day) {
   const tasksToDelete = [];
   await enumerateDay(day, async (id, value, priority) => {
     tasksAmount++;
+    let pushToForgotten = false;
     if (value === 1) completedTasks++;
-    else forgottenTasks.push(id);
-    //if (day.cleared) return;
-    const task = await db.getItem('tasks', id);
-    if (task.special && task.special == 'untilComplete' && value === 0) {
-      tasksToDelete.push({ priority, id });
+    else pushToForgotten = true;
+    if (!day.cleared) {
+      const task = await db.getItem('tasks', id);
+      if (task.special && task.special == 'untilComplete' && value === 0) {
+        tasksToDelete.push({ priority, id });
+        pushToForgotten = false;
+      }
     }
+    if (pushToForgotten) forgottenTasks.push(id);
   });
   for (let adress of tasksToDelete) {
     delete day.tasks[adress.priority][adress.id];
