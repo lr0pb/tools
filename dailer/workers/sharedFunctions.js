@@ -163,6 +163,7 @@ async function afterDayEnded(day) {
   for (let adress of tasksToDelete) {
     delete day.tasks[adress.priority][adress.id];
   }
+  tasksAmount -= tasksToDelete.length;
   day.cleared = true;
   day.tasksAmount = tasksAmount;
   day.completedTasks = completedTasks;
