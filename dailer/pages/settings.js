@@ -112,6 +112,9 @@ export const settings = {
     });
   },
   opening: async ({globals}) => {
+    if (dailerData.experiments) {
+      qs('style.notif').innerHTML = '.notif { display: inherit !important; }';
+    }
     const toRender = {
       periodsContainer: paintPeriods,
       reminderList: paintBackupReminder,

@@ -26,13 +26,11 @@ export function toggleExperiments() {
     for (let elem of qsa('meta[name="theme-color"]')) {
       elem.content = color;
     }
-    qs('style.notif').innerHTML = '.notif { display: inherit !important; }';
   } else {
     //document.documentElement.classList.remove('compress');
     const metas = qsa('meta[name="theme-color"]');
     metas[0].content = '#f2f2f2';
     metas[1].content = '#000000';
-    qs('style.notif').innerHTML = '';
   }
 }
 
