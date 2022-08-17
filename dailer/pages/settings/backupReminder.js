@@ -1,6 +1,6 @@
-import { globQs as qs, createOptionsList, togglableElement } from './highLevel/utils.js'
-import { renderToggler, toggleFunc, getTextDate } from './highLevel/taskThings.js'
-import { getToday, oneDay } from './highLevel/periods.js'
+import { globQs as qs, createOptionsList, togglableElement } from '../highLevel/utils.js'
+import { renderToggler, toggleFunc, getTextDate } from '../highLevel/taskThings.js'
+import { getToday, oneDay } from '../highLevel/periods.js'
 
 export async function addBackupReminder(globals) {
   const remind = await globals.db.getItem('settings', 'backupReminder');

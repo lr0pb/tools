@@ -1,5 +1,5 @@
 import { globQs as qs } from '../highLevel/utils.js'
-import { renderToggler, toggleFunc } from './highLevel/taskThings.js'
+import { renderToggler, toggleFunc } from '../highLevel/taskThings.js'
 import { installApp } from '../main.js'
 
 export async function addNotifications(globals) {
