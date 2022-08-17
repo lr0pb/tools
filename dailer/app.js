@@ -118,7 +118,6 @@ async function deployWorkers() {
       minInterval: oneDay
     });
   } catch (err) {}
-  const tags = await reg.periodicSync.getTags();
   return resp;
 }
 
