@@ -123,6 +123,9 @@ export const settings = {
     for (let elem in toRender) {
       if (!qs(`#${elem}`).children.length) await toRender[elem](globals);
     }
-    if (qs('#install').dataset.installed == 'true') toggleNotifReason(null, globals);
+    if (qs('#install').dataset.installed == 'true') {
+      const session = await globals.db.getItem('settings', 'session');
+      toggleNotifReason(null, globals);
+    }
   }
 };

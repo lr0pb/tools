@@ -9,28 +9,28 @@ export async function addNotifications(globals) {
   if (dailerData.isIOS || !notifications.support || !periodicSync.support) {
     return qs('style.notif').innerHTML = '.notif { display: none !important; }';
   }
-  const currentValue = getNotifPerm(null, notifications.enabled);
+  const currentValue = getNotifPerm(session, null, notifications.enabled);
   toggleNotifReason(currentValue);
   renderToggler({
     name: `${emjs.bell} Enable notifications`, id: 'notifications', buttons: [{
-      emoji: getEmoji(null, notifications.enabled),
+      emoji: getEmoji(session, null, notifications.enabled),
       func: onNotifTogglerClick, args: { globals }
     }], page: qs('#notifications'), value: currentValue
   });
 }
 
-function getNotifPerm(value = Notification.permission, enabled) {
+function getNotifPerm(session, value = Notification.permission, enabled) {
   if (value == 'granted') return enabled ? 1 : 0;
   return !session.installed ? 3 : value == 'granted' ? 1 : value == 'denied' ? 2 : 0;
 }
 
-function getEmoji(notifPerm, enabled) {
-  const value = getNotifPerm(notifPerm, enabled);
+function getEmoji(session, notifPerm, enabled) {
+  const value = getNotifPerm(session, notifPerm, enabled);
   return emjs[value == 1 ? 'sign' : value == 2 ? 'cross' : value == 3 ? 'lock' : 'blank'];
 }
 
-function toggleNotifReason(value, globals) {
-  if (!value && value !== 0) value = getNotifPerm();
+function toggleNotifReason(session, value, globals) {
+  if (!value && value !== 0) value = getNotifPerm(session);
   if ([2, 3].includes(value)) {
     qs('#notifReason').style.display = 'block';
     qs('#notifReason').innerHTML = value == 2
@@ -98,10 +98,10 @@ async function onNotifTogglerClick({e, elem, globals}) {
       data.permission = resp;
       data.enabled = resp == 'granted' ? true : false;
     });
-    const value = getNotifPerm(resp, data.enabled);
-    toggleNotifReason(value, globals);
+    const value = getNotifPerm(session, resp, data.enabled);
+    toggleNotifReason(session, value, globals);
     elem.dataset.value = value;
-    return target.innerHTML = getEmoji(resp, data.enabled);
+    return target.innerHTML = getEmoji(session, resp, data.enabled);
   }
   const value = toggleFunc({e, elem});
   await globals.db.updateItem('settings', 'notifications', (data) => {
