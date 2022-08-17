@@ -97,30 +97,34 @@ async function checkDayNote(globals) {
 }
 
 export async function checkInstall(globals) {
-  if (navigator.standalone === undefined && !globals.installPrompt) return;
+  if (dailerData.isIOS) return;
+  if (!globals.installPrompt) return;
   const persist = await globals.checkPersist();
   const session = await globals.db.getItem('settings', 'session');
   if (persist === false || !session.installed) {
     globals.floatingMsg({
       id: 'install',
-      text: `${emjs.crateDown} To protect your data, install dailer app on your home screen${
-        navigator.standalone === false ? ': click Share > Add to home screen' : ''
-      }`,
-      button: globals.installPrompt ? 'Install' : null,
-      longButton: globals.installPrompt ? `${emjs.crateDown}&nbsp;Install&nbsp;dailer` : null,
+      text: `${emjs.crateDown} To protect your data, install dailer app on your home screen`,
+      button: 'Install',
+      longButton: `${emjs.crateDown}&nbsp;Install&nbsp;dailer`,
       onClick: async (e) => {
         e.target.parentElement.remove();
-        globals.installPrompt.prompt();
-        const choice = await globals.installPrompt.userChoice;
-        delete globals.installPrompt;
-        if (choice.outcome === 'accepted' && !('onappinstalled' in window)) {
-          await onAppInstalled(globals);
-        }
+        await installApp(globals);
       },
       pageName: 'main'
     });
     return true;
   }
+}
+
+export async function installApp(globals) {
+  globals.installPrompt.prompt();
+  const choice = await globals.installPrompt.userChoice;
+  delete globals.installPrompt;
+  if (choice.outcome === 'accepted' && !('onappinstalled' in window)) {
+    await onAppInstalled(globals);
+  }
+  return choice.outcome === 'accepted';
 }
 
 export async function onAppInstalled(globals) {
@@ -129,6 +133,8 @@ export async function onAppInstalled(globals) {
   });
   const elem = globQs('.floatingMsg[data-id="install"]');
   if (elem) elem.remove();
+  globQs('#install').style.display = 'none';
+  globQs('#install').dataset.installed = 'true';
   await processChecks(globals);
 }
 

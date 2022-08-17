@@ -530,7 +530,7 @@ a:visited { color: var(--secondary); }
 
 .pageBtn, .hidedUI, #editButtons, #popup, input[type="file"], .uploadUI, .uploadSuccess,
 .downloadUI, .downloadLink, .historyMonth > [data-used="false"], .completed, .forgotten,
-.notifNotAllowed, #notifTopics {
+.notifNotAllowed {
   display: none;
 }
 

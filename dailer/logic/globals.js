@@ -146,13 +146,14 @@ export function getGlobals() {
       if (prevElem) prevElem.remove();
       const elem = document.createElement('div');
       if (id) elem.dataset.id = id;
+      const useLong = longButton && dailerData.isWideInterface;
       elem.className = `floatingMsg ${notFixed ? 'notFixed' : ''}`;
       elem.innerHTML = `
         <h3>${text}</h3>
         ${button
-          ? `<button class="${
-            longButton && dailerData.isWideInterface ? '' : 'noEmoji'
-          }">${longButton && dailerData.isWideInterface ? longButton : button}</button>`
+          ? `<button class="${useLong ? '' : 'noEmoji'}" style="${
+            useLong ? 'display: inline-flex; align-items: center;' : ''
+          }">${useLong ? longButton : button}</button>`
           : ''}
       `;
       const content = localQs('.content', pageName);

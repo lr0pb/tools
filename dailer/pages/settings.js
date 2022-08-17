@@ -1,11 +1,11 @@
-import { renderToggler, toggleFunc, getTextDate } from './highLevel/taskThings.js'
-import {
-  /*emjs,*/ globQs as qs, globQsa as qsa, createOptionsList, togglableElement
-} from './highLevel/utils.js'
-import { getToday, oneDay, isCustomPeriod } from './highLevel/periods.js'
+import { renderToggler, toggleFunc } from './highLevel/taskThings.js'
+import { globQs as qs } from './highLevel/utils.js'
 import { uploadData } from './highLevel/uploadBackup.js'
 import { downloadData } from './highLevel/createBackup.js'
 import { toggleExperiments } from './highLevel/settingsBackend.js'
+import { paintPeriods } from './settings/periods.js'
+import { addBackupReminder, paintBackupReminder } from './settings/backupReminder.js'
+import { addNotifications, fillNotifTopics } from './settings/notifications.js'
 
 const periodsCount = 5;
 
@@ -61,6 +61,7 @@ export const settings = {
           <div id="reminder" class="first"></div>
         </div>
       </div>
+      <style class="notif"></style>
       <h2 data-section="notifications" class="notif">Notifications</h2>
       <h3 class="notif">You can turn on notifications about some things in app. They will arrive in a bundle only once a day</h3>
       <div class="doubleColumns first notif">
@@ -85,26 +86,15 @@ export const settings = {
       globals.closeSettings();
       globals.paintPage('debugPage');
     });
-    qs('#uploadData').addEventListener('click', async () => await uploadData(globals));
+    qs('#uploadData').addEventListener('click', async () => {
+      await uploadData(globals, paintPeriods);
+    });
     qs('#getData').addEventListener('click', async () => {
       const link = await downloadData(globals);
       link.click();
     });
-    const remind = await globals.db.getItem('settings', 'backupReminder');
-    const value = remind.value ? 1 : 0;
-    togglableElement(qs('#reminderInfo'), value ? 'showing' : 'hided');
-    renderToggler({
-      name: `${emjs.alarmClock} Remind me`, id: 'reminder', buttons: [{
-        emoji: emjs[value ? 'sign' : 'blank'],
-        func: onReminderClick, args: { globals }
-      }], page: qs('#reminder'), value
-    });
-    qs('#reminderList').addEventListener('change', async (e) => {
-      const reminder = qs('[data-id="reminder"]');
-      reminder.dataset.value = 1;
-      reminder.children[1].innerHTML = emjs.sign;
-      await onRemindIdChange(globals, e.target.value);
-    });
+    await addBackupReminder(globals);
+    await addNotifications(globals);
     renderToggler({
       name: `${emjs.experiments} Enable experiments`, id: 'experiments', buttons: [{
         emoji: emjs[dailerData.experiments ? 'sign' : 'blank'],
@@ -120,182 +110,16 @@ export const settings = {
         }
       }], page: qs('#experiments'), value: dailerData.experiments
     });
-    const session = await globals.db.getItem('settings', 'session');
-    const getNotifPerm = (value = Notification.permission) => {
-      return session.installed ? 3 : value == 'granted' ? 1 : value == 'denied' ? 2 : 0;
-    };
-    const getEmoji = (notifPerm) => {
-      const value = getNotifPerm(notifPerm);
-      return emjs[value == 1 ? 'sign' : value == 2 ? 'cross' : value == 3 ? 'lock' : 'blank'];
-    };
-    const currentValue = getNotifPerm();
-    if ([2, 3].includes(currentValue)) {
-      qs('#notifReason').style.display = 'block';
-      qs('#notifReason').innerHTML = currentValue == 2
-      ? `${emjs.warning} You denied in notifications permission, so enable it via site settings in browser`
-      : `${emjs.warning} Notifications are available only as you install app on your home screen`;
-    }
-    renderToggler({
-      name: `${emjs.bell} Enable notifications`, id: 'notifications', buttons: [{
-        emoji: getEmoji(),
-        func: async ({e, elem}) => {
-          const actualSession = await globals.db.getItem('settings', 'session');
-          const target = e.target.dataset.action ? e.target : e.target.parentElement;
-          if (!actualSession.installed) {
-            target.dataset.value = '3';
-            target.innerHTML = emjs.lock;
-            return globals.message({
-              state: 'success', text: 'Install dailer on your home screen to unlock notifications'
-            });
-          }
-          if (Notification.permission == 'denied') {
-            target.dataset.value = '2';
-            target.innerHTML = emjs.cross;
-            return globals.message({
-              state: 'fail', text: 'Enable notifications via site settings in browser'
-            });
-          }
-          if (Notification.permission == 'default') {
-            target.innerHTML = emjs.loading;
-            const resp = await Notification.requestPermission();
-            await globals.db.updateItem('settings', 'notifications', (data) => {
-              data.permission = resp;
-              data.enabled = resp == 'granted' ? true : false;
-            });
-            if (resp == 'granted') qs('#notifReason').style.display = 'none';
-            target.innerHTML = getEmoji(resp);
-          }
-          const value = toggleFunc({e, elem});
-          await globals.db.updateItem('settings', 'notifications', (data) => {
-            data.enabled = value ? true : false;
-          });
-          target.innerHTML = getEmoji(value);
-        }
-      }], page: qs('#notifications'), value: getNotifPerm()
-    });
   },
   opening: async ({globals}) => {
-    if (!qs('#periodsContainer').children.length) {
-      await paintPeriods(globals);
+    const toRender = {
+      periodsContainer: paintPeriods,
+      reminderList: paintBackupReminder,
+      notifTopics: fillNotifTopics,
+    };
+    for (let elem in toRender) {
+      if (!qs(`#${elem}`).children.length) await toRender[elem](globals);
     }
-    if (!qs('#reminderList').children.length) {
-      const reminderList = await globals.getList('reminderList');
-      createOptionsList(qs('#reminderList'), reminderList);
-      const remind = await globals.db.getItem('settings', 'backupReminder');
-      if (remind.id) qs('#reminderList').value = remind.id;
-      if (!remind.value) return;
-      qs('#nextRemind').innerHTML = getNextRemindText(remind.nextRemind);
-      qs('#nextRemind').style.display = 'block';
-    }
+    if (qs('#install').dataset.installed == 'true') toggleNotifReason(null, globals);
   }
 };
-
-export async function paintPeriods(globals) {
-  const pc = qs('#periodsContainer');
-  const periods = await globals.getPeriods();
-  const periodData = await globals.db.getItem('settings', 'periods');
-  const editTitle = 'View or edit period';
-  const markTitle = (per) => `Add period${per ? ` "${per}"` : ''} to drop down list`;
-  pc.innerHTML = '';
-  for (let per in periods) {
-    const period = periods[per];
-    const buttons = [];
-    if (isCustomPeriod(period.id)) {
-      buttons.push({
-        emoji: emjs.pen, args: { globals },
-        title: editTitle, aria: `${editTitle}: ${period.title}`,
-        func: async ({globals}) => {
-          if (!globals.pageInfo) globals.pageInfo = {};
-          globals.pageInfo.periodId = period.id;
-          globals.pageInfo.periodAction = 'edit';
-          globals.closeSettings();
-          await globals.paintPage('periodCreator');
-        }
-      });
-    }
-    const used = getPeriodUsed(periodData.list, per);
-    buttons.push({
-      emoji: emjs[used ? 'sign' : 'blank'], value: used,
-      title: markTitle(), aria: markTitle(period.title),
-      func: updatePeriodsList, args: { globals, periodsCount }
-    });
-    renderToggler({ name: period.title, id: period.id, page: pc, buttons });
-  }
-}
-
-async function updatePeriodsList({e, globals, periodsCount, elem }) {
-  const periodData = await globals.db.getItem('settings', 'periods');
-  const list = periodData.list;
-  const id = elem.dataset.id;
-  if (list.includes(id)) {
-    if (list.length == 1) {
-      return globals.message({
-        state: 'fail', text: `You need to have at least 1 period`
-      });
-    }
-    const idx = list.indexOf(id);
-    list.splice(idx, 1);
-  } else {
-    const isFull = list.length == periodsCount;
-    isFull ? globals.message({
-        state: 'fail', text: `You already choose ${periodsCount} periods`
-      })
-    : list.push(id);
-    if (isFull) return;
-  }
-  list.sort((el1, el2) => {
-    el1 = Number(el1);
-    el2 = Number(el2);
-    if (el1 > el2) return 1;
-    if (el1 == el2) return 0;
-    return -1;
-  });
-  await globals.db.setItem('settings', periodData);
-  toggleFunc({e, elem});
-}
-
-function getPeriodUsed(periodsList, id) {
-  return periodsList.includes(id) ? 1 : 0;
-}
-
-async function onReminderClick({e, elem, globals}) {
-  const value = toggleFunc({e, elem});
-  if (value) {
-    const remindId = qs('#reminderList').value;
-    if (remindId == '0') {
-      toggleFunc({e, elem});
-      globals.message({ state: 'fail', text: 'Select how often to remind you first' });
-    } else await onRemindIdChange(globals, remindId);
-  } else {
-    await globals.db.updateItem('settings', 'backupReminder', (remind) => {
-      remind.value = value;
-    });
-    qs('#reminderInfo').setStyle('hided');
-    globals.message({ state: 'success', text: 'Reminder was removed' });
-  }
-}
-
-async function onRemindIdChange(globals, remindId) {
-  const reminderList = await globals.getList('reminderList');
-  const remind = await globals.db.updateItem('settings', 'backupReminder', (remind) => {
-    remind.knowAboutFeature = true;
-    remind.id = remindId;
-    remind.value = reminderList[remind.id].offset * oneDay;
-    remind.nextRemind = getToday() + remind.value;
-    remind.isDownloaded = false;
-  });
-  qs('#nextRemind').innerHTML = getNextRemindText(remind.nextRemind);
-  qs('#reminderInfo').setStyle('showing');
-  globals.message({
-    state: 'success', text: `Now you will get reminders ${reminderList[remind.id].title}`
-  });
-  const elem = qs('.floatingMsg[data-id="reminderPromo"]');
-  if (elem) elem.remove();
-}
-
-export function getNextRemindText(nextRemind) {
-  if (nextRemind == getToday()) {
-    return `You got reminder today`;
-  }
-  return `Next reminder will be ${getTextDate(nextRemind)}`;
-}

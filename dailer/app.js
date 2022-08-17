@@ -29,6 +29,7 @@ if (!window.dailerData) window.dailerData = {
   nav: 'navigation' in window ? true : false,
   forcePeriodPromo: false,
   forceReminderPromo: false,
+  isIOS: 'standalone' in navigator,
   isDesktop: isDesktop(),
   isWideInterface: isWideInterface(),
   experiments: 0,

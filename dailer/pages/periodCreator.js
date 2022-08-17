@@ -3,7 +3,7 @@ import {
   qs, qsa, globQs, globQsa, /*emjs,*/ safeDataInteractions, handleKeyboard,
   togglableElement, syncGlobals, copyArray
 } from './highLevel/utils.js'
-import { paintPeriods } from './settings.js'
+import { paintPeriods } from './settings/periods.js'
 
 const maxDays = 7;
 let periodTitle = null;
