@@ -7,7 +7,7 @@ export async function addNotifications(globals) {
   const notifications = await globals.db.getItem('settings', 'notifications');
   const periodicSync = await globals.db.getItem('settings', 'periodicSync');
   if (dailerData.isIOS || !notifications.support || !periodicSync.support) {
-    return qs('style.notif').innerHTML = '.notif { display: none !important; }';
+    return qs('.notifStyle').innerHTML = '.notif { display: none !important; }';
   }
   const currentValue = getNotifPerm(session, null, notifications.enabled);
   toggleNotifReason(currentValue);

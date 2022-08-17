@@ -2,6 +2,8 @@ import { globQs as qs } from '../highLevel/utils.js'
 import { renderToggler, toggleFunc } from '../highLevel/taskThings.js'
 import { isCustomPeriod } from '../highLevel/periods.js'
 
+const periodsCount = 5;
+
 export async function paintPeriods(globals) {
   const pc = qs('#periodsContainer');
   const periods = await globals.getPeriods();

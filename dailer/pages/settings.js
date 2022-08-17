@@ -7,8 +7,6 @@ import { paintPeriods } from './settings/periods.js'
 import { addBackupReminder, paintBackupReminder } from './settings/backupReminder.js'
 import { addNotifications, fillNotifTopics } from './settings/notifications.js'
 
-const periodsCount = 5;
-
 export const settings = {
   get title() { return `${emjs.box} Settings`},
   sections: ['periods', 'manageData', 'notifications'],
@@ -61,7 +59,7 @@ export const settings = {
           <div id="reminder" class="first"></div>
         </div>
       </div>
-      <style class="notif"></style>
+      <style class="notifStyle"></style>
       <h2 data-section="notifications" class="notif">Notifications</h2>
       <h3 class="notif">You can turn on notifications about some things in app. They will arrive in a bundle only once a day</h3>
       <div class="doubleColumns first notif">
@@ -113,7 +111,7 @@ export const settings = {
   },
   opening: async ({globals}) => {
     if (dailerData.experiments) {
-      qs('style.notif').innerHTML = '.notif { display: inherit !important; }';
+      qs('.notifStyle').innerHTML = '.notif { display: inherit !important; }';
     }
     const toRender = {
       periodsContainer: paintPeriods,
