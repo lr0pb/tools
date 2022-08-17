@@ -51,8 +51,8 @@ function toggleNotifReason(session, value, globals) {
 }
 
 export async function fillNotifTopics(globals, enabled) {
+  const notifications = await globals.db.getItem('settings', 'notifications');
   if (!enabled && enabled !== 0) {
-    const notifications = await globals.db.getItem('settings', 'notifications');
     enabled = notifications.enabled ? 1 : 0;
   }
   const notifTopics = qs('#notifTopics');
