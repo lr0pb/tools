@@ -116,14 +116,13 @@ export const settings = {
     const toRender = {
       periodsContainer: paintPeriods,
       reminderList: paintBackupReminder,
-      notifTopics: fillNotifTopics,
     };
     for (let elem in toRender) {
       if (!qs(`#${elem}`).children.length) await toRender[elem](globals);
     }
     if (qs('#install').dataset.installed == 'true') {
       const session = await globals.db.getItem('settings', 'session');
-      toggleNotifReason(null, globals);
+      toggleNotifReason(session, null, globals);
     }
   }
 };

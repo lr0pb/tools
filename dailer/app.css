@@ -165,7 +165,7 @@ html { font-size: 1.25vmin; }
 
 .doubleColumns > * {
   width: var(--fullWidth);
-  margin-left: 0; margin-top: 0;
+  margin-top: 0; margin-left: 0; margin-right: 0;
 }
 .doubleColumns > .fullHeight { min-height: var(--fullHeight); }
 
