@@ -27,7 +27,8 @@ export async function addNotifications(globals) {
   });
 }
 
-function getNotifPerm(session, value = Notification.permission, enabled) {
+function getNotifPerm(session, value, enabled) {
+  if (!value) value = Notification.permission;
   if (value == 'granted') return enabled ? 1 : 0;
   return !session.installed ? 3 : value == 'denied' ? 2 : 0;
 }
