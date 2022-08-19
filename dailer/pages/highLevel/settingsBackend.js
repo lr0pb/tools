@@ -78,7 +78,11 @@ async function addNotifications(globals) {
     support: isSupported,
     permission: isSupported ? Notification.permission : null,
     enabled: false, byCategories,
-    callsHistory: [],
+    grantedAt: [],
+    firstPromoDay: [],
+    showPromoLag: [0, 10, 45],
+    daysToShowPromo: [2, 3, 5],
+    callsHistory: {},
     version: database.settings.notifications
   });
 }
@@ -122,7 +126,7 @@ async function addBackupReminder(globals) {
       data.knowAboutFeature = data.id ? true : false;
       data.firstPromoDay = null;
       data.daysToShowPromo = 4;
-    } else data.dayToStartShowPromo = 7;
+    } else data.dayToStartShowPromo = 17;
   });
   if (resp) return;
   await globals.db.setItem('settings', {
@@ -132,7 +136,7 @@ async function addBackupReminder(globals) {
     isDownloaded: localStorage.reminded ? (localStorage.reminded == 'true' ? true : false) : false,
     nextRemind: localStorage.nextRemind ? Number(localStorage.nextRemind) : null,
     knowAboutFeature: localStorage.remindId ? true : false,
-    dayToStartShowPromo: 7,
+    dayToStartShowPromo: 17,
     firstPromoDay: null,
     daysToShowPromo: 4,
     version: database.settings.backupReminder

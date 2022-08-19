@@ -2,13 +2,21 @@ import { globQs as qs, globQsa as qsa } from '../highLevel/utils.js'
 import { renderToggler, toggleFunc } from '../highLevel/taskThings.js'
 import { installApp } from '../main.js'
 
-export async function addNotifications(globals) {
-  const session = await globals.db.getItem('settings', 'session');
-  const notifications = await globals.db.getItem('settings', 'notifications');
+export async function isNotificationsAvailable(globals) {
   const periodicSync = await globals.db.getItem('settings', 'periodicSync');
-  if (dailerData.isIOS || !notifications.support || !periodicSync.support) {
+  if (dailerData.isIOS || !('Notification' in window) || !periodicSync.support) {
+    return false;
+  }
+  return true;
+}
+
+export async function addNotifications(globals) {
+  const isSupported = await isNotificationsAvailable(globals);
+  if (!isSupported) {
     return qs('.notifStyle').innerHTML = '.notif { display: none !important; }';
   }
+  const session = await globals.db.getItem('settings', 'session');
+  const notifications = await globals.db.getItem('settings', 'notifications');
   const currentValue = getNotifPerm(session, null, notifications.enabled);
   toggleNotifReason(session, currentValue, globals);
   renderToggler({
@@ -21,7 +29,7 @@ export async function addNotifications(globals) {
 
 function getNotifPerm(session, value = Notification.permission, enabled) {
   if (value == 'granted') return enabled ? 1 : 0;
-  return !session.installed ? 3 : value == 'granted' ? 1 : value == 'denied' ? 2 : 0;
+  return !session.installed ? 3 : value == 'denied' ? 2 : 0;
 }
 
 function getEmoji(session, notifPerm, enabled, forcedValue) {
@@ -56,7 +64,7 @@ function toggleNotifReason(session, value, globals) {
   } else {
     qs('#notifReason').innerHTML = 'Set what about notifications you will get';
     qs('#install').style.display = 'none';
-    if (globals) fillNotifTopics(globals, value);
+    if (globals && !qs('#notifTopics').children.length) fillNotifTopics(globals, value);
   }
 }
 
@@ -110,21 +118,33 @@ async function onNotifTogglerClick({e, elem, globals}) {
   }
   if (Notification.permission == 'default') {
     target.innerHTML = emjs.loading;
-    const resp = await Notification.requestPermission();
-    const data = await globals.db.updateItem('settings', 'notifications', (data) => {
-      data.permission = resp;
-      data.enabled = resp == 'granted' ? true : false;
-    });
-    const value = getNotifPerm(session, resp, data.enabled);
-    isBadValue(value) ? toggleNotifReason(session, value) : updateNotifTopics(!value);
-    elem.dataset.value = value;
-    return target.innerHTML = getEmoji(session, resp, data.enabled);
+    target.setAttribute('disabled', '');
+    await requestNotifications(globals);
+    return target.removeAttribute('disabled');
   }
   const value = toggleFunc({e, elem});
   await globals.db.updateItem('settings', 'notifications', (data) => {
     data.enabled = value ? true : false;
   });
   updateNotifTopics(!value);
+}
+
+export async function requestNotifications(globals) {
+  const resp = await Notification.requestPermission();
+  const data = await globals.db.updateItem('settings', 'notifications', (data) => {
+    data.permission = resp;
+    data.enabled = resp == 'granted' ? true : false;
+    if (data.enabled) data.grantedAt.push(Date.now());
+  });
+  if (data.enabled) await registerPeriodicSync();
+  const session = await globals.db.getItem('settings', 'session');
+  const value = getNotifPerm(session, resp, data.enabled);
+  const elem = qs('[data-id="notifications"]');
+  elem.dataset.value = value;
+  elem.querySelector('button').innerHTML = getEmoji(null, null, null, value);
+  toggleNotifReason(session, value, globals);
+  updateNotifTopics(!value);
+  return value;
 }
 
 function updateNotifTopics(disabled) {
@@ -134,4 +154,19 @@ function updateNotifTopics(disabled) {
       [disabled ? 'setAttribute' : 'removeAttribute']
       ('disabled', '');
   }
+}
+
+export async function registerPeriodicSync(reg) {
+  const status = await navigator.permissions.query({
+    name: 'periodic-background-sync',
+  });
+  const resp = status.state;
+  if (status.state !== 'granted') return resp;
+  try {
+    if (!reg) reg = await navigator.serviceWorker.getRegistration();
+    await reg.periodicSync.register('dailyNotification', {
+      minInterval: oneDay
+    });
+  } catch (err) {}
+  return resp;
 }

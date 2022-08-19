@@ -124,8 +124,9 @@ self.addEventListener('periodicsync', (e) => {
 });
 
 self.addEventListener('notificationclick', (e) => {
+  db = new IDB(database.name, database.version, database.stores);
   e.notification.close();
-  e.waitUntil(openApp(e.notification.data));
+  e.waitUntil(openApp(e.notification));
 });
 
 async function checkNotifications() {
@@ -133,47 +134,53 @@ async function checkNotifications() {
   if (!session.experiments) return;
   const notifs = await db.getItem('settings', 'notifications');
   const periodicSync = await db.getItem('settings', 'periodicSync');
-  periodicSync.callsHistory.push({
-    timestamp: Date.now()
-  });
+  periodicSync.callsHistory.push({ timestamp: Date.now() });
   await db.setItem('settings', periodicSync);
   if (!notifs.enabled || notifs.permission !== 'granted') return;
   if (notifs.byCategories.tasksForDay) {
     const recap = await getDayRecap();
-    if (recap) await showNotification(recap);
+    if (recap) await showNotification(notifs, 'tasksForDay', recap);
   }
   if (notifs.byCategories.backupReminder) {
     const { show } = await checkBackupReminder();
-    if (show) await showNotification({
+    if (show) await showNotification(notifs, 'backupReminder', {
       title: `\u{1f4e5} It's time to back up your data`,
       body: `You've set reminders to make backups, so today we made one for you \u{1f4e6}`,
       icon: './icons/downloadBackup.png',
       data: { showPage: 'main&popup=downloadBackup' }
     });
   }
+  await db.setItem('settings', notifs);
 }
 
-async function showNotification(options) {
+async function showNotification(notifs, type, options) {
   if (!options || (options && !options.title)) return;
   const title = options.title;
   delete options.title;
+  const ts = Date.now();
   options = Object.assign({
     //badge: './icons/badge.png',
+    timestamp: ts,
     data: { showPage: 'main' },
     icon: './icons/apple-touch-icon.png',
   }, options);
+  notifs.callsHistory[ts] = { type, click: null };
   await registration.showNotification(title, options);
 }
 
-async function openApp(data) {
+async function openApp({ timestamp, data }) {
   const allClients = await clients.matchAll({ type: 'window' });
   if (allClients.length > 0) {
-    return allClients[0].focus();
+    allClients[0].focus();
+  } else {
+    const windowClient = await clients.openWindow(
+      `${getBaseLink()}?from=notification&page=${data.showPage || 'main'}`
+    );
+    if (windowClient) windowClient.focus();
   }
-  const windowClient = await clients.openWindow(
-    `${getBaseLink()}?from=notification&page=${data.showPage || 'main'}`
-  );
-  if (windowClient) windowClient.focus();
+  await db.updateItem('settings', 'notifications', (notifs) => {
+    notifs.callsHistory[timestamp].click = Date.now();
+  });
 }
 
 async function getDayRecap() {
@@ -190,7 +197,7 @@ async function getDayRecap() {
       body += `- ${task.name}\n`;
     });
     body = body.replace(/\n$/, '');
-    return { title: `\u{1f5e1} Don't forget about today's important tasks:`, body };
+    return { title: `\u{1f5e1} Don't forget about importants:`, body };
   }
   if (!recap.show) return {
     title: '\u{1f4d1} Explore tasks for today',
@@ -205,8 +212,8 @@ async function getDayRecap() {
       ? '\nOpen app to mark forgottens and check newly arrived tasks'
       : '\nTry to make a streak?'
     }`,
+    icon: './icons/statsUp.png',
     data: { showPage: 'recap' }
   };
-  if (recap.completed) resp.icon = './icons/statsUp.png';
   return resp;
 }

@@ -3,7 +3,7 @@ import { qs, qsa, /*emjs*/ } from './highLevel/utils.js'
 import { renderTask } from './highLevel/taskThings.js'
 
 export const recap = {
-  get header() { return `${emjs.newspaper} Yesterday recap`},
+  get header() { return `${emjs.newspaper} Recap of the day`},
   noSettings: true,
   get page() { return `
     <h2 class="emoji completed">${emjs.party}${emjs.sign}</h2>

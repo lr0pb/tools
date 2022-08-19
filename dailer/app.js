@@ -12,6 +12,7 @@ import {
 import { getToday, oneDay } from './pages/highLevel/periods.js'
 import { processSettings, toggleExperiments } from './pages/highLevel/settingsBackend.js'
 import { checkInstall, onAppInstalled } from './pages/main.js'
+import { registerPeriodicSync } from './pages/settings/notifications.js'
 
 if (!('at' in Array.prototype)) {
   function at(n) {
@@ -71,8 +72,7 @@ function createDb() {
 
 async function deployWorkers() {
   const resp = {
-    worker: null,
-    periodicSync: { support: false }
+    worker: null, periodicSync: { support: false }
   };
   if (!('serviceWorker' in navigator && 'caches' in window)) return resp;
   const reg = await navigator.serviceWorker.register('./sw.js');
@@ -95,8 +95,7 @@ async function deployWorkers() {
   };
   worker.onmessage = (e) => {
     worker._callsList.set(e.data._id, {
-      data: e.data.data,
-      used: false
+      data: e.data.data, used: false
     });
   };
   worker.postMessage({isWorkerReady: false});
@@ -108,16 +107,7 @@ async function deployWorkers() {
   const session = await globals.db.getItem('settings', 'session');
   if (!session) return resp;
   if (!session.experiments) return resp;
-  const status = await navigator.permissions.query({
-    name: 'periodic-background-sync',
-  });
-  resp.periodicSync.permission = status.state;
-  if (status.state !== 'granted') return resp;
-  try {
-    await reg.periodicSync.register('dailyNotification', {
-      minInterval: oneDay
-    });
-  } catch (err) {}
+  resp.periodicSync.permission = await registerPeriodicSync(reg);
   return resp;
 }
 

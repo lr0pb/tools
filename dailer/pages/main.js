@@ -2,6 +2,7 @@ import { isUnder3AM, getToday, oneDay, isCustomPeriod } from './highLevel/period
 import { qs, globQs } from './highLevel/utils.js'
 import { renderTask, setPeriodTitle } from './highLevel/taskThings.js'
 import { downloadData } from './highLevel/createBackup.js'
+import { isNotificationsAvailable, requestNotifications } from './settings/notifications.js'
 
 export const main = {
   get header() { return `${emjs.sword} Today's tasks`},
@@ -71,8 +72,8 @@ async function renderDay({globals, page}) {
 
 async function processChecks(globals) {
   const checks = [
-    checkInstall, checkDayNote, checkBackupReminder, checkReminderPromo,
-    checkNotifications
+    checkDayNote, checkBackupReminder, checkInstall, checkNotifications,
+    checkReminderPromo
   ];
   for (let checkFunction of checks) {
     const check = await checkFunction(globals);
@@ -104,9 +105,8 @@ export async function checkInstall(globals) {
   if (persist === false || !session.installed) {
     globals.floatingMsg({
       id: 'install',
-      text: `${emjs.crateDown} To protect your data, install dailer app on your home screen`,
-      button: 'Install',
-      longButton: `${emjs.crateDown}&nbsp;Install&nbsp;dailer`,
+      text: `${emjs.crateDown} To protect your data, install dailer on your home screen`,
+      button: 'Install', longButton: `${emjs.crateDown}&nbsp;Install&nbsp;dailer`,
       onClick: async (e) => {
         e.target.parentElement.remove();
         await installApp(globals);
@@ -149,26 +149,20 @@ async function checkBackupReminder(globals) {
     onClick: async (e) => {
       const link = await downloadData(globals);
       link.click();
+      await processChecks(globals);
     }
   });
   return true;
 }
 
 async function checkReminderPromo(globals) {
-  const remind = await globals.db.getItem('settings', 'backupReminder');
   if (!dailerData.forceReminderPromo) {
-    if (remind.knowAboutFeature) return;
-    const session = await globals.db.getItem('settings', 'session');
-    if (getToday() < session.firstDayEver + oneDay * remind.dayToStartShowPromo) return;
-    if (!remind.firstPromoDay) {
-      remind.firstPromoDay = getToday();
-      await globals.db.setItem('settings', remind);
-    }
-    if (remind.firstPromoDay + oneDay * remind.daysToShowPromo <= getToday()) return;
+    const resp = await globals.worker.call({ process: checkReminderPromo });
+    if (!resp.show) return;
   }
   globals.floatingMsg({
     id: 'reminderPromo',
-    text: `${emjs.light} Tip: you can set reminders to create data backups periodically`,
+    text: `${emjs.light} You can be safe with your data by creating backups periodically`,
     button: 'View', longButton: `${emjs.settings}&nbsp;View&nbsp;settings`,
     pageName: 'main',
     onClick: async (e) => {
@@ -184,16 +178,20 @@ async function checkReminderPromo(globals) {
 
 async function checkNotifications(globals) {
   if (!dailerData.experiments) return;
-  if (!('Notification' in window)) return;
+  const isSupported = await isNotificationsAvailable(globals);
+  if (!isSupported) return;
   if (Notification.permission !== 'default') return;
+  const { show } = await globals.worker.call({ process: checkNotifications });
+  if (!show) return;
   globals.floatingMsg({
     id: 'notifications',
-    text: `${emjs.bell} Get a daily recap of the tasks through notifications`,
+    text: `${emjs.bell} Get a daily overview of tasks through notifications`,
     button: 'Turn&nbsp;on', longButton: `${emjs.alarmClock}&nbsp;Turn&nbsp;it&nbsp;on`,
     pageName: 'main',
     onClick: async (e) => {
       e.target.parentElement.remove();
-      await Notification.requestPermission();
+      await requestNotifications(globals);
+      await processChecks(globals);
     }
   });
   return true;

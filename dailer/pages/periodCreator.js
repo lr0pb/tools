@@ -21,7 +21,7 @@ export const periodCreator = {
   get header() { return `${emjs.calendar} <span id="periodAction">Create</span> period`},
   get page() { return `
     <h3>Enter period title</h3>
-    <input type="text" id="periodName" placeHolder="Period title e.g. Every saturday">
+    <input type="text" id="periodName" placeHolder="Period title e.g 'Every friday'">
     <h3>You also can type period description</h3>
     <input type="text" id="periodDesc" placeHolder="Period description">
     <h3 class="excludeInEdit">How much days will be in period?</h3>

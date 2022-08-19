@@ -135,12 +135,13 @@ async function onTaskCreator({globals}) {
 }
 
 async function checkPeriodPromo(globals) {
-  const periodData = await globals.db.getItem('settings', 'periods');
   const setKnowTrue = async () => {
-    periodData.knowAboutFeature = true;
-    await globals.db.setItem('settings', periodData);
+    await globals.db.updateItem('settings', 'periods', (data) => {
+      data.knowAboutFeature = true;
+    });
   };
   if (!dailerData.forcePeriodPromo) {
+    const periodData = await globals.db.getItem('settings', 'periods');
     if (periodData.knowAboutFeature) return;
     const tasksCount = await globals.db.hasItem('tasks');
     if (tasksCount < periodData.tasksToShowPromo) return;
@@ -152,7 +153,7 @@ async function checkPeriodPromo(globals) {
   }
   globals.floatingMsg({
     id: 'periodPromo',
-    text: `${emjs.light} Tip: you can create your own periods e.g. "Every saturday"`,
+    text: `${emjs.light} You can create your own periods for custom use e.g 'Every friday'`,
     button: 'Try&nbsp;it', longButton: `${emjs.calendar}&nbsp;Create&nbsp;one`,
     onClick: async (e) => {
       globals.openSettings('periods');
