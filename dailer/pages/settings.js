@@ -66,7 +66,7 @@ export const settings = {
         <div id="notifications"></div>
         <button id="install" class="notifNotAllowed">${emjs.crateDown} Install dailer</button>
       </div>
-      <h3 id="notifReason" class="notifNotAllowed notif"></h3>
+      <h3 id="notifReason" class="notif"></h3>
       <div id="notifTopics" class="doubleColumns first notif" focusgroup></div>
       <div id="experiments"></div>
       <button id="toDebug" class="secondary">${emjs.construction} Open debug page</button>

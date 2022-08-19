@@ -269,7 +269,10 @@ async function onPeriodChange(e, globals) {
   if (per.special && per.startDate) day = per.startDate;
   else if (per.getWeekStart) day = getWeekStart();
   else day = getToday();
-  if (per.startDayShift) day += oneDay * per.startDayShift;
+  if (per.startDayShift) {
+    day += oneDay * per.startDayShift;
+    date.dataset.hardcoded = 'true';
+  } else { date.dataset.hardcoded = 'false'; }
   date.value = convertDate(day);
   if (per.selectTitle && !per.getWeekStart) {
     dateTitle.innerHTML = per.selectTitle;
@@ -305,6 +308,7 @@ function onDateChange(e) {
 
 function onStartDateChange(e) {
   const date = qs('#date');
+  if (date.dataset.hardcoded == 'true') return;
   const dateTitle = qs('#dateTitle');
   date.style.display = 'none';
   dateTitle.style.display = 'none';
