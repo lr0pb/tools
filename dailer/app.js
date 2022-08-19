@@ -12,7 +12,7 @@ import {
 import { getToday, oneDay } from './pages/highLevel/periods.js'
 import { processSettings, toggleExperiments } from './pages/highLevel/settingsBackend.js'
 import { checkInstall, onAppInstalled } from './pages/main.js'
-import { registerPeriodicSync } from './pages/settings/notifications.js'
+import { registerPeriodicSync, toggleNotifReason } from './pages/settings/notifications.js'
 
 if (!('at' in Array.prototype)) {
   function at(n) {
@@ -104,9 +104,6 @@ async function deployWorkers() {
   const isPeriodicSyncSupported = 'periodicSync' in reg;
   resp.periodicSync.support = isPeriodicSyncSupported;
   if (!isPeriodicSyncSupported) return resp;
-  const session = await globals.db.getItem('settings', 'session');
-  if (!session) return resp;
-  if (!session.experiments) return resp;
   resp.periodicSync.permission = await registerPeriodicSync(reg);
   return resp;
 }
@@ -209,10 +206,11 @@ if ('navigation' in window) {
 
 window.addEventListener('beforeinstallprompt', async (e) => {
   e.preventDefault();
-  await globals.db.updateItem('settings', 'session', (session) => {
+  globals.installPrompt = e;
+  const session = await globals.db.updateItem('settings', 'session', (session) => {
     session.installed = false;
   });
-  globals.installPrompt = e;
+  toggleNotifReason(session, null, globals);
   if (qs('#main')) await checkInstall(globals);
 });
 

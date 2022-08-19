@@ -59,7 +59,6 @@ async function checkRecord(globals, recordName, updateFields, onVersionUpgrade) 
 }
 
 async function addNotifications(globals) {
-  if (!dailerData.experiments) return;
   const isSupported = 'Notification' in window;
   const updateFields = {
     support: isSupported, permission: isSupported ? Notification.permission : null,
@@ -88,7 +87,6 @@ async function addNotifications(globals) {
 }
 
 async function addPeriodicSync(globals, periodicSync) {
-  if (!dailerData.experiments) return;
   const isSupported = periodicSync.support;
   const resp = await checkRecord(globals, 'periodicSync', periodicSync);
   if (resp) return;

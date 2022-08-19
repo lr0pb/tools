@@ -130,8 +130,6 @@ self.addEventListener('notificationclick', (e) => {
 });
 
 async function checkNotifications() {
-  const session = await db.getItem('settings', 'session');
-  if (!session.experiments) return;
   const notifs = await db.getItem('settings', 'notifications');
   const periodicSync = await db.getItem('settings', 'periodicSync');
   periodicSync.callsHistory.push({ timestamp: Date.now() });

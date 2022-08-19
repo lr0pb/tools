@@ -581,5 +581,3 @@ a:visited { color: var(--secondary); }
   align-items: baseline;
 }
 .dataLine p { word-break: break-all; }
-
-.notif { display: none !important; }

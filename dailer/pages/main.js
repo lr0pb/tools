@@ -177,7 +177,6 @@ async function checkReminderPromo(globals) {
 }
 
 async function checkNotifications(globals) {
-  if (!dailerData.experiments) return;
   const isSupported = await isNotificationsAvailable(globals);
   if (!isSupported) return;
   if (Notification.permission !== 'default') return;

@@ -43,7 +43,7 @@ function isBadValue(value) {
   return [2, 3].includes(value);
 }
 
-function toggleNotifReason(session, value, globals) {
+export function toggleNotifReason(session, value, globals) {
   if (!value && value !== 0) value = getNotifPerm(session);
   if (isBadValue(value)) {
     qs('#notifTopics').innerHTML = '';
@@ -137,7 +137,14 @@ export async function requestNotifications(globals) {
     data.enabled = resp == 'granted' ? true : false;
     if (data.enabled) data.grantedAt.push(Date.now());
   });
-  if (data.enabled) await registerPeriodicSync();
+  if (data.enabled) {
+    await registerPeriodicSync();
+    globals.message({ state: 'success', text: 'Notifications are enabled!' });
+  } else {
+    globals.message({
+      state: 'fail', text: 'You denied in permission. Grant it via site settings in browser to enable notifications'
+    });
+  }
   const session = await globals.db.getItem('settings', 'session');
   const value = getNotifPerm(session, resp, data.enabled);
   const elem = qs('[data-id="notifications"]');

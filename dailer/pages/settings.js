@@ -71,7 +71,7 @@ export const settings = {
       <div id="experiments"></div>
       <button id="toDebug" class="secondary">${emjs.construction} Open debug page</button>
       <h2>About</h2>
-      <h3>${emjs.label} dailer app, version 1.3.8</h3>
+      <h3>${emjs.label} dailer app, version 1.4.0</h3>
       <h3>${emjs.sparkles} Emojis powered by <a href="https://github.com/googlefonts/noto-emoji/" target="_blank">Google</a></h3>
       <!--<h3>${emjs.magicBall} Codename: Sangria</h3>-->
       <h3>${emjs.microscope} Developed in 2022</h3>
@@ -110,9 +110,6 @@ export const settings = {
     });
   },
   opening: async ({globals}) => {
-    if (dailerData.experiments) {
-      qs('.notifStyle').innerHTML = '.notif { display: inherit !important; }';
-    }
     const toRender = {
       periodsContainer: paintPeriods,
       reminderList: paintBackupReminder,
