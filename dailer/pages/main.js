@@ -157,7 +157,7 @@ async function checkBackupReminder(globals) {
 
 async function checkReminderPromo(globals) {
   if (!dailerData.forceReminderPromo) {
-    const resp = await globals.worker.call({ process: checkReminderPromo });
+    const resp = await globals.worker.call({ process: 'checkReminderPromo' });
     if (!resp.show) return;
   }
   globals.floatingMsg({
@@ -181,7 +181,7 @@ async function checkNotifications(globals) {
   const isSupported = await isNotificationsAvailable(globals);
   if (!isSupported) return;
   if (Notification.permission !== 'default') return;
-  const { show } = await globals.worker.call({ process: checkNotifications });
+  const { show } = await globals.worker.call({ process: 'checkNotifications' });
   if (!show) return;
   globals.floatingMsg({
     id: 'notifications',
