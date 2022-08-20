@@ -78,11 +78,11 @@ async function deployWorkers() {
   const reg = await navigator.serviceWorker.register('./sw.js');
   navigator.serviceWorker.onmessage = async (e) => {
     if (typeof e.data !== 'object') return;
-    await externalNavigate(e.data.navigate);
+    await externalNavigate(globals, e.data.navigate);
   };
   if ('launchQueue' in window && 'targetURL' in LaunchParams.prototype) {
     launchQueue.setConsumer(async (launchParams) => {
-      await externalNavigate(launchParams.targetURL);
+      await externalNavigate(globals, launchParams.targetURL);
     });
   }
   const worker = new Worker('./workers/mainWorker.js');

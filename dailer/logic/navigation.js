@@ -150,7 +150,7 @@ export async function onTraverseNavigation(globals, e, silent) {
   }
 }
 
-export async function externalNavigate(link) {
+export async function externalNavigate(globals, link) {
   const params = getParams(link);
   if (!dailerData.nav) return;
   const appHistory = navigation.entries();
@@ -175,7 +175,7 @@ export async function externalNavigate(link) {
     await globals.paintPage(params.page);
   }
   await navigation.navigate(link, {
-    state: navigation.currentEntry.getState() || {},
+    state: globals.pageInfo || navigation.currentEntry.getState() || {},
     history: 'replace', info: {call: 'customReplace'}
   }).finished;
   await processPageBuilding(globals, params);
