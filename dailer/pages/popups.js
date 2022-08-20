@@ -16,7 +16,7 @@ export const popups = {
     return {
       emoji: emjs.box,
       text: 'Uploading backups in this way will be supported later',
-      action: globals.closePopup;
+      action: globals.closePopup
     };
   }
 };
