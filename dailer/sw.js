@@ -158,7 +158,7 @@ async function checkNotifications(tag) {
       title: `\u{1f4e5} It's time to back up your data`,
       body: `You've set reminders to make backups, so today we made one for you \u{1f4e6}`,
       icon: './icons/downloadBackup.png',
-      data: { showPage: 'main&popup=downloadBackup' }
+      data: { popup: 'downloadBackup' }
     });
   }
   await db.setItem('settings', notifs);
@@ -182,7 +182,7 @@ async function showNotification(notifs, type, options) {
   options = Object.assign({
     //badge: './icons/badge.png',
     timestamp: ts,
-    data: { showPage: 'main' },
+    data: { page: 'main' },
     icon: './icons/apple-touch-icon.png',
   }, options);
   notifs.callsHistory[ts] = { type, click: null, close: null };
@@ -190,7 +190,10 @@ async function showNotification(notifs, type, options) {
 }
 
 async function openApp({ timestamp, data }) {
-  const link = `${getBaseLink()}?from=notification&page=${data.showPage || 'main'}`;
+  let link = `${getBaseLink()}?from=notification`;
+  for (let param in data) {
+    link += `&${param}=${data[param]}`;
+  }
   const allClients = await clients.matchAll({ type: 'window' });
   if (allClients.length > 0) {
     allClients[0].focus();
@@ -232,7 +235,7 @@ async function getDayRecap() {
       : '\nTry to make a streak?'
     }`,
     icon: './icons/statsUp.png',
-    data: { showPage: 'recap' }
+    data: { page: 'recap' }
   };
   return resp;
 }

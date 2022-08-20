@@ -10,21 +10,21 @@ export function getFirstPage(session) {
   return session.recaped < getToday() ? 'recap' : 'main';
 }
 
-function getRenderPage(params, session, firstPage) {
+async function verifyRenderPage(globals, params) {
+  const session = await globals.db.getItem('settings', 'session');
+  const firstPage = getFirstPage(session);
   const onbrd = session.onboarded;
   if (!onbrd) return 'onboarding';
   let page = (params.page && pages[params.page]) ? params.page : firstPage;
   if (onbrd && page == 'onboarding') page = firstPage;
   if (page == 'recap' && session.recaped == getToday()) page = 'main';
   if (page == 'main') page = firstPage;
-  return page;
+  return { rndr: page, firstPage };
 }
 
 export async function renderFirstPage(globals) {
   const params = getParams();
-  const session = await globals.db.getItem('settings', 'session');
-  const firstPage = getFirstPage(session);
-  const rndr = getRenderPage(params, session, firstPage);
+  const { rndr, firstPage } = await verifyRenderPage(params);
   if (['main', 'recap', 'onboarding'].includes(rndr)) {
     await globals.paintPage(rndr, true, true);
   } else {
@@ -166,13 +166,12 @@ export async function externalNavigate(globals, link) {
       existentEntry = entry; break;
     }
   }
-  if (existentEntry) {
-    if (existentEntry !== current) await navigation.traverseTo(existentEntry.key, {
-      info: {call: 'customTraverse'}
-    }).finished;
-  } else {
+  if (existentEntry && existentEntry !== current) {
+    await navigation.traverseTo(existentEntry.key).finished;
+  } else if (!existentEntry) {
     if (!pages[params.page]) return;
-    await globals.paintPage(params.page);
+    const { rndr } = await verifyRenderPage(globals, params);
+    await globals.paintPage(rndr);
   }
   await navigation.navigate(link, {
     state: globals.pageInfo || navigation.currentEntry.getState() || {},
