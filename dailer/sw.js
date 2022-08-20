@@ -1,5 +1,6 @@
 importScripts('./workers/defaultFunctions.js');
 importScripts('./workers/sharedFunctions.js');
+importScripts('./workers/notifications.js');
 
 const APP_CACHE = 'app-14.08';
 const EMOJI_CACHE = 'emoji-24.07';
@@ -131,7 +132,6 @@ self.addEventListener('notificationclick', (e) => {
 
 self.addEventListener('notificationclose', (e) => {
   db = new IDB(database.name, database.version, database.stores);
-  console.log(e.notification);
   e.waitUntil(statNotification(e.notification.timestamp, 'close'));
 });
 
@@ -147,53 +147,7 @@ async function checkNotifications(tag) {
   periodicSync.callsHistory.push({ timestamp: Date.now() });
   await db.setItem('settings', periodicSync);
   if (!notifs.enabled || notifs.permission !== 'granted') return;
-  const isAppAlreadyOpened = await cleaning(notifs, tag);
-  if (isAppAlreadyOpened) return;
-  if (notifs.byCategories.tasksForDay) {
-    const recap = await getDayRecap();
-    if (recap) await showNotification(notifs, 'tasksForDay', recap);
-  }
-  if (notifs.byCategories.backupReminder) {
-    const { show } = await checkBackupReminder();
-    if (show) await showNotification(notifs, 'backupReminder', {
-      title: `\u{1f4e5} It's time to back up your data`,
-      body: `You've set reminders to make backups, so today we made one for you \u{1f4e6}`,
-      icon: './icons/downloadBackup.png',
-      data: { popup: 'downloadBackup' }
-    });
-  }
-  await db.setItem('settings', notifs);
-}
-
-async function cleaning(notifs, tag) {
-  const remainingNotifications = await registration.getNotifications();
-  for (let notif of remainingNotifications) {
-    notif.close();
-    notifs.callsHistory[notif.timestamp].clean = Date.now();
-  }
-  await db.setItem('settings', notifs);
-  console.log(tag);
-  if (tag !== 'dailyNotification') return;
-  const allClients = await clients.matchAll({ type: 'window' });
-  for (let windowClient of allClients) {
-    console.log(windowClient.focused);
-    if (windowClient.focused) return true;
-  }
-}
-
-async function showNotification(notifs, type, options) {
-  if (!options || (options && !options.title)) return;
-  const title = options.title;
-  delete options.title;
-  const ts = Date.now();
-  options = Object.assign({
-    //badge: './icons/badge.png',
-    timestamp: ts,
-    data: { page: 'main' },
-    icon: './icons/apple-touch-icon.png',
-  }, options);
-  notifs.callsHistory[ts] = { type };
-  await registration.showNotification(title, options);
+  await proccessNotifications(notifs, tag);
 }
 
 async function openApp({ timestamp, data }) {
@@ -207,42 +161,8 @@ async function openApp({ timestamp, data }) {
     allClients[0].postMessage({ navigate: link });
   } else {
     const windowClient = await clients.openWindow(link);
-    if (windowClient) windowClient.focus();
+    const actualClients = await clients.matchAll({ type: 'window' });
+    actualClients[0].focus();
   }
   await statNotification(timestamp, 'click');
-}
-
-async function getDayRecap() {
-  const { response: recap } = await getYesterdayRecap();
-  if (recap.recaped) {
-    const day = await db.getItem('days', getToday().toString());
-    if (day.tasksAmount === 0) return;
-    let body = day.tasks[2].length === 0 ? null : '';
-    if (body !== '') return;
-    await enumerateDay(day, async (id, value, priority) => {
-      if (priority !== 2) return;
-      if (value === 1) return;
-      const task = await db.getItem('tasks', id);
-      body += `- ${task.name}\n`;
-    });
-    body = body.replace(/\n$/, '');
-    return { title: `\u{1f5e1} Don't forget about importants:`, body };
-  }
-  if (!recap.show) return {
-    title: '\u{1f4d1} Explore tasks for today',
-    body: `You have no tasks yesterday, but its time to add some new ones\nDon't miss the dailer! \u{23f0}`
-  };
-  const resp = {
-    title: '\u{1f4f0} Recap of yesterday',
-    body: `${
-      recap.completed ? 'Congratulations! \u{1f389} ' : ''
-    }You done ${recap.count} out of ${recap.all} tasks${
-      !recap.completed
-      ? '\nOpen app to mark forgottens and check newly arrived tasks'
-      : '\nTry to make a streak?'
-    }`,
-    icon: './icons/statsUp.png',
-    data: { page: 'recap' }
-  };
-  return resp;
 }
