@@ -120,7 +120,7 @@ async function addCache(request, cacheName) {
 self.addEventListener('periodicsync', (e) => {
   console.log(e.tag);
   db = new IDB(database.name, database.version, database.stores);
-  e.waitUntil(checkNotifications());
+  e.waitUntil(checkNotifications(e.tag));
 });
 
 self.addEventListener('notificationclick', (e) => {
@@ -129,12 +129,25 @@ self.addEventListener('notificationclick', (e) => {
   e.waitUntil(openApp(e.notification));
 });
 
-async function checkNotifications() {
+self.addEventListener('notificationclose', (e) => {
+  db = new IDB(database.name, database.version, database.stores);
+  e.waitUntil(statNotification(e.notification.timestamp, 'close'));
+});
+
+async function statNotification(timestamp, field) {
+  await db.updateItem('settings', 'notifications', (notifs) => {
+    notifs.callsHistory[timestamp][field] = Date.now();
+  });
+}
+
+async function checkNotifications(tag) {
   const notifs = await db.getItem('settings', 'notifications');
   const periodicSync = await db.getItem('settings', 'periodicSync');
   periodicSync.callsHistory.push({ timestamp: Date.now() });
   await db.setItem('settings', periodicSync);
   if (!notifs.enabled || notifs.permission !== 'granted') return;
+  const isAppAlreadyOpened = await cleaning(tag);
+  if (isAppAlreadyOpened) return;
   if (notifs.byCategories.tasksForDay) {
     const recap = await getDayRecap();
     if (recap) await showNotification(notifs, 'tasksForDay', recap);
@@ -151,6 +164,16 @@ async function checkNotifications() {
   await db.setItem('settings', notifs);
 }
 
+async function cleaning(tag) {
+  const notifs = await registration.getNotifications();
+  for (let notif of notifs) { notif.close(); }
+  if (tag !== 'dailyNotification') return;
+  const allClients = await clients.matchAll({ type: 'window' });
+  for (let windowClient of allClients) {
+    if (windowClient.focused) return true;
+  }
+}
+
 async function showNotification(notifs, type, options) {
   if (!options || (options && !options.title)) return;
   const title = options.title;
@@ -162,23 +185,21 @@ async function showNotification(notifs, type, options) {
     data: { showPage: 'main' },
     icon: './icons/apple-touch-icon.png',
   }, options);
-  notifs.callsHistory[ts] = { type, click: null };
+  notifs.callsHistory[ts] = { type, click: null, close: null };
   await registration.showNotification(title, options);
 }
 
 async function openApp({ timestamp, data }) {
+  const link = `${getBaseLink()}?from=notification&page=${data.showPage || 'main'}`;
   const allClients = await clients.matchAll({ type: 'window' });
   if (allClients.length > 0) {
     allClients[0].focus();
+    allClients[0].postMessage({ navigate: link });
   } else {
-    const windowClient = await clients.openWindow(
-      `${getBaseLink()}?from=notification&page=${data.showPage || 'main'}`
-    );
+    const windowClient = await clients.openWindow(link);
     if (windowClient) windowClient.focus();
   }
-  await db.updateItem('settings', 'notifications', (notifs) => {
-    notifs.callsHistory[timestamp].click = Date.now();
-  });
+  await statNotification(timestamp, 'click');
 }
 
 async function getDayRecap() {

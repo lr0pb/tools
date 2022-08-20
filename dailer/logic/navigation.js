@@ -31,6 +31,10 @@ export async function renderFirstPage(globals) {
     await globals.paintPage(firstPage, true, true, true);
     await globals.paintPage(rndr);
   }
+  await processPageBuilding(globals, params);
+}
+
+async function processPageBuilding(globals, params) {
   if (params.settings) await globals.openSettings(params.section);
   if (params.popup && params.popup in popups) {
     const popupData = popups[params.popup](globals);
@@ -73,7 +77,7 @@ export async function onHistoryAPIBack(e, globals) {
   }
 }
 
-const callsList = ['paintPage', 'settings', 'additionalBack', 'traverseToStart'];
+const callsList = ['paintPage', 'settings', 'additionalBack', 'customTraverse', 'customReplace'];
 const instantPromise = () => new Promise((res) => { res() });
 
 export function onAppNavigation(e, globals) {
@@ -93,7 +97,7 @@ export function onAppNavigation(e, globals) {
 async function hardReload(globals, info) {
   const appHistory = navigation.entries();
   await navigation.traverseTo(appHistory[0].key, {
-    info: {call: 'traverseToStart'}
+    info: {call: 'customTraverse'}
   }).finished;
   qs('.hidePrevPage').classList.add('current');
   for (let page of qsa('.page:not(.basic)')) {
@@ -109,6 +113,7 @@ export async function onTraverseNavigation(globals, e, silent) {
   let delta = Math.abs(rawDelta);
   const dir = rawDelta > 0 ? -1 : 1; // -1 stands for backward, 1 stands for forward
   const appHistory = navigation.entries();
+  globals.closePopup();
   for (let i = 0; i < delta; i++) {
     const currentIndex = idx + i * dir;
     const nextIndex = currentIndex + dir;
@@ -143,4 +148,34 @@ export async function onTraverseNavigation(globals, e, silent) {
       globals.additionalBack = 0;
     }
   }
+}
+
+export async function externalNavigate(link) {
+  const params = getParams(link);
+  if (!dailerData.nav) return;
+  const appHistory = navigation.entries();
+  const current = navigation.currentEntry;
+  if (!params.page) {
+    params.page = getParams(current.url).page;
+    link += `&page=${params.page}`;
+  };
+  let existentEntry = null;
+  for (let entry of appHistory) {
+    const entryParams = getParams(entry.url);
+    if (entryParams.page === params.page) {
+      existentEntry = entry; break;
+    }
+  }
+  if (existentEntry) {
+    if (existentEntry !== current) await navigation.traverseTo(existentEntry.key, {
+      info: {call: 'customTraverse'}
+    }).finished;
+  } else {
+    if (!pages[params.page]) return;
+    await globals.paintPage(params.page);
+  }
+  await navigation.navigate(link, {
+    history: 'replace', info: {call: 'customReplace'}
+  }).finished;
+  await processPageBuilding(globals, params);
 }

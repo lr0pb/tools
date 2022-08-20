@@ -3,7 +3,7 @@ import { pages } from './logic/pages.js'
 import { IDB, database } from './logic/IDB.js'
 import {
   getFirstPage, renderFirstPage, renderPage, onHistoryAPIBack, onAppNavigation,
-  onTraverseNavigation
+  onTraverseNavigation, externalNavigate
 } from './logic/navigation.js'
 import {
   globQs as qs, checkForFeatures, isDesktop, inert, convertEmoji, getParams,
@@ -76,6 +76,15 @@ async function deployWorkers() {
   };
   if (!('serviceWorker' in navigator && 'caches' in window)) return resp;
   const reg = await navigator.serviceWorker.register('./sw.js');
+  navigator.serviceWorker.onmessage = async (e) => {
+    if (typeof e.data !== 'object') return;
+    await externalNavigate(e.data.navigate);
+  };
+  if ('launchQueue' in window && 'targetURL' in LaunchParams.prototype) {
+    launchQueue.setConsumer(async (launchParams) => {
+      await externalNavigate(launchParams.targetURL);
+    });
+  }
   const worker = new Worker('./workers/mainWorker.js');
   worker._callsList = new Map();
   worker.call = async (call = {}) => {
