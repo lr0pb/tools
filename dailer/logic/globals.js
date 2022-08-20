@@ -117,18 +117,19 @@ export function getGlobals() {
         globals.closePopup();
       }
     },
-    closePopup: () => {
+    closePopup: (dontImpactToNavigation) => {
       const popup = qs('#popup');
       inert.remove(qs(globals.settings ? '#settings' : '.current'));
       inert.set(popup);
       popup.classList.remove('strictClosing');
       popup.style.display = 'none';
       qs('[data-action="confirm"]').onclick = null;
+      if (dontImpactToNavigation) return;
       const link = location.href.replace(/&popup=\w+/, '');
       dailerData.nav
       ? navigation.navigate(link, {
           state: globals.pageInfo || navigation.currentEntry.getState() || {},
-          history: 'replace', info: {call: 'popupClosing'}
+          history: 'replace', info: {call: 'customReplace'}
         })
       : history.replaceState(globals.pageInfo || history.state || {}, '', link);
     },

@@ -113,7 +113,7 @@ export async function onTraverseNavigation(globals, e, silent) {
   let delta = Math.abs(rawDelta);
   const dir = rawDelta > 0 ? -1 : 1; // -1 stands for backward, 1 stands for forward
   const appHistory = navigation.entries();
-  globals.closePopup();
+  globals.closePopup(true);
   for (let i = 0; i < delta; i++) {
     const currentIndex = idx + i * dir;
     const nextIndex = currentIndex + dir;
@@ -175,6 +175,7 @@ export async function externalNavigate(link) {
     await globals.paintPage(params.page);
   }
   await navigation.navigate(link, {
+    state: navigation.currentEntry.getState() || {},
     history: 'replace', info: {call: 'customReplace'}
   }).finished;
   await processPageBuilding(globals, params);
