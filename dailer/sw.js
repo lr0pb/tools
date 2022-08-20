@@ -131,6 +131,7 @@ self.addEventListener('notificationclick', (e) => {
 
 self.addEventListener('notificationclose', (e) => {
   db = new IDB(database.name, database.version, database.stores);
+  console.log(e.notification);
   e.waitUntil(statNotification(e.notification.timestamp, 'close'));
 });
 
@@ -146,7 +147,7 @@ async function checkNotifications(tag) {
   periodicSync.callsHistory.push({ timestamp: Date.now() });
   await db.setItem('settings', periodicSync);
   if (!notifs.enabled || notifs.permission !== 'granted') return;
-  const isAppAlreadyOpened = await cleaning(tag);
+  const isAppAlreadyOpened = await cleaning(notifs, tag);
   if (isAppAlreadyOpened) return;
   if (notifs.byCategories.tasksForDay) {
     const recap = await getDayRecap();
@@ -164,12 +165,18 @@ async function checkNotifications(tag) {
   await db.setItem('settings', notifs);
 }
 
-async function cleaning(tag) {
-  const notifs = await registration.getNotifications();
-  for (let notif of notifs) { notif.close(); }
+async function cleaning(notifs, tag) {
+  const remainingNotifications = await registration.getNotifications();
+  for (let notif of remainingNotifications) {
+    notif.close();
+    notifs.callsHistory[notif.timestamp].clean = Date.now();
+  }
+  await db.setItem('settings', notifs);
+  console.log(tag);
   if (tag !== 'dailyNotification') return;
   const allClients = await clients.matchAll({ type: 'window' });
   for (let windowClient of allClients) {
+    console.log(windowClient.focused);
     if (windowClient.focused) return true;
   }
 }
@@ -185,7 +192,7 @@ async function showNotification(notifs, type, options) {
     data: { page: 'main' },
     icon: './icons/apple-touch-icon.png',
   }, options);
-  notifs.callsHistory[ts] = { type, click: null, close: null };
+  notifs.callsHistory[ts] = { type };
   await registration.showNotification(title, options);
 }
 

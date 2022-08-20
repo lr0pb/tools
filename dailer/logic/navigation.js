@@ -24,7 +24,7 @@ async function verifyRenderPage(globals, params) {
 
 export async function renderFirstPage(globals) {
   const params = getParams();
-  const { rndr, firstPage } = await verifyRenderPage(params);
+  const { rndr, firstPage } = await verifyRenderPage(globals, params);
   if (['main', 'recap', 'onboarding'].includes(rndr)) {
     await globals.paintPage(rndr, true, true);
   } else {
