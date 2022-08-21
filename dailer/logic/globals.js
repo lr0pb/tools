@@ -29,6 +29,7 @@ const globals = {
   _cachedConfigFile: null,
   getPeriods,
   getList,
+  _setCacheConfig,
   paintPage,
   message,
   openPopup,
@@ -53,14 +54,17 @@ async function getPeriods() {
 }
 
 async function getList(listName) {
-  if (!globals._cachedConfigFile) {
-    const raw = await fetch('./config.json');
-    globals._cachedConfigFile = await raw.json();
-  }
+  await globals._setCacheConfig();
   if (listName in globals._cachedConfigFile) {
     const list = globals._cachedConfigFile[listName];
     return copyArray(list);
   }
+}
+
+async function _setCacheConfig() {
+  if (globals._cachedConfigFile) return;
+  const raw = await fetch('./config.json');
+  globals._cachedConfigFile = await raw.json();
 }
 
 async function paintPage(name, dontPushHistory, replaceState, noAnim) {
