@@ -44,17 +44,35 @@ window.addEventListener('pageshow', appEntryPoint);
 async function appEntryPoint(e) {
   createDb();
   if (e.persisted) return;
-  document.documentElement.lang = navigator.language;
-  const { worker, periodicSync } = await deployWorkers();
-  globals.worker = worker;
-  await loadEmojiList();
-  await processSettings(globals, periodicSync);
-  toggleExperiments();
-  pages.settings.fillHeader({page: qs('#settings > .header')});
-  await pages.settings.paint({globals, page: qs('#settings > .content')});
-  inert.set(qs('#settings'), true);
-  inert.set(qs('#popup'), true);
-  dailerData.nav ? await startApp() : await renderPage(e, false, globals);
+  try {
+    document.documentElement.lang = navigator.language;
+    const { worker, periodicSync } = await deployWorkers();
+    globals.worker = worker;
+    await loadEmojiList();
+    await processSettings(globals, periodicSync);
+    toggleExperiments();
+    pages.settings.fillHeader({page: qs('#settings > .header')});
+    await pages.settings.paint({globals, page: qs('#settings > .content')});
+    inert.set(qs('#settings'), true);
+    inert.set(qs('#popup'), true);
+    dailerData.nav ? await startApp() : await renderPage(e, false, globals);
+  } catch (err) {
+    const elem = document.createElement('div');
+    elem.className = 'page';
+    elem.innerHTML = `
+      <div class="content center doubleColumns">
+        <h2 class="emoji">
+          <span class="emojiSymbol"
+            style="background-image: url('https://raw.githubusercontent.com/googlefonts/noto-emoji/main/svg/emoji_u1fae1.svg');">
+          </span>
+        </h2>
+        <h2>Something really goes wrong</h2>
+        <h3>There is this something: ${err}</h3>
+      </div>
+    `;
+    document.body.append(elem);
+    elem.classList.add('showing');
+  }
 }
 
 window.addEventListener('pagehide', () => {
