@@ -7,6 +7,18 @@ const EMOJI_CACHE = 'emoji-24.07';
 const HTML_TIMEOUT = 670;
 const FILE_TIMEOUT = 340;
 
+if (!('at' in Array.prototype)) {
+  function at(n) {
+    n = Math.trunc(n) || 0;
+    if (n < 0) n += this.length;
+    if (n < 0 || n >= this.length) return undefined;
+    return this[n];
+  }
+  Object.defineProperty(Array.prototype, 'at', {
+    value: at, writable: true, enumerable: false, configurable: true
+  });
+}
+
 async function addToCache(cacheName, fileName, onFileReceived) {
   const cache = await caches.open(cacheName);
   const resp = await fetch(`./${fileName}.json`);
@@ -157,12 +169,11 @@ async function openApp({ timestamp, data }) {
   }
   const allClients = await clients.matchAll({ type: 'window' });
   if (allClients.length > 0) {
-    allClients[0].focus();
-    allClients[0].postMessage({ navigate: link });
+    allClients.at(-1).focus();
+    allClients.at(-1).postMessage({ navigate: link });
   } else {
     const windowClient = await clients.openWindow(link);
-    const actualClients = await clients.matchAll({ type: 'window' });
-    actualClients[0].focus();
+    if (windowClient && !windowClient.focused) windowClient.focus();
   }
   await statNotification(timestamp, 'click');
 }

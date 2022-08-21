@@ -43,7 +43,7 @@ async function processPageBuilding(globals, params) {
 }
 
 export async function renderPage(e, back, globals) {
-  if (!back) renderFirstPage();
+  if (!back) renderFirstPage(globals);
   const params = getParams();
   if (params.settings == 'open') {
     if (globals.pageName !== params.page) {
@@ -69,7 +69,7 @@ export async function onHistoryAPIBack(e, globals) {
   if (pages[globals.pageName].onBack) {
     pages[globals.pageName].onBack(globals);
   }
-  await renderPage(e, true);
+  await renderPage(e, true, globals);
   if (globals.additionalBack) {
     const backs = globals.additionalBack;
     globals.additionalBack = 0;

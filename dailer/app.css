@@ -385,12 +385,13 @@ button:disabled, [disabled]:not(input, select) {
   position: fixed;
   left: 50%;
   transform: translateX(-50%);
+  margin: 0 !important;
 }
 
 #message {
   display: none; z-index: 999;
   width: var(--fullWidth); min-height: 5rem;
-  padding: 2rem; margin: 0;
+  padding: 2rem;
   bottom: 4rem;
   background-image: linear-gradient(90deg, var(--color) 0%, var(--msgBg) 75%);
   border-color: var(--color);
@@ -411,7 +412,6 @@ button:disabled, [disabled]:not(input, select) {
   width: var(--gridContent);
   background-color: var(--lightBlueBg);
   bottom: var(--footerHeight);
-  margin: 0;
 }
 .floatingMsg.notFixed { margin: 1rem 0; }
 .floatingMsg h3 {

@@ -16,7 +16,7 @@ export const debugPage = {
         <!--<button id="toRecap" class="noEmoji">Show recap page</button>
         <h3>Reload app and show Yesterday recap page</h3>-->
         <button id="clearSettings" class="danger noEmoji">Clear some settings</button>
-        <h3>You probably can loose everything</h3>
+        <h3>You probably can lose everything</h3>
       </div>
     </div>
   `},

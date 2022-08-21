@@ -62,7 +62,7 @@
     },
     "09": {
       "id": "09",
-      "title": "One time until complete",
+      "title": "Until complete",
       "days": [1],
       "description": "Task will be active unlimited time until you complete them",
       "periodDay": -1,
