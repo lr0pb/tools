@@ -96,9 +96,8 @@ async function paintPage(name, dontPushHistory, replaceState, noAnim) {
     content.setAttribute('focusgroup', 'horizontal');
   }
   await showPage(globals, qs('.current'), container, noAnim);
-  const settingsElem = localQs('.openSettings');
   const args = page.noSettings ? [undefined] : ['click', () => globals.openSettings()];
-  settingsElem[page.noSettings ? 'remove' : 'addEventListener'](...args);
+  container.querySelector('.openSettings')[page.noSettings ? 'remove' : 'addEventListener'](...args);
   const link = getPageLink(name);
   if (dailerData.nav) {
     let historyAction = null;
