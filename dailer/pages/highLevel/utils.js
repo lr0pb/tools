@@ -222,5 +222,7 @@ export function showErrorPage(err) {
     </div>
   `;
   document.body.append(elem);
-  elem.classList.add('showing');
+  setTimeout(() => {
+    elem.classList.add('showing');
+  }, 0);
 }
