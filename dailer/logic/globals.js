@@ -113,13 +113,10 @@ async function paintPage(name, dontPushHistory, replaceState, noAnim) {
     if (replaceState) history.replaceState(globals.pageInfo || history.state || {}, '', link);
     else if (!dontPushHistory) history.pushState(globals.pageInfo || history.state || {}, '', link);
   }
-  page.script({ globals, page: content })
-    .catch(showErrorPage)
-    .then(() => globals.isPageReady = true);
-  await new Promise((res) => {
-    const isReady = () => globals.isPageReady ? res() : setTimeout(isReady, 10);
-    isReady();
-  });
+  container.classList.remove('hided');
+  container.classList.add('current');
+  await page.script({ globals, page: content });
+  globals.isPageReady = true;
 }
 
 function message({state, text}) {
@@ -253,8 +250,7 @@ export async function showPage(globals, prev, current, noAnim, noCleaning) {
   current.style.willChange = 'transform';
   prev.classList.remove('showing', 'current');
   prev.classList.add('hidePrevPage');
-  if (current.classList.contains('hided')) current.classList.remove('hided');
-  current.classList.add('current');
+  current.classList.remove('hided');
   inert.set(prev);
   inert.remove(current);
   let done = false;
@@ -268,6 +264,7 @@ export async function showPage(globals, prev, current, noAnim, noCleaning) {
       inert.clearCache(elem);
     }
   } else {
+    current.classList.add('current');
     if (pages[current.id].onPageShow) {
       await pages[current.id].onPageShow({globals, page: qs(`#${current.id} .content`)});
     }
