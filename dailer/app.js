@@ -7,12 +7,16 @@ import {
 } from './logic/navigation.js'
 import {
   globQs as qs, checkForFeatures, isDesktop, inert, convertEmoji, getParams,
-  isWideInterface
+  isWideInterface, showErrorPage
 } from './pages/highLevel/utils.js'
 import { getToday, oneDay } from './pages/highLevel/periods.js'
 import { processSettings, toggleExperiments } from './pages/highLevel/settingsBackend.js'
 import { checkInstall, onAppInstalled } from './pages/main.js'
 import { registerPeriodicSync, toggleNotifReason } from './pages/settings/notifications.js'
+
+window.addEventListener('unhandledrejection', (e) => {
+  showErrorPage(e.reason);
+});
 
 if (!('at' in Array.prototype)) {
   function at(n) {
@@ -57,21 +61,7 @@ async function appEntryPoint(e) {
     inert.set(qs('#popup'), true);
     dailerData.nav ? await startApp() : await renderPage(e, false, globals);
   } catch (err) {
-    const elem = document.createElement('div');
-    elem.className = 'page';
-    elem.innerHTML = `
-      <div class="content center doubleColumns">
-        <h2 class="emoji">
-          <span class="emojiSymbol"
-            style="background-image: url('https://raw.githubusercontent.com/googlefonts/noto-emoji/main/svg/emoji_u1fae1.svg');">
-          </span>
-        </h2>
-        <h2>Something really goes wrong</h2>
-        <h3>There is this something: ${err}</h3>
-      </div>
-    `;
-    document.body.append(elem);
-    elem.classList.add('showing');
+    showErrorPage(err);
   }
 }
 

@@ -1,6 +1,6 @@
 import { pages } from './pages.js'
 import {
-  qs as localQs, globQs as qs, globQsa as qsa, copyArray, inert
+  qs as localQs, globQs as qs, globQsa as qsa, copyArray, inert, showErrorPage
 } from '../pages/highLevel/utils.js'
 
 const getUrl = () => location.href.toString();
@@ -89,7 +89,9 @@ async function paintPage(name, dontPushHistory, replaceState, noAnim) {
     if (!e.target.classList.contains('page')) return;
     e.target.style.removeProperty('will-change');
   });
-  document.body.append(container);
+  let body = document.body;
+  if (!body) body = qs('body');
+  body.append(container);
   const content = container.querySelector('.content');
   content.className = `content ${page.styleClasses || ''}`;
   if (page.styleClasses && page.styleClasses.includes('doubleColumns')) {
@@ -111,8 +113,13 @@ async function paintPage(name, dontPushHistory, replaceState, noAnim) {
     if (replaceState) history.replaceState(globals.pageInfo || history.state || {}, '', link);
     else if (!dontPushHistory) history.pushState(globals.pageInfo || history.state || {}, '', link);
   }
-  await page.script({ globals, page: content });
-  globals.isPageReady = true;
+  page.script({ globals, page: content })
+    .catch(showErrorPage)
+    .then(() => globals.isPageReady = true);
+  await new Promise((res) => {
+    const isReady = globals.isPageReady ? res() : setTimeout(isReady, 10);
+    isReady();
+  });
 }
 
 function message({state, text}) {

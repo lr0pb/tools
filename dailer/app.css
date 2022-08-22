@@ -179,6 +179,10 @@ body, .page, #settings, #popup, noscript {
   color: var(--mainText);
   margin: 0;
 }
+noscript {
+  position: fixed;
+  z-index: 999;
+}
 .page, #settings {
   position: fixed;
   display: grid;
@@ -201,14 +205,14 @@ body, .page, #settings, #popup, noscript {
   z-index: 1;
   --footerHeight: 0 !important;
   transform: translateX(100vw);
-  transition: transform var(--fastAnim);
+  transition: transform var(--normalAnim) cubic-bezier(.22,.61,.36,1);
 }
 #settings > .content > *:last-child {
   margin-bottom: 4rem;
 }
 .page {
   transform: translateX(100vw);
-  transition: transform var(--normalAnim);
+  transition: transform var(--normalAnim) cubic-bezier(.86,0,.07,1);
   background-size: cover;
 }
 .showing {
@@ -223,7 +227,7 @@ body, .page, #settings, #popup, noscript {
 .footer { grid-area: footer; }
 
 .header, .content, .footer, .task, .floatingMsg, #infoBackground,
-.dataLine, noscript {
+.dataLine {
   display: flex;
 }
 .header > h1, .header > h4 {
@@ -242,10 +246,10 @@ body, .page, #settings, #popup, noscript {
 .content::-webkit-scrollbar, .hiddenScroll::-webkit-scrollbar {
   width: 0; height: 0;
 }
-.header, .footer, .content.center, .floatingMsg, noscript {
+.header, .footer, .content.center, .floatingMsg {
   align-items: center;
 }
-.footer, .center, noscript {
+.footer, .center {
   justify-content: center;
 }
 .center {
@@ -306,6 +310,15 @@ strong {
   background-color: var(--darkShadow);
   padding: 0.4rem 1.2rem;
   border-radius: 2.5rem;
+  font-weight: bold;
+}
+
+.basic .emojiSymbol {
+  animation: rotation calc(var(--normalAnim) * 6) linear infinite;
+}
+
+@keyframes rotation {
+  100% { transform: rotateZ(1turn); }
 }
 
 button, .task, #message, input, select, #infoBackground,

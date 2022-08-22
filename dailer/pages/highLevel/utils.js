@@ -210,3 +210,17 @@ export async function reloadApp(globals, page) {
     info: {call: 'hardReload', page}
   }).finished;
 }
+
+export function showErrorPage(err) {
+  const elem = document.createElement('div');
+  elem.className = 'page';
+  elem.innerHTML = `
+    <div class="content center doubleColumns">
+      <h2 class="emoji">${emjs.salute}</h2>
+      <h2>Something really goes wrong</h2>
+      <h3>There is this something: ${err}</h3>
+    </div>
+  `;
+  document.body.append(elem);
+  elem.classList.add('showing');
+}
