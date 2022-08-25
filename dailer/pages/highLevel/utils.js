@@ -22,7 +22,7 @@ export function hide(elem) { elem.style.display = 'none'; }
 export function getElements(...elems) {
   const resp = {};
   for (let elem of elems) {
-    resp.elem = qs(`#${elem}`);
+    resp[elem] = qs(`#${elem}`);
   }
   return resp;
 }

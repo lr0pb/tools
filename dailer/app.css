@@ -54,10 +54,10 @@ html { font-size: 1.25vmin; }
     /*--accentGreen: #54c416;
     --accentRed: #ef5353;*/
     --lightBlueBg: hsl(var(--brand), 67%, 82%);
-    --taskBg: hsla(var(--brand), 52%, 92%, 0.5);
+    --taskBg: hsla(var(--brand), 52%, 91%, 0.5);
     /*--gradientLight: #9aaafa;*/
     --gradientDark: #463e8c;
-    --infoRectBg: hsla(var(--brand), 20%, 91%, 0.5);
+    --infoRectBg: hsla(var(--brand), 20%, 96%, 0.5);
     --lightBorder: rgb(174, 174, 174, 0.35);
     --popupBg: var(--mainBg);
     --marker: hsl(var(--brand), 100%, 75%);
@@ -467,7 +467,7 @@ button:disabled, [disabled]:not(input, select) {
   justify-content: center;
 }
 .compress .task > div {
-  margin: 0.5rem auto 1.5rem 1.5rem;
+  margin: 0.2rem auto 1.2rem 1.0rem;
 }
 .task h2 { margin: 1.5rem auto 0 1rem; }
 .task > :last-child { margin-right: 1.5rem; }
