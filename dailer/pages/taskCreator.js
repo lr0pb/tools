@@ -215,9 +215,9 @@ function enableEditButtons(globals, td) {
   });
 }
 
-async function onPeriodChange(e, globals) {
+async function onPeriodChange(event, globals) {
   const periods = await globals.getPeriods();
-  const value = e.target.value;
+  const value = event.target.value;
   if (value == '00') return globals.openSettings('periods');
   updateState({lastPeriodValue: value});
   const e = getElements('date', 'dateTitle', 'startDate', 'startDateTitle', 'description');
