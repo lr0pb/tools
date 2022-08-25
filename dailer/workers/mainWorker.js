@@ -2,6 +2,7 @@ importScripts('./defaultFunctions.js');
 importScripts('./sharedFunctions.js');
 
 db = new IDB(database.name, database.version, database.stores);
+periods = null;
 
 self.onmessage = async (e) => { // safari never call message event setted via listener
   if (typeof e.data !== 'object') return;
@@ -18,8 +19,9 @@ self.onmessage = async (e) => { // safari never call message event setted via li
 const internals = {
   backupReminder: checkBackupReminder,
   disable: disableTask,
-  createDay, getRawDay,
-  updateSession, getYesterdayRecap, checkNotifications, checkReminderPromo,
+  createDay, getRawDay, createTask,
+  updateSession, updatePeriods,
+  getYesterdayRecap, checkNotifications, checkReminderPromo,
 };
 
 async function disableTask(taskId) {
@@ -28,6 +30,9 @@ async function disableTask(taskId) {
 }
 
 function updateSession(item) { session = item; }
+async function updatePeriods() {
+  periods = await db.getAll('periods');
+}
 
 async function checkNotifications() {
   const notifs = await db.getItem('settings', 'notifications');
@@ -60,4 +65,41 @@ async function checkReminderPromo() {
   if (remind.firstPromoDay + oneDay * remind.daysToShowPromo <= getToday()) return resp;
   resp.show = true;
   return resp;
+}
+
+async function createTask({
+  id, isPageExist, name, period, priority, date, enableEndDate, endDate
+}) {
+  if (!periods) periods = await db.getAll('periods');
+  const td = id ? await db.getItem('tasks', id) : {};
+  const per = periods[period];
+  const tdPer = td.periodId ? periods[td.periodId] : {};
+  const perId = td.periodId || td.ogTitle || per.id;
+  const task = {
+    id: td.id || Date.now().toString(),
+    name, priority,
+    period: td.period || per.days,
+    periodId: perId,
+    periodTitle: isCustomPeriod(perId) ? '' : tdPer.title || per.title,
+    periodStart: td.periodStart && td.periodStart <= getToday()
+    ? td.periodStart
+    : tdPer.selectTitle || per.selectTitle || per.getWeekStart
+    ? dateValue : td.periodStart || dateValue,
+    periodDay: td.periodId
+    ? td.periodDay
+    : (per.getWeekStart
+       ? new Date().getDay() - 1
+       : per.periodDay),
+    history: td.history || [],
+    special: td.periodId ? td.special : per.special,
+    nameEdited: td.periodId ? td.nameEdited : false,
+    disabled: td.disabled || false,
+    deleted: false
+  };
+  if (!task.special) delete task.special;
+  if (td.name && task.name != td.name) task.nameEdited = true;
+  if (td.created) task.created = td.created;
+  if (enableEndDate && endDate) task.endDate = endDate;
+  setPeriodTitle(task);
+  return task;
 }

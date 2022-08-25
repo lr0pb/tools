@@ -1,7 +1,7 @@
 import { renderToggler, toggleFunc } from './highLevel/taskThings.js'
 import {
   qs, qsa, globQs, globQsa, /*emjs,*/ safeDataInteractions, handleKeyboard,
-  togglableElement, syncGlobals, copyArray
+  togglableElement, syncGlobals, copyArray, hide
 } from './highLevel/utils.js'
 import { paintPeriods } from './settings/periods.js'
 
@@ -14,9 +14,7 @@ export const periodCreator = {
       periodTitle ? `Edit period: ${periodTitle}` : 'Create new period'
     }`;
   },
-  get titleEnding() {
-    return periodTitle ? 'line' : 'text';
-  },
+  get titleEnding() { return periodTitle ? 'line' : 'text'; },
   dynamicTitle: true,
   get header() { return `${emjs.calendar} <span id="periodAction">Create</span> period`},
   get page() { return `
@@ -69,9 +67,7 @@ async function onPeriodCreator({globals, page}) {
     if (per.description) qs('#periodDesc').value = per.description;
     qs('#daysCount').value = per.days.length;
     qs('#daysCount').setAttribute('disabled', 'disabled');
-    for (let elem of qsa('.excludeInEdit')) {
-      elem.style.display = 'none';
-    }
+    qsa('.excludeInEdit').forEach(hide);
     for (let elem of qsa('.togglerContainer')) {
       elem.classList.remove('first');
     }
@@ -98,9 +94,7 @@ async function onPeriodCreator({globals, page}) {
           daysCount.value = maxDays;
           onDaysCountChange({ target: daysCount });
           daysCount.setAttribute('disabled', '');
-        } else {
-          daysCount.removeAttribute('disabled');
-        }
+        } else daysCount.removeAttribute('disabled');
         toggleDays(value);
       }
     }], disabled: isEdit
@@ -110,19 +104,6 @@ async function onPeriodCreator({globals, page}) {
     toggler: isEdit ? emjs[per.selected ? 'sign' : 'blank'] : emjs.blank,
     page: containers[2], value: isEdit ? (per.selected ? 1 : 0) : 0
   });
-  /*page.innerHTML += `
-    <!--<h3>Limit days to select task start day</h3>-->
-  `;
-  renderToggler({
-    name: 'No limit', id: 'noMaxDate', page: containers[3],
-    toggler: emjs.sign, value: 1
-  });
-  page.innerHTML += `
-    <div id="maxDateBlock">
-      <input type="range" id="maxDate" min="1" max="13" value="13">
-      <h3>In task creation process you able to select start day from today +<span id="maxDateTitle">13</span> days</h3>
-    </div>
-  `;*/
   safeDataInteractions(['periodName', 'periodDesc', /*'daysCount'*/]);
   qs('#savePeriod').addEventListener('click', async () => {
     const period = await createPeriod(globals, per, isEdit);
@@ -130,9 +111,7 @@ async function onPeriodCreator({globals, page}) {
       state: 'fail', text: 'Fill all fields'
     });
     globals.db.setItem('periods', period);
-    globals.message({
-      state: 'success', text: `Period ${isEdit ? 'edited' : 'created'}`
-    });
+    globals.message({ state: 'success', text: `Period ${isEdit ? 'edited' : 'created'}` });
     await globals.checkPersist();
     await paintPeriods(globals);
     if (isEdit) {
@@ -167,8 +146,7 @@ function appendDays(originalDays, getWeekStart) {
       elem.tabIndex = dailerData.focusgroup ? (i == 0 ? 0 : -1) : 0;
     }
     elem.innerHTML += `
-      <h4>${days ? emjs[days[i] ? 'sign' : 'blank'] : emjs.blank}</h4>
-      <h3>${dayNames[i]}</h3>
+      <h4>${days ? emjs[days[i] ? 'sign' : 'blank'] : emjs.blank}</h4><h3>${dayNames[i]}</h3>
     `;
     togglableElement(elem, 'hided');
     hm.append(elem);
@@ -201,9 +179,7 @@ export async function createPeriod(globals, per = {}, isEdit) {
   const period = {
     id: isEdit ? per.id : String(periodData.lastId + 1),
     title: qs('#periodName') ? qs('#periodName').value : per.title,
-    days: per.days || [],
-    selectTitle: 'Select day to start',
-    periodDay: -1
+    days: per.days || [], periodDay: -1, selectTitle: 'Select day to start'
   };
   const rects = qsa('.historyMonth:last-child > [data-used="true"]');
   if (!per.days) for (let elem of rects) {

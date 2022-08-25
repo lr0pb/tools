@@ -12,6 +12,21 @@ function q(func, elem, page, local) {
   return document[func](`${local ? '.current ' : ''}${elem}`);
 }
 
+export function show(elem, data) {
+  if (typeof elem === 'string') elem = qs(elem);
+  if (data && typeof data !== 'number') elem.innerHTML = data;
+  elem.style.display = 'block';
+}
+export function hide(elem) { elem.style.display = 'none'; }
+
+export function getElements(...elems) {
+  const resp = {};
+  for (let elem of elems) {
+    resp.elem = qs(`#${elem}`);
+  }
+  return resp;
+}
+
 export const copyObject = (obj) => {
   const response = {};
   for (let name in obj) response[name] = obj[name];
@@ -25,9 +40,7 @@ export const copyArray = (arr) => {
       response.push(copyArray(elem));
     } else if (typeof elem == 'object') {
       response.push(copyObject(elem));
-    } else {
-      response.push(elem);
-    }
+    } else { response.push(elem); }
   }
   return response;
 };
@@ -38,9 +51,7 @@ export const intlDate = (date) => {
 };
 
 export const convertEmoji = (str) => {
-  return str
-    .replace(/<span class\="emojiSymbol"[\s\w-:()/;"=.]+>/g, '')
-    .replace(/<\/span>/g, '');
+  return str.replace(/<span class\="emojiSymbol"[\s\w-:()/;"=.]+>/g, '').replace(/<\/span>/g, '');
 };
 
 export function getParams(url) {
@@ -56,9 +67,7 @@ export function getParams(url) {
 }
 
 export function safeDataInteractions(elems) {
-  const state = dailerData.nav
-  ? navigation.currentEntry.getState()
-  : history.state || {};
+  const state = dailerData.nav ? navigation.currentEntry.getState() : history.state || {};
   for (let elem of elems) {
     if (state[elem]) qs(`#${elem}`).value = state[elem];
     qs(`#${elem}`).addEventListener('input', stateSave);
@@ -125,16 +134,12 @@ export function checkForFeatures(features) {
 }
 
 export function isDesktop() {
-  if (navigator.userAgentData) {
-    return !navigator.userAgentData.mobile;
-  }
+  if (navigator.userAgentData) return !navigator.userAgentData.mobile;
   if ('standalone' in navigator) return false;
   return window.matchMedia('(pointer: fine) and (hover: hover)').matches;
 }
 
-export function isWideInterface() {
-  return window.matchMedia('(min-width: 470px)').matches;
-}
+export function isWideInterface() { return window.matchMedia('(min-width: 470px)').matches; }
 
 const focusables = [
   'button:not(:disabled)', 'input:not(:disabled)', '[role="button"]:not([disabled])'
@@ -152,8 +157,7 @@ export const inert = {
       page.existentAttributes = new Map();
       for (let el of focusableElems) {
         page.existentAttributes.set(el, {
-          disabled: el.disabled,
-          tabIndex: el.tabIndex
+          disabled: el.disabled, tabIndex: el.tabIndex
         });
         el.disabled = true;
         el.tabIndex = -1;
@@ -168,12 +172,10 @@ export const inert = {
     if (!dailerData.inert) {
       elem.ariaHidden = false;
       if (page) for (let [el, saved] of page.existentAttributes) {
-        el.disabled = saved.disabled;
-        el.tabIndex = saved.tabIndex;
+        el.disabled = saved.disabled; el.tabIndex = saved.tabIndex;
       }
     }
-    if (!elemToFocus) elemToFocus = page && page.focused
-    ? page.focused : elem.querySelector(focusables);
+    if (!elemToFocus) elemToFocus = page && page.focused ? page.focused : elem.querySelector(focusables);
     if (elemToFocus) elemToFocus.focus();
   },
   _cache: new Map(),
@@ -183,22 +185,17 @@ export const inert = {
 export function syncGlobals(globals) {
   if (!globals.pageInfo) globals.pageInfo = {};
   const state = dailerData.nav
-  ? (dailerData.forcedStateEntry || navigation.currentEntry).getState()
-  : copyObject(history.state);
+  ? (dailerData.forcedStateEntry || navigation.currentEntry).getState() : copyObject(history.state);
   Object.assign(globals.pageInfo, state);
 }
 
 export function updateState(updatedStateEntries) {
-  let state = dailerData.nav
-  ? navigation.currentEntry.getState()
-  : copyObject(history.state);
+  let state = dailerData.nav ? navigation.currentEntry.getState() : copyObject(history.state);
   if (!state) state = {};
   for (let key in updatedStateEntries) {
     state[key] = updatedStateEntries[key];
   }
-  dailerData.nav
-  ? navigation.updateCurrentEntry({ state })
-  : history.replaceState(state, '', location.href);
+  dailerData.nav ? navigation.updateCurrentEntry({ state }) : history.replaceState(state, '', location.href);
 }
 
 export async function reloadApp(globals, page) {
@@ -206,9 +203,7 @@ export async function reloadApp(globals, page) {
     await globals.paintPage(page || 'main', false, false, true);
     return location.reload();
   }
-  await navigation.reload({
-    info: {call: 'hardReload', page}
-  }).finished;
+  await navigation.reload({ info: {call: 'hardReload', page} }).finished;
 }
 
 export function showErrorPage(err) {
@@ -220,9 +215,11 @@ export function showErrorPage(err) {
       <h2>Something really goes wrong</h2>
       <h3>There is this something: ${err}</h3>
     </div>
+    <div class="footer">
+      <button>${emjs.reload} Reload app</button>
+    </div>
   `;
   document.body.append(elem);
-  setTimeout(() => {
-    elem.classList.add('showing');
-  }, 0);
+  elem.querySelector('button').addEventListener('click', () => location.reload() );
+  setTimeout(() => { elem.classList.add('showing'); }, 0);
 }

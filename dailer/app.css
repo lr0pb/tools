@@ -17,7 +17,7 @@
   /* Color section */
   --brand: 215deg;
 
-  --mainBg: black/*hsl(var(--brand), 100%, 3%)*/;
+  --mainBg: hsl(var(--brand), 50%, 3%);
   --transparentBg: rgba(0, 0, 0, 0.1);
   --mainText: white;
   --darkBorder: hsla(var(--brand), 12%, 16%, 0.5);
@@ -27,7 +27,7 @@
   --accentGreen: #379b00;
   --accentRed: #cb3a3a;
   --lightBlueBg: hsl(var(--brand), 19%, 48%);
-  --taskBg: hsla(var(--brand), 10%, 13%, 0.5);
+  --taskBg: hsla(var(--brand), 10%, 17%, 0.5);
   --gradientLight: #5a73f2;
   --gradientDark: #0f0b30;
   --infoRectBg: hsla(var(--brand), 40%, 13%, 0.5);
@@ -44,7 +44,7 @@ html { font-size: 1.25vmin; }
 
 @media (prefers-color-scheme: light) {
   :root {
-    --mainBg: #f2f2f2/*hsl(var(--brand), 60%, 97%)*/;
+    --mainBg: hsl(var(--brand), 30%, 98%);
     --transparentBg: rgba(255, 255, 255, 0.2);
     --mainText: black;
     --darkBorder: hsla(var(--brand), 60%, 90%, 0.5);
@@ -215,11 +215,19 @@ noscript {
   transition: transform var(--normalAnim) cubic-bezier(.86,0,.07,1);
   background-size: cover;
 }
-.showing {
-  transform: translateX(0);
+.basic { transition-duration: calc(var(--normalAnim) * 2); }
+.showing { transform: translateX(0); }
+.hidePrevPage { transform: translateX(-35vw); }
+.basic.hidePrevPage { transform: translateX(-100vw); }
+
+.basic .emojiSymbol {
+  animation: rotation calc(var(--normalAnim) * 6) linear infinite;
 }
-.hidePrevPage {
-  transform: translateX(-35vw);
+.basic.hidePrevPage .emojiSymbol {
+  animation-play-state: paused;
+}
+@keyframes rotation {
+  100% { transform: rotateZ(1turn); }
 }
 
 .header { grid-area: header; }
@@ -311,14 +319,6 @@ strong {
   padding: 0.4rem 1.2rem;
   border-radius: 2.5rem;
   font-weight: bold;
-}
-
-.basic .emojiSymbol {
-  animation: rotation calc(var(--normalAnim) * 6) linear infinite;
-}
-
-@keyframes rotation {
-  100% { transform: rotateZ(1turn); }
 }
 
 button, .task, #message, input, select, #infoBackground,
@@ -452,6 +452,7 @@ button:disabled, [disabled]:not(input, select) {
   width: var(--fullWidth);
   /*background-color: #777777;*/
   background-color: var(--taskBg);
+  border-color: transparent;
   flex-direction: row;
   margin: 0 0 2.5rem;
 }

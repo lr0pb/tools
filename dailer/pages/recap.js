@@ -1,5 +1,5 @@
 import { getToday, oneDay } from './highLevel/periods.js'
-import { qs, qsa, /*emjs*/ } from './highLevel/utils.js'
+import { qs, qsa, show, hide, getElements } from './highLevel/utils.js'
 import { renderTask } from './highLevel/taskThings.js'
 
 export const recap = {
@@ -33,8 +33,7 @@ export const recap = {
       await globals.paintPage('main', true, true);
     });
     if (!response.show) return qs('#toMain').click();
-    const counter = qs('#tasksCount');
-    const prog = qs('#dayProgress');
+    const { tasksCount: counter, dayProgress: prog } = getElements('tasksCount', 'dayProgress');
     prog.max = response.all;
     let completedTasks = response.count;
     const updateUI = () => {
@@ -48,12 +47,8 @@ export const recap = {
     };
     updateUI();
     if (response.completed) {
-      for (let elem of qsa('.completed')) {
-        elem.style.display = 'block';
-      }
-      for (let elem of qsa('.content > *:not(.completed)')) {
-        elem.style.display = 'none';
-      }
+      qsa('.completed').forEach(show);
+      qsa('.content > *:not(.completed)').forEach(hide);
       page.classList.add('center', 'doubleColumns');
       qs('#congrats').innerHTML += counter.parentElement.innerHTML;
       return;
@@ -65,11 +60,11 @@ export const recap = {
     for (let id of day.forgottenTasks) {
       const td = await globals.db.getItem('tasks', id);
       renderTask({
-        type: 'day', globals, td, page: container, extraFunc: async (actualDay, value) => {
+        type: 'day', globals, td, extraFunc: async (actualDay, value) => {
           completedTasks += 1 * (value ? 1 : -1);
           await completeDay(actualDay);
           updateUI();
-        }, forcedDay: date
+        }, page: container, forcedDay: date
       });
     }
   }

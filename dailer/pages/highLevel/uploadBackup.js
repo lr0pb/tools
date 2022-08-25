@@ -1,4 +1,4 @@
-import { globQs as qs, globQsa as qsa, intlDate } from './utils.js'
+import { globQs as qs, globQsa as qsa, intlDate, show, hide } from './utils.js'
 import { getToday, oneDay, isCustomPeriod } from './periods.js'
 import { createPeriod } from '../periodCreator.js'
 import { createTask } from '../taskCreator.js'
@@ -33,12 +33,8 @@ export async function uploadData(globals, paintPeriods) {
 }
 
 export async function uploading(globals, data) {
-  for (let elem of qsa('.beforeUpload')) {
-    elem.style.display = 'none';
-  }
-  for (let elem of qsa('.uploadUI')) {
-    elem.style.display = 'block';
-  }
+  qsa('.beforeUpload').forEach(hide);
+  qsa('.uploadUI').forEach(show);
   const session = await globals.db.getItem('settings', 'session');
   session.lastTasksChange = Date.now();
   const periodsConvert = {};
@@ -49,16 +45,14 @@ export async function uploading(globals, data) {
   }
   const periods = await globals.getPeriods();
   const days = {};
-  await globals.db.getAll('days', (day) => {
-    days[day.date] = day;
-  });
+  await globals.db.getAll('days', (day) => { days[day.date] = day; });
   let earliestDay = getToday();
   const tasks = [];
   for (let td of data.dailer_tasks) {
     if (td.periodStart < earliestDay) earliestDay = td.periodStart;
     td.id = Date.now().toString();
     if (isCustomPeriod(td.periodId)) td.periodId = periodsConvert[td.periodId];
-    const task = createTask(periods, td);
+    const task = await createTask(globals, td);
     tasks.push(task);
     if (
       (task.special == 'oneTime' ? task.periodStart : task.endDate) == getToday() - oneDay
@@ -72,9 +66,6 @@ export async function uploading(globals, data) {
     if (days[date]) continue;
     days[date] = await globals.worker.call({ process: 'getRawDay', args: [date, true] });
   }
-  /*const prog = qs('progress.uploadUI');
-  prog.max = tasks.length;
-  prog.value = 0;*/
   for (let i = 0; i < tasks.length; i++) {
     const task = tasks[i];
     const iha = isHistoryAvailable(task);
@@ -91,21 +82,9 @@ export async function uploading(globals, data) {
       const endDate = task.endDate ? Math.min(getToday(), task.endDate) : getToday();
       await onActiveDay(endDate, task.history[0]);
     }
-    //prog.value = i + 1;
   }
-  //prog.removeAttribute('value');
-  for (let date in days) {
-    await globals.db.setItem('days', days[date]);
-  }
-  //
-  /*for (let elem of qsa('.beforeUpload')) {
-    elem.style.display = 'block';
-  }*/
+  for (let date in days) { await globals.db.setItem('days', days[date]); }
   globals.pageInfo = { backupUploaded: true };
-  for (let elem of qsa('.uploadUI')) {
-    elem.style.display = 'none';
-  }
-  for (let elem of qsa('.uploadSuccess')) {
-    elem.style.display = 'block';
-  }
+  qsa('.uploadUI').forEach(hide);
+  qsa('.uploadSuccess').forEach(show);
 }

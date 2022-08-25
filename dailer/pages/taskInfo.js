@@ -10,9 +10,7 @@ export const taskInfo = {
       taskTitle ? `Task info: ${taskTitle}` : 'Task info'
     }`;
   },
-  get titleEnding() {
-    return taskTitle ? 'line' : 'text';
-  },
+  get titleEnding() { return taskTitle ? 'line' : 'text'; },
   dynamicTitle: true,
   get header() { return `${emjs.oldPaper} Task info`},
   get page() { return ``},
@@ -102,9 +100,7 @@ function renderItemsHolder({task, periods, priorities, iha}) {
     ? `${perTitle} from ${startTitle}${task.endDate ? ` to ${endTitle}` : ''}`
     : (task.endDate
       ? `${perTitle}${task.disabled ? '. Ended' : ' to'} ${endTitle}` : task.periodTitle);
-  createInfoRect(
-    emjs.calendar, periodText, 'blue', (!iha && !task.disabled) || (iha && showQS) ? 1 : 2
-  );
+  createInfoRect(emjs.calendar, periodText, 'blue', (!iha && !task.disabled) || (iha && showQS) ? 1 : 2);
 
   const isActive = task.period[task.periodDay];
   const isActiveText = `Today ${isActive ? 'you should do' : `you haven't`} this task`;
@@ -145,8 +141,7 @@ function createInfoRect(emoji, text, color, coef = 1) {
   elem.style.setProperty('--color', `var(--${color})`);
   elem.style.setProperty('--coef', coef);
   elem.innerHTML = `
-    <h4>${emoji}</h4>
-    <h3>${text}</h3>
+    <h4>${emoji}</h4><h3>${text}</h3>
   `;
   qs('.itemsHolder').append(elem);
 }
@@ -159,13 +154,10 @@ export function isHistoryAvailable(task) {
 
 function getPeriodsData(task) {
   let activeDays = 0;
-  for (let day of task.period) {
-    if (day) activeDays++;
-  }
+  for (let day of task.period) { if (day) activeDays++; }
   const periodsInWeek = 7 / task.period.length;
   return {
-    periodsInWeek,
-    daysInWeek: activeDays * periodsInWeek,
+    periodsInWeek, daysInWeek: activeDays * periodsInWeek,
     runnedPeriods: task.history.length / activeDays
   };
 }
@@ -182,16 +174,13 @@ function createMonth(name, month, history) {
   const elem = document.createElement('div');
   elem.dataset.month = month;
   elem.innerHTML = `
-    <h3>${name}</h3>
-    <div class="historyMonth"></div>
+    <h3>${name}</h3><div class="historyMonth"></div>
   `;
   history.append(elem);
   return elem.querySelector('.historyMonth');
 }
 
-const formatter = new Intl.DateTimeFormat('en', {
-  month: 'long', year: 'numeric'
-});
+const formatter = new Intl.DateTimeFormat('en', { month: 'long', year: 'numeric' });
 
 function borderValues(value) {
   value--;
@@ -216,9 +205,7 @@ function getWeekendDays(date, month) {
 }
 
 function renderEmptyDays(hm, count) {
-  for (let i = 0; i < count; i++) {
-    hm.innerHTML += `<h4> </h4>`;
-  }
+  for (let i = 0; i < count; i++) { hm.innerHTML += `<h4> </h4>`; }
 }
 
 function init(date, h, hm) {

@@ -1,16 +1,16 @@
 import { getToday, normalizeDate, isCustomPeriod } from './periods.js'
-import { globQs as qs } from './utils.js'
+import { globQs as qs, show, hide } from './utils.js'
 
 export async function downloadData(globals) {
   const prog = qs('.downloadUI');
-  prog.style.display = 'block';
+  show(prog);
   const data = await getData(globals);
   const blob = new Blob([JSON.stringify(data)], {type: 'application/vnd.dailer+json'});
   const link = qs('#downloadData');
   const name = String(data.dailer_created).match(/(?:\d\d)(\d{6})/)[1];
   link.download = `${name}.dailer`;
   link.href = URL.createObjectURL(blob);
-  prog.style.display = 'none';
+  hide(prog);
   await globals.db.updateItem('settings', 'backupReminder', (remind) => {
     if (remind.nextRemind === getToday() && !remind.isDownloaded) {
       remind.isDownloaded = true;

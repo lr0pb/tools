@@ -70,7 +70,6 @@ async function renderPage({globals, page}) {
   qs('#clearSettings').addEventListener('click', async () => {
     //await globals.db.deleteAll('settings');
     await globals.db.deleteItem('settings', 'notifications');
-    await globals.db.deleteItem('settings', 'periods');
     await reloadApp(globals);
   });
 }

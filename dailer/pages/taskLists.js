@@ -30,9 +30,7 @@ export const planCreator = {
       page.innerHTML = '';
       page.classList.remove('center');
     }
-    const task = renderTask({
-      type: 'edit', globals, td, page: elem ? null : page, periods, priorities
-    });
+    const task = renderTask({ type: 'edit', globals, td, page: elem ? null : page, periods, priorities });
     if (elem && task) elem.replaceWith(task);
     delete globals.pageInfo.dataChangedTaskId;
   },
@@ -40,9 +38,7 @@ export const planCreator = {
 };
 
 const meta = {
-  planCreator: {
-    bad: (td) => td.deleted || td.disabled
-  },
+  planCreator: { bad: (td) => td.deleted || td.disabled },
   tasksArchive: {
     bad: (td) => td.deleted || !td.disabled,
     sort: (t1, t2) => {
@@ -58,8 +54,7 @@ const meta = {
 
 async function onPlanCreator({globals, page}) {
   globals.pageButton({
-    emoji: emjs.book, title: 'Open tasks archive',
-    onClick: () => globals.paintPage('tasksArchive')
+    emoji: emjs.book, title: 'Open tasks archive', onClick: () => globals.paintPage('tasksArchive')
   });
   qs('#back').addEventListener('click', () => history.back());
   qs('#addTask').addEventListener('click', () => globals.paintPage('taskCreator'));
@@ -91,9 +86,7 @@ async function renderProgressiveTasksList({globals, page, isBadTask}) {
   globals.db.getAll('tasks', (td) => {
     if (isBadTask(td)) return;
     renderTask({type: 'edit', globals, td, page, periods, priorities});
-  }).then(() => {
-    if (!page.children.length) showNoTasks(page);
-  });
+  }).then(() => { if (!page.children.length) showNoTasks(page); });
 }
 
 async function renderSortedTasksList({globals, page, isBadTask, sort}) {
@@ -102,20 +95,15 @@ async function renderSortedTasksList({globals, page, isBadTask, sort}) {
   const priorities = await globals.getList('priorities');
   page.innerHTML = '';
   let prevTask = null, prevTaskId = null;
-  const setPrev = (task, id) => {
-    prevTask = task; prevTaskId = id;
-  };
-  if (!tasks.length) {
-    showNoTasks(page);
-  } else for (let i = 0; i < tasks.length; i++) {
+  const setPrev = (task, id) => { prevTask = task; prevTaskId = id; };
+  if (!tasks.length) { showNoTasks(page); }
+  else for (let i = 0; i < tasks.length; i++) {
     // one loop with filtering, sorting and action with data instead of
     // 3 loops for all this actions
     let td = prevTask || tasks[i]; // td stands for task's data
     if (isBadTask(td)) continue;
     if (sort) {
-      while (isBadTask(tasks[i + 1] || td)) {
-        i++;
-      }
+      while (isBadTask(tasks[i + 1] || td)) { i++; }
       const nextTask = tasks[i + 1] || td;
       const resp = sort(td, nextTask);
       if (resp === -1) {
@@ -138,11 +126,7 @@ async function onBackupUploaded({globals, page}) {
   if (!globals.pageInfo) syncGlobals(globals);
   if (!globals.pageInfo.backupUploaded) return;
   const args = {
-    globals, page,
-    isBadTask: meta[globals.pageName].bad,
-    sort: meta[globals.pageName].sort
+    globals, page, isBadTask: meta[globals.pageName].bad, sort: meta[globals.pageName].sort
   };
-  meta[globals.pageName].sort
-  ? await renderSortedTasksList(args)
-  : await renderProgressiveTasksList(args);
+  meta[globals.pageName].sort ? await renderSortedTasksList(args) : await renderProgressiveTasksList(args);
 }

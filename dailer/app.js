@@ -73,9 +73,7 @@ window.addEventListener('pagehide', () => {
 });
 
 function createDb() {
-  if (!globals.db) globals.db = new IDB(
-    database.name, database.version, database.stores
-  );
+  if (!globals.db) globals.db = new IDB(database.name, database.version, database.stores);
 }
 
 async function deployWorkers() {
@@ -202,9 +200,7 @@ async function updatePageTitle() {
   const page = pages[params.settings ? 'settings' : params.page];
   if (page.dynamicTitle) {
     await new Promise((res) => {
-      const isReady = () => {
-        setTimeout(() => globals.isPageReady ? res() : isReady(), 10);
-      };
+      const isReady = () => setTimeout(() => globals.isPageReady ? res() : isReady(), 10);
       isReady();
     });
   }
