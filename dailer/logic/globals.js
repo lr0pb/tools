@@ -116,6 +116,7 @@ async function paintPage(name, { dontPushHistory, replaceState, noAnim, params }
   }
   container.classList.remove('hided');
   container.classList.add('current');
+  if (!params) params = getParams(link);
   await page.script({ globals, page: content, params });
   globals.isPageReady = true;
 }

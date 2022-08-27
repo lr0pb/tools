@@ -109,6 +109,7 @@ async function onTaskDeleteClick({elem, globals, page}) {
 
 function openTaskInfo({elem, globals}) {
   const id = elem.dataset.id;
+  if (!globals.pageInfo) globals.pageInfo = {};
   globals.pageInfo = { taskId: id };
   globals.paintPage('taskInfo', { params: { id } });
 }

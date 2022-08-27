@@ -1,6 +1,6 @@
 import { getToday, normalizeDate, oneDay, isCustomPeriod } from './highLevel/periods.js'
 import { getTextDate } from './highLevel/taskThings.js'
-import { qs, /*emjs,*/ intlDate, syncGlobals } from './highLevel/utils.js'
+import { qs, hide, intlDate, syncGlobals } from './highLevel/utils.js'
 
 let taskTitle = null;
 
@@ -49,12 +49,12 @@ async function renderTaskInfo({globals, page, params}) {
   const periods = await globals.getPeriods();
   const priorities = await globals.getList('priorities');
   if (task.disabled || task.deleted) {
-    qs('#edit').style.display = 'none';
+    hide('#edit');
   } else {
     qs('#edit').addEventListener('click', () => {
-      if (!globals.pageInfo) globals.pageInfo = history.state;
+      if (!globals.pageInfo) syncGlobals(globals);
       globals.pageInfo.taskAction = 'edit';
-      globals.paintPage('taskCreator', { params });
+      globals.paintPage('taskCreator');
     });
   }
   const iha = isHistoryAvailable(task);
