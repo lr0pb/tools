@@ -116,12 +116,11 @@ async function hardReload(globals, info) {
 }
 
 export async function onTraverseNavigation(globals, e, silent) {
-  const idx = (e.from || navigation.currentEntry).index;
+  const idx = (e.from || navigation.transition.from).index;
   const rawDelta = idx - e.destination.index;
   let delta = Math.abs(rawDelta);
   const dir = rawDelta > 0 ? -1 : 1; // -1 stands for backward, 1 stands for forward
   const appHistory = navigation.entries();
-  console.log(appHistory.length);
   console.log(delta);
   globals.closePopup(true);
   for (let i = 0; i < delta; i++) {
@@ -135,7 +134,6 @@ export async function onTraverseNavigation(globals, e, silent) {
       pages[currentParams.page].onBack(globals);
     }
     globals.pageName = nextParams.page;
-    console.log(globals.pageName);
     if (settings) {
       if (differentPages) {
         dir === -1
@@ -159,7 +157,6 @@ export async function onTraverseNavigation(globals, e, silent) {
       globals.additionalBack = 0;
     }
   }
-  console.log('End of navigation');
 }
 
 export async function externalNavigate(globals, link) {
