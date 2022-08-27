@@ -1,6 +1,6 @@
 import { pages } from './pages.js'
 import {
-  qs as localQs, globQs as qs, globQsa as qsa, copyArray, inert, showErrorPage
+  qs as localQs, globQs as qs, globQsa as qsa, copyArray, inert, getParams
 } from '../pages/highLevel/utils.js'
 
 const getUrl = () => location.href.toString();

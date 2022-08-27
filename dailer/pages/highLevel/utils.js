@@ -225,7 +225,7 @@ export function showErrorPage(err) {
       <button>${emjs.reload} Reload app</button>
     </div>
   `;
-  qsa('.page').forEach(inert.set);
+  qsa('.page').forEach((page) => inert.set(page, true));
   document.body.append(elem);
   document.activeElement.blur();
   elem.querySelector('button').addEventListener('click', () => location.reload() );
