@@ -263,7 +263,7 @@ async function onPeriodChange(event, globals) {
   if (per.description) show(e.description, per.description);
   if (dailerData.experiments && per.special == 'untilComplete') {
     showFlex('[data-id="wishlist"]')
-    show('h3.wishlist');
+    qsa('.wishlist').forEach(show);
   } else qsa('.wishlist').forEach(hide);
   if (per.special == 'oneTime') {
     const toggler = qs('[data-id="noEndDate"]');

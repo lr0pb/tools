@@ -82,22 +82,23 @@ const instantPromise = () => new Promise((res) => { res() });
 
 export function onAppNavigation(e, globals) {
   console.log(e);
+  console.log('intercept' in e);
   if (!dailerData.nav) return;
   if (!e.canIntercept && !e.canTransition) return;
   const info = e.info || {};
-  if (info.call === 'hardReload') return e.canIntercept
-  ? e.intercept({ focusReset: 'manual', handler: async () => await hardReload(globals, info) })
+  if (info.call === 'hardReload') return 'intercept' in e
+  ? e.intercept({ focusReset: 'manual', async handler() { await hardReload(globals, info) } })
   : e.transitionWhile(hardReload(globals, info));
   if (e.downloadRequest || e.navigationType == 'reload') return;
   if (
     callsList.includes(info.call) || e.navigationType !== 'traverse'
   ) {
-    return e.canIntercept
-    ? e.intercept({ focusReset: 'manual', handler: async () => await instantPromise() })
+    return 'intercept' in e
+    ? e.intercept({ focusReset: 'manual', async handler() { await instantPromise() } })
     : e.transitionWhile(instantPromise());
   }
-  e.canIntercept
-  ? e.intercept({ focusReset: 'manual', handler: async () => await onTraverseNavigation(globals, e) })
+  'intercept' in e
+  ? e.intercept({ focusReset: 'manual', async handler() { await onTraverseNavigation(globals, e) } })
   : e.transitionWhile(onTraverseNavigation(globals, e));
 }
 
