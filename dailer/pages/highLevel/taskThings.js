@@ -68,7 +68,8 @@ export function renderTask({
     name: td.name, id: td.id, buttons: [{
       emoji: getTaskComplete(td), title: markTitle(), aria: markTitle(td.name),
       func: onTaskCompleteClick, args: { globals, forcedDay, extraFunc }
-    }], page, onBodyClick: openTask ? openTaskInfo : null, value: td.history.at(-1)
+    }], page, onBodyClick: openTask ? openTaskInfo : null,
+    args: { globals }, value: td.history.at(-1)
   });
   const buttons = [{
     emoji: emjs.pen, title: 'Edit task', aria: `Edit task: ${td.name}`,

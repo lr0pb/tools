@@ -1,7 +1,7 @@
 import { getToday, convertDate, oneDay, getWeekStart, isCustomPeriod } from './highLevel/periods.js'
 import { editTask, setPeriodTitle, renderToggler, toggleFunc } from './highLevel/taskThings.js'
 import {
-  qs, copyObject, safeDataInteractions, createOptionsList, syncGlobals, updateState,
+  qs, qsa, copyObject, safeDataInteractions, createOptionsList, syncGlobals, updateState,
   show, showFlex, hide, getElements, getValue
 } from './highLevel/utils.js'
 
