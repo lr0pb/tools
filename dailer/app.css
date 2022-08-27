@@ -207,7 +207,7 @@ noscript {
   transform: translateX(100vw);
   transition: transform var(--normalAnim) cubic-bezier(.22,.61,.36,1);
 }
-#settings > .content > *:last-child {
+#settings > .content > *:last-child:not(.doubleColumns) {
   margin-bottom: 4rem;
 }
 .page {

@@ -1,5 +1,5 @@
 import { renderToggler, toggleFunc } from './highLevel/taskThings.js'
-import { globQs as qs } from './highLevel/utils.js'
+import { globQs as qs, convertEmoji } from './highLevel/utils.js'
 import { uploadData } from './highLevel/uploadBackup.js'
 import { downloadData } from './highLevel/createBackup.js'
 import { toggleExperiments } from './highLevel/settingsBackend.js'
@@ -75,6 +75,9 @@ export const settings = {
       <h3>${emjs.sparkles} Emojis powered by <a href="https://github.com/googlefonts/noto-emoji/" target="_blank">Google</a></h3>
       <!--<h3>${emjs.magicBall} Codename: Sangria</h3>-->
       <h3>${emjs.microscope} Developed in 2022</h3>
+      <div class="doubleColumns first">
+        <button id="share">${emjs.loudspeaker} Share dailer</button>
+      </div>
     `;
     qs('#toPeriodCreator').addEventListener('click', () => {
       globals.closeSettings();
@@ -83,6 +86,13 @@ export const settings = {
     qs('#toDebug').addEventListener('click', () => {
       globals.closeSettings();
       globals.paintPage('debugPage');
+    });
+    if (!navigator.share) {
+      qs('#share').parentElement.remove();
+    } else qs('#share').addEventListener('click', async () => {
+      await navigator.share({
+        title: 'dailer \u{2705}', text: 'Check what is the dailer \u{1f642}', url: location.origin + location.pathname
+      });
     });
     qs('#uploadData').addEventListener('click', async () => {
       await uploadData(globals, paintPeriods);

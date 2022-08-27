@@ -49,21 +49,17 @@ window.addEventListener('pageshow', appEntryPoint);
 async function appEntryPoint(e) {
   createDb();
   if (e.persisted) return;
-  try {
-    document.documentElement.lang = navigator.language;
-    const { worker, periodicSync } = await deployWorkers();
-    globals.worker = worker;
-    await loadEmojiList();
-    await processSettings(globals, periodicSync);
-    toggleExperiments();
-    pages.settings.fillHeader({page: qs('#settings > .header')});
-    await pages.settings.paint({globals, page: qs('#settings > .content')});
-    inert.set(qs('#settings'), true);
-    inert.set(qs('#popup'), true);
-    dailerData.nav ? await startApp() : await renderPage(e, false, globals);
-  } catch (err) {
-    showErrorPage(err);
-  }
+  document.documentElement.lang = navigator.language;
+  const { worker, periodicSync } = await deployWorkers();
+  globals.worker = worker;
+  await loadEmojiList();
+  await processSettings(globals, periodicSync);
+  toggleExperiments();
+  pages.settings.fillHeader({page: qs('#settings > .header')});
+  await pages.settings.paint({globals, page: qs('#settings > .content')});
+  inert.set(qs('#settings'), true);
+  inert.set(qs('#popup'), true);
+  dailerData.nav ? await startApp() : await renderPage(e, false, globals);
 }
 
 window.addEventListener('pagehide', () => {

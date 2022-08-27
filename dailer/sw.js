@@ -167,7 +167,7 @@ async function openApp({ timestamp, data }) {
   for (let param in data) {
     link += `&${param}=${data[param]}`;
   }
-  const allClients = await clients.matchAll({ type: 'window' });
+  const allClients = await clients.matchAll({ type: 'window', includeUncontrolled: true });
   if (allClients.length > 0) {
     allClients.at(-1).focus();
     allClients.at(-1).postMessage({ navigate: link });
