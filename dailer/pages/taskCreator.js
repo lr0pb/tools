@@ -112,7 +112,7 @@ async function onTaskCreator({globals, params}) {
     if (!globals.pageInfo) globals.pageInfo = {};
     globals.pageInfo.lastPeriodValue = '09';
     period.setAttribute('disabled', '');
-    qs('[data-id="wishlistToggler"]').activate();
+    qs('[data-id="wishlist"]').activate();
   }
   safeDataInteractions(['name', 'priority', 'period', 'startDate', 'date', 'endDate']);
   await taskCreator.onSettingsUpdate({globals});
