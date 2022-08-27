@@ -89,10 +89,12 @@ export const settings = {
     });
     if (!navigator.share) {
       qs('#share').parentElement.remove();
-    } else qs('#share').addEventListener('click', async () => {
-      await navigator.share({
+    } else qs('#share').addEventListener('click', () => {
+      navigator.share({
         title: 'dailer \u{2705}', text: 'Check what is the dailer \u{1f642}', url: location.origin + location.pathname
-      });
+      }).catch(err) {
+        console.log('Share was cancelled');
+      };
     });
     qs('#uploadData').addEventListener('click', async () => {
       await uploadData(globals, paintPeriods);

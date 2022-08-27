@@ -116,6 +116,7 @@ async function hardReload(globals, info) {
 }
 
 export async function onTraverseNavigation(globals, e, silent) {
+  console.log('Calling?');
   const idx = (e.from || navigation.currentEntry).index;
   const rawDelta = idx - e.destination.index;
   let delta = Math.abs(rawDelta);
