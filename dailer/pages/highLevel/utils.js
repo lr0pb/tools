@@ -12,12 +12,14 @@ function q(func, elem, page, local) {
   return document[func](`${local ? '.current ' : ''}${elem}`);
 }
 
-export function show(elem, data) {
+function rawShow(display, elem, data) {
   if (typeof elem === 'string') elem = qs(elem);
   if (data && typeof data !== 'number') elem.innerHTML = data;
-  elem.style.display = 'block';
+  elem.style.display = display;
 }
-export function hide(elem) { elem.style.display = 'none'; }
+export const show = (...args) => rawShow('block', ...args);
+export const showFlex = (...args) => rawShow('flex', ...args);
+export const hide = (elem) => rawShow('none', elem);
 
 export function getElements(...elems) {
   const resp = {};
@@ -25,6 +27,10 @@ export function getElements(...elems) {
     resp[elem] = qs(`#${elem}`);
   }
   return resp;
+}
+
+export function getValue(elem) {
+  return Number(qs(`[data-id="${elem}"]`).dataset.value);
 }
 
 export const copyObject = (obj) => {
@@ -200,7 +206,7 @@ export function updateState(updatedStateEntries) {
 
 export async function reloadApp(globals, page) {
   if (!dailerData.nav) {
-    await globals.paintPage(page || 'main', false, false, true);
+    await globals.paintPage(page || 'main', { noAnim: true });
     return location.reload();
   }
   await navigation.reload({ info: {call: 'hardReload', page} }).finished;
@@ -208,7 +214,7 @@ export async function reloadApp(globals, page) {
 
 export function showErrorPage(err) {
   const elem = document.createElement('div');
-  elem.className = 'page';
+  elem.className = 'page error';
   elem.innerHTML = `
     <div class="content center doubleColumns">
       <h2 class="emoji">${emjs.salute}</h2>
@@ -219,7 +225,9 @@ export function showErrorPage(err) {
       <button>${emjs.reload} Reload app</button>
     </div>
   `;
+  qsa('.page').forEach(inert.set);
   document.body.append(elem);
+  document.activeElement.blur();
   elem.querySelector('button').addEventListener('click', () => location.reload() );
   setTimeout(() => { elem.classList.add('showing'); }, 0);
 }

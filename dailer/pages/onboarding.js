@@ -16,7 +16,7 @@ export const onboarding = {
       await globals.db.updateItem('settings', 'session', (session) => {
         session.onboarded = true;
       });
-      await globals.paintPage('taskCreator', true);
+      await globals.paintPage('taskCreator', { dontPushHistory: true });
     });
   }
 };

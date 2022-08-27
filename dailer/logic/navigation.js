@@ -26,9 +26,9 @@ export async function renderFirstPage(globals) {
   const params = getParams();
   const { rndr, firstPage } = await verifyRenderPage(globals, params);
   if (['main', 'recap', 'onboarding'].includes(rndr)) {
-    await globals.paintPage(rndr, true, true);
+    await globals.paintPage(rndr, { replaceState: true });
   } else {
-    await globals.paintPage(firstPage, true, true, true);
+    await globals.paintPage(firstPage, { replaceState: true, noAnim: true });
     await globals.paintPage(rndr);
   }
   await processPageBuilding(globals, params);
@@ -83,15 +83,22 @@ const instantPromise = () => new Promise((res) => { res() });
 export function onAppNavigation(e, globals) {
   console.log(e);
   if (!dailerData.nav) return;
+  if (!e.canIntercept && !e.canTransition) return;
   const info = e.info || {};
-  if (info.call === 'hardReload') return e.transitionWhile(hardReload(globals, info));
+  if (info.call === 'hardReload') return e.canIntercept
+  ? e.intercept({ focusReset: 'manual', handler: async () => await hardReload(globals, info) })
+  : e.transitionWhile(hardReload(globals, info));
   if (e.downloadRequest || e.navigationType == 'reload') return;
   if (
     callsList.includes(info.call) || e.navigationType !== 'traverse'
   ) {
-    return e.transitionWhile(instantPromise());
+    return e.canIntercept
+    ? e.intercept({ focusReset: 'manual', handler: async () => await instantPromise() })
+    : e.transitionWhile(instantPromise());
   }
-  return e.transitionWhile(onTraverseNavigation(globals, e));
+  e.canIntercept
+  ? e.intercept({ focusReset: 'manual', handler: async () => await onTraverseNavigation(globals, e) })
+  : e.transitionWhile(onTraverseNavigation(globals, e));
 }
 
 async function hardReload(globals, info) {
@@ -104,7 +111,7 @@ async function hardReload(globals, info) {
     page.remove();
   }
   const session = await globals.db.getItem('settings', 'session');
-  await globals.paintPage(info.page || getFirstPage(session), true, true);
+  await globals.paintPage(info.page || getFirstPage(session), { replaceState: true });
 }
 
 export async function onTraverseNavigation(globals, e, silent) {

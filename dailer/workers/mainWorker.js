@@ -4,6 +4,11 @@ importScripts('./sharedFunctions.js');
 db = new IDB(database.name, database.version, database.stores);
 periods = null;
 
+self.addEventListener('unhandledrejection', (e) => {
+  console.error(e.reason);
+  self.postMessage({ error: `From Worker: ${e.reason}` });
+})
+
 self.onmessage = async (e) => { // safari never call message event setted via listener
   if (typeof e.data !== 'object') return;
   const d = e.data;
@@ -68,7 +73,7 @@ async function checkReminderPromo() {
 }
 
 async function createTask({
-  id, isPageExist, name, period, priority, date, enableEndDate, endDate
+  id, isPageExist, name, period, priority, date, enableEndDate, endDate, wishlist
 }) {
   if (!periods) periods = await db.getAll('periods');
   const td = id ? await db.getItem('tasks', id) : {};
@@ -84,7 +89,7 @@ async function createTask({
     periodStart: td.periodStart && td.periodStart <= getToday()
     ? td.periodStart
     : tdPer.selectTitle || per.selectTitle || per.getWeekStart
-    ? dateValue : td.periodStart || dateValue,
+    ? date : td.periodStart || date,
     periodDay: td.periodId
     ? td.periodDay
     : (per.getWeekStart
@@ -100,6 +105,7 @@ async function createTask({
   if (td.name && task.name != td.name) task.nameEdited = true;
   if (td.created) task.created = td.created;
   if (enableEndDate && endDate) task.endDate = endDate;
+  if (task.special == 'untilComplete' && wishlist) task.wishlist = wishlist;
   setPeriodTitle(task);
   return task;
 }

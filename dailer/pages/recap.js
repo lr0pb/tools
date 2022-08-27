@@ -30,7 +30,7 @@ export const recap = {
         delete day.forgottenTasks;
         day.afterDayEndedProccessed = true;
       });
-      await globals.paintPage('main', true, true);
+      await globals.paintPage('main', { replaceState: true });
     });
     if (!response.show) return qs('#toMain').click();
     const { tasksCount: counter, dayProgress: prog } = getElements('tasksCount', 'dayProgress');

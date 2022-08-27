@@ -61,14 +61,14 @@ export function toggleFunc({e, elem}) {
 }
 
 export function renderTask({
-  type, globals, td, page, onBodyClick, periods, priorities, forcedDay, extraFunc
+  type, globals, td, page, periods, priorities, forcedDay, extraFunc, openTask
 }) {
   const markTitle = (task) => `Mark task${task ? ` "${task}"` : ''} as completed`;
   if (type == 'day') return renderToggler({
     name: td.name, id: td.id, buttons: [{
       emoji: getTaskComplete(td), title: markTitle(), aria: markTitle(td.name),
       func: onTaskCompleteClick, args: { globals, forcedDay, extraFunc }
-    }], page, onBodyClick, value: td.history.at(-1)
+    }], page, onBodyClick: openTask ? openTaskInfo : null, value: td.history.at(-1)
   });
   const buttons = [{
     emoji: emjs.pen, title: 'Edit task', aria: `Edit task: ${td.name}`,
@@ -88,13 +88,14 @@ export function renderTask({
         }</span>${td.periodTitle}` : td.periodTitle
       } | ${emoji}${emoji === '' ? '' : ' '}${priority.title}</p>
     `, id: td.id, buttons: td.disabled ? undefined : buttons,
-    page, onBodyClick: onTaskManageClick, args: { globals }
+    page, onBodyClick: openTaskInfo, args: { globals }
   });
 }
 
 function onTaskEditClick({elem, globals}) {
-  globals.pageInfo = { taskAction: 'edit', taskId: elem.dataset.id };
-  globals.paintPage('taskCreator');
+  const id = elem.dataset.id;
+  globals.pageInfo = { taskAction: 'edit', taskId: id };
+  globals.paintPage('taskCreator', { params: { id } });
 }
 
 async function onTaskDeleteClick({elem, globals, page}) {
@@ -106,9 +107,10 @@ async function onTaskDeleteClick({elem, globals, page}) {
   });
 }
 
-function onTaskManageClick({elem, globals}) {
-  globals.pageInfo = { taskId: elem.dataset.id };
-  globals.paintPage('taskInfo');
+function openTaskInfo({elem, globals}) {
+  const id = elem.dataset.id;
+  globals.pageInfo = { taskId: id };
+  globals.paintPage('taskInfo', { params: { id } });
 }
 
 export function showNoTasks(page) {

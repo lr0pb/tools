@@ -40,9 +40,10 @@ export const taskInfo = {
   }
 };
 
-async function renderTaskInfo({globals, page}) {
+async function renderTaskInfo({globals, page, params}) {
   qs('#back').addEventListener('click', () => history.back());
   syncGlobals(globals);
+  if (!globals.pageInfo.taskId) globals.pageInfo.taskId = params.id;
   const task = await globals.db.getItem('tasks', globals.pageInfo.taskId);
   taskTitle = task.name;
   const periods = await globals.getPeriods();
@@ -53,7 +54,7 @@ async function renderTaskInfo({globals, page}) {
     qs('#edit').addEventListener('click', () => {
       if (!globals.pageInfo) globals.pageInfo = history.state;
       globals.pageInfo.taskAction = 'edit';
-      globals.paintPage('taskCreator');
+      globals.paintPage('taskCreator', { params });
     });
   }
   const iha = isHistoryAvailable(task);
@@ -92,14 +93,15 @@ function renderItemsHolder({task, periods, priorities, iha}) {
 
   const rawTitle = periods[task.periodId].title;
   const perTitle = isCustomPeriod(task.periodId)
-  ? `<span class="customTitle" data-period="${task.periodId}">${rawTitle}</span>`
-  : rawTitle;
+  ? `<span class="customTitle" data-period="${task.periodId}">${rawTitle}</span>` : rawTitle;
   const startTitle = getTextDate(task.periodStart);
   const endTitle = task.endDate ? getTextDate(task.endDate) : null;
   const periodText = !task.special
     ? `${perTitle} from ${startTitle}${task.endDate ? ` to ${endTitle}` : ''}`
     : (task.endDate
-      ? `${perTitle}${task.disabled ? '. Ended' : ' to'} ${endTitle}` : task.periodTitle);
+      ? `${perTitle}${task.disabled ? '. Ended' : ' to'}${
+        task.special == 'untilComplete' ? ` in ${(task.endDate - task.periodStart) / oneDay} days` : ''
+      } ${endTitle}` : task.periodTitle);
   createInfoRect(emjs.calendar, periodText, 'blue', (!iha && !task.disabled) || (iha && showQS) ? 1 : 2);
 
   const isActive = task.period[task.periodDay];
@@ -113,8 +115,7 @@ function renderItemsHolder({task, periods, priorities, iha}) {
 
   if (iha && showQS) {
     const quickStats = {
-      amount: Math[task.period[task.periodDay] ? 'ceil' : 'floor'](daysInWeek),
-      completed: 0, done: false
+      amount: Math[task.period[task.periodDay] ? 'ceil' : 'floor'](daysInWeek), completed: 0, done: false
     };
     for (let i = 1; i < quickStats.amount + 1; i++) {
       if (task.history.at(-1 * i)) quickStats.completed++;

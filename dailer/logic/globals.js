@@ -5,7 +5,7 @@ import {
 
 const getUrl = () => location.href.toString();
 
-const getPageLink = (name) => {
+const getPageLink = (name, params = {}) => {
   const getLink = (sign) => getUrl() + sign + `page=${name}`;
   const matcher = getUrl().match(/(?:page=)(\w+)/);
   let link = getUrl().includes('?')
@@ -14,6 +14,7 @@ const getPageLink = (name) => {
      : getLink('&'))
   : getLink('?');
   link = link.replace(/\&settings=\w+/, '');
+  for (let prop in params) { link += `&${prop}=${params[prop]}`; }
   const url = new URL(link);
   return dailerData.nav ? url.pathname + url.search : link;
 };
@@ -67,7 +68,7 @@ async function _setCacheConfig() {
   globals._cachedConfigFile = await raw.json();
 }
 
-async function paintPage(name, dontPushHistory, replaceState, noAnim) {
+async function paintPage(name, { dontPushHistory, replaceState, noAnim, params } = {}) {
   globals.pageName = name;
   globals.isPageReady = false;
   const page = pages[name];
@@ -100,7 +101,7 @@ async function paintPage(name, dontPushHistory, replaceState, noAnim) {
   await showPage(globals, qs('.current'), container, noAnim);
   const args = page.noSettings ? [undefined] : ['click', () => globals.openSettings()];
   container.querySelector('.openSettings')[page.noSettings ? 'remove' : 'addEventListener'](...args);
-  const link = getPageLink(name);
+  const link = getPageLink(name, params);
   if (dailerData.nav) {
     let historyAction = null;
     if (!dontPushHistory) historyAction = 'push';
@@ -115,7 +116,7 @@ async function paintPage(name, dontPushHistory, replaceState, noAnim) {
   }
   container.classList.remove('hided');
   container.classList.add('current');
-  await page.script({ globals, page: content });
+  await page.script({ globals, page: content, params });
   globals.isPageReady = true;
 }
 
@@ -254,10 +255,11 @@ export async function showPage(globals, prev, current, noAnim, noCleaning) {
   inert.set(prev);
   inert.remove(current);
   let done = false;
-  setTimeout(() => {
+  const addShowing = () => {
     current.classList.add('showing');
     done = true;
-  }, noAnim ? 0 : 10);
+  }
+  noAnim ? addShowing() : setTimeout(addShowing, 10);
   if (!noCleaning) {
     for (let elem of qsa('.hided')) {
       elem.remove();
@@ -279,8 +281,8 @@ export async function hidePage(globals, current, prevName, noPageUpdate) {
   inert.set(current);
   const prev = qs(`#${prevName}`);
   if (!prev) {
-    if (!qs('#main')) await globals.paintPage('main', false, true);
-    if (prevName !== 'main') await globals.paintPage(prevName, true, false);
+    if (!qs('#main')) await globals.paintPage('main', { replaceState: true });
+    if (prevName !== 'main') await globals.paintPage(prevName, { dontPushHistory: true });
     return;
   }
   prev.style.willChange = 'transform';

@@ -110,9 +110,8 @@ async function deployWorkers() {
     return resp.data;
   };
   worker.onmessage = (e) => {
-    worker._callsList.set(e.data._id, {
-      data: e.data.data, used: false
-    });
+    if (e.data.error) return showErrorPage(e.data.error);
+    worker._callsList.set(e.data._id, { data: e.data.data, used: false });
   };
   worker.postMessage({isWorkerReady: false});
   resp.worker = worker;
@@ -169,7 +168,7 @@ async function restoreApp(appHistory) {
       params.page = getFirstPage(session);
     }
     if (ogPage !== params.page) {
-      await globals.paintPage(params.page, true, true);
+      await globals.paintPage(params.page, { replaceState: true });
       dailerData.forcedStateEntry = null;
       await navigation.traverseTo(appHistory[0].key, {
         info: {call: 'traverseToStart'}
@@ -180,7 +179,7 @@ async function restoreApp(appHistory) {
       await globals.openSettings(params.section, true);
     } else {
       if (globals.settings) await globals.closeSettings();
-      await globals.paintPage(params.page, true, false, true);
+      await globals.paintPage(params.page, { dontPushHistory: true, noAnim: true });
     }
   }
   dailerData.forcedStateEntry = null;

@@ -41,9 +41,10 @@ async function getData(globals) {
       priority: td.priority,
       history: td.history
     };
-    if (td.endDate) task.endDate = td.endDate;
-    if (td.special) task.special = td.special;
-    if (td.disabled) task.disabled = true;
+    const fields = ['disabled', 'special', 'endDate', 'wishlist'];
+    for (let field of fields) {
+      if (td[field]) task[field] = td[field];
+    }
     data.dailer_tasks.push(task);
   });
   await globals.db.getAll('periods', (per) => {

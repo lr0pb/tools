@@ -40,7 +40,7 @@ export const planCreator = {
 const meta = {
   planCreator: { bad: (td) => td.deleted || td.disabled },
   tasksArchive: {
-    bad: (td) => td.deleted || !td.disabled,
+    bad: (td) => td.wishlist || td.deleted || !td.disabled,
     sort: (t1, t2) => {
       const chooseDate = (t) => t.special == 'untilComplete' && t.endDate ? t.endDate : t.periodStart;
       const t1date = chooseDate(t1);

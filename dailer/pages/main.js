@@ -61,10 +61,7 @@ async function renderDay({globals, page}) {
     const tasks = day.tasks[i];
     for (let id in tasks) {
       const td = await globals.db.getItem('tasks', id);
-      renderTask({type: 'day', globals, td, page, onBodyClick: ({elem}) => {
-        globals.pageInfo = { taskId: elem.dataset.id };
-        globals.paintPage('taskInfo');
-      }});
+      renderTask({ type: 'day', globals, td, page, openTask: true });
     }
   }
   await processChecks(globals);

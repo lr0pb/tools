@@ -1,7 +1,8 @@
 {
   "short_name": "dailer",
   "name": "dailer",
-  "description": "Plan tasks for the day and manage how you grow yourself over time",
+  "description": "Plan tasks for the day and analyze how you grow yourself over time. Create wishlist to manage more ambitious tasks",
+  "categories": ["lifestyle", "productivity"],
   "theme_color": "#000000",
   "background_color": "#000000",
   "display": "standalone",

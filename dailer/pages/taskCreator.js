@@ -2,7 +2,7 @@ import { getToday, convertDate, oneDay, getWeekStart, isCustomPeriod } from './h
 import { editTask, setPeriodTitle, renderToggler, toggleFunc } from './highLevel/taskThings.js'
 import {
   qs, copyObject, safeDataInteractions, createOptionsList, syncGlobals, updateState,
-  show, hide, getElements
+  show, showFlex, hide, getElements, getValue
 } from './highLevel/utils.js'
 
 let taskTitle = null;
@@ -29,9 +29,11 @@ export const taskCreator = {
     </select>
     <h3 id="dateTitle" class="hidedUI"></h3>
     <input type="date" id="date" class="hidedUI">
+    <div id="wishlistToggler" class="wishlist"></div>
+    <h3 class="wishlist hidedUI">Add more ambitious and long-term tasks to your wishlist</h3>
     <div id="endDateToggler"></div>
-    <h3 id="endDateTitle" class="hidedUI">Select day when stop to performing this task</h3>
-    <input type="date" id="endDate" class="hidedUI">
+    <h3 id="endDateTitle" class="endDate hidedUI">Select day when stop to performing this task</h3>
+    <input type="date" id="endDate" class="endDate hidedUI">
     <div id="editButtons">
       <button id="disable" class="secondary noEmoji">Disable task</button>
       <button id="delete" class="danger noEmoji">Delete task</button>
@@ -84,41 +86,52 @@ async function getPeriods(globals) {
   return { periods, periodsList };
 }
 
-async function onTaskCreator({globals}) {
-  qs('#back').addEventListener('click', () => history.back());
+async function onTaskCreator({globals, params}) {
+  const { back, startDate, period, date } = getElements('back', 'startDate', 'period', 'date');
+  back.addEventListener('click', () => history.back());
   const session = await globals.db.getItem('settings', 'session');
-  if (!session.firstDayEver) qs('#back').style.display = 'none';
+  if (!session.firstDayEver) hide(back);
   const priorities = await globals.getList('priorities');
   createOptionsList(qs('#priority'), priorities);
   const startDateOptions = await globals.getList('startDateOptions');
-  createOptionsList(qs('#startDate'), startDateOptions);
+  createOptionsList(startDate, startDateOptions);
+  renderToggler({
+    name: `${emjs.star} Add to wishlist`, id: 'wishlist',
+    page: qs('#wishlistToggler'), value: 0, toggler: emjs.blank, first: true
+  });
   renderToggler({
     name: `${emjs.alarmClock} No limit to end date`, id: 'noEndDate',
-    page: qs('#endDateToggler'), value: 1, first: true,
     buttons: [{
-      emoji: emjs.sign,
-      func: ({e, elem}) => {
+      emoji: emjs.sign, func: ({e, elem}) => {
         const value = toggleFunc({e, elem});
-        qs('#endDateTitle').style.display = value ? 'none' : 'block';
-        qs('#endDate').style.display = value ? 'none' : 'block';
+        qsa('.endDate').forEach(value ? hide : show);
       }
-    }]
+    }], page: qs('#endDateToggler'), value: 1, first: true
   });
+  if (params.wishlist == 'true') {
+    globals.pageInfo.lastPeriodValue = '09';
+    period.setAttribute('disabled', '');
+    qs('[data-id="wishlistToggler"]').activate();
+  }
   safeDataInteractions(['name', 'priority', 'period', 'startDate', 'date', 'endDate']);
   await taskCreator.onSettingsUpdate({globals});
-  qs('#period').addEventListener('change', async (e) => await onPeriodChange(e, globals));
-  qs('#startDate').addEventListener('change', onStartDateChange);
-  qs('#date').min = convertDate(Date.now());
-  qs('#date').addEventListener('change', onDateChange);
+  period.addEventListener('change', async (e) => await onPeriodChange(e, globals));
+  startDate.addEventListener('change', onStartDateChange);
+  date.min = convertDate(Date.now());
+  date.addEventListener('change', onDateChange);
   syncGlobals(globals);
   taskTitle = null;
-  const isEdit = globals.pageInfo && globals.pageInfo.taskAction == 'edit';
+  if (params.id) globals.pageInfo.taskId = params.id;
+  const isEdit = params.id || globals.pageInfo.taskAction == 'edit';
   let td;
   if (isEdit) {
     td = await enterEditTaskMode(globals);
     enableEditButtons(globals, td);
     taskTitle = td.name;
-  } else { await checkPeriodPromo(globals); }
+  } else {
+    qs('#name').focus();
+    await checkPeriodPromo(globals);
+  }
   qs('#saveTask').addEventListener('click', async () => {
     await onSaveTaskClick(globals, session, td, isEdit);
   });
@@ -171,7 +184,7 @@ async function onSaveTaskClick(globals, session, td, isEdit) {
   if (!globals.pageInfo) globals.pageInfo = {};
   globals.pageInfo.dataChangedTaskId = task.id;
   await globals.checkPersist();
-  if (!session.firstDayEver) return globals.paintPage('main', true, true);
+  if (!session.firstDayEver) return globals.paintPage('main', { replaceState: true });
   history.back();
 }
 
@@ -198,7 +211,13 @@ async function enterEditTaskMode(globals) {
     qs('[data-id="noEndDate"]').activate();
     endDate.value = convertDate(td.endDate);
   } else if (td.special == 'oneTime') {
-    qs('[data-id="noEndDate"]').style.display = 'none';
+    hide('[data-id="noEndDate"]');
+  }
+  if (td.special == 'untilComplete') {
+    if (td.wishlist) qs('[data-id="wishlist"]').activate();
+    show('h3.wishlist');
+  } else {
+    hide('[data-id="wishlist"]');
   }
   endDate.min = convertDate(getToday() + oneDay);
   return td;
@@ -242,11 +261,15 @@ async function onPeriodChange(event, globals) {
     }
   }
   if (per.description) show(e.description, per.description);
+  if (dailerData.experiments && per.special == 'untilComplete') {
+    showFlex('[data-id="wishlist"]')
+    show('h3.wishlist');
+  } else qsa('.wishlist').forEach(hide);
   if (per.special == 'oneTime') {
     const toggler = qs('[data-id="noEndDate"]');
     if (!Number(toggler.dataset.value)) toggler.activate();
-    toggler.style.display = 'none';
-  } else qs('[data-id="noEndDate"]').style.display = 'flex';
+    hide(toggler);
+  } else showFlex('[data-id="noEndDate"]');
   onStartDateChange({ target: e.startDate });
   onDateChange({ target: e.date });
 }
@@ -283,8 +306,9 @@ export async function createTask(globals, td = {}) {
     period: isPageExist ? e.period.value : td.periodId,
     priority: isPageExist ? Number(e.priority.value) : td.priority,
     date: isPageExist ? new Date(e.date.value).getTime() : td.periodStart,
-    enableEndDate: isPageExist ? Number(qs('[data-id="noEndDate"]').dataset.value) : td.endDate,
-    endDate: isPageExist ? new Date(e.endDate.value).getTime() : td.endDate
+    enableEndDate: isPageExist ? getValue('noEndDate') : td.endDate,
+    endDate: isPageExist ? new Date(e.endDate.value).getTime() : td.endDate,
+    wishlist: isPageExist ? getValue('wishlist') : td.wishlist,
   }] });
   console.log(task);
   if (task.name == '' || isNaN(task.periodStart)) return 'error';

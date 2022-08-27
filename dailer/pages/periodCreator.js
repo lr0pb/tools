@@ -1,7 +1,7 @@
 import { renderToggler, toggleFunc } from './highLevel/taskThings.js'
 import {
   qs, qsa, globQs, globQsa, /*emjs,*/ safeDataInteractions, handleKeyboard,
-  togglableElement, syncGlobals, copyArray, hide
+  togglableElement, syncGlobals, copyArray, hide, getValue
 } from './highLevel/utils.js'
 import { paintPeriods } from './settings/periods.js'
 
@@ -211,8 +211,4 @@ export async function createPeriod(globals, per = {}, isEdit) {
     await globals.db.setItem('settings', periodData);
   }
   return period;
-}
-
-function getValue(elem) {
-  return Number(qs(`[data-id="${elem}"]`).dataset.value);
 }

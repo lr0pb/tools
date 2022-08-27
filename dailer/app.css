@@ -230,6 +230,11 @@ noscript {
   100% { transform: rotateZ(1turn); }
 }
 
+.error {
+  position: fixed;
+  z-index: 999;
+}
+
 .header { grid-area: header; }
 .content { grid-area: content; }
 .footer { grid-area: footer; }
