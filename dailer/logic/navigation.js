@@ -82,7 +82,6 @@ const instantPromise = () => new Promise((res) => { res() });
 
 export function onAppNavigation(e, globals) {
   console.log(e);
-  console.log('intercept' in e);
   if (!dailerData.nav) return;
   if (!e.canIntercept && !e.canTransition) return;
   const info = e.info || {};
@@ -116,12 +115,12 @@ async function hardReload(globals, info) {
 }
 
 export async function onTraverseNavigation(globals, e, silent) {
-  const idx = (e.from || navigation.transition.from).index;
+  const from = e.from || ('intercept' in e ? navigation.transition.from : navigation.currentEntry);
+  const idx = from.index;
   const rawDelta = idx - e.destination.index;
   let delta = Math.abs(rawDelta);
   const dir = rawDelta > 0 ? -1 : 1; // -1 stands for backward, 1 stands for forward
   const appHistory = navigation.entries();
-  console.log(delta);
   globals.closePopup(true);
   for (let i = 0; i < delta; i++) {
     const currentIndex = idx + i * dir;

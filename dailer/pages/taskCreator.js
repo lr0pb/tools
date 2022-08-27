@@ -109,6 +109,7 @@ async function onTaskCreator({globals, params}) {
     }], page: qs('#endDateToggler'), value: 1, first: true
   });
   if (params.wishlist == 'true') {
+    if (!globals.pageInfo) globals.pageInfo = {};
     globals.pageInfo.lastPeriodValue = '09';
     period.setAttribute('disabled', '');
     qs('[data-id="wishlistToggler"]').activate();
