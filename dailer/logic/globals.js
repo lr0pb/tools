@@ -3,15 +3,12 @@ import {
   qs as localQs, globQs as qs, globQsa as qsa, copyArray, inert, getParams
 } from '../pages/highLevel/utils.js'
 
-const getUrl = () => location.href.toString();
-
-const getPageLink = (name, params = {}) => {
-  const getLink = (sign) => getUrl() + sign + `page=${name}`;
-  const matcher = getUrl().match(/(?:page=)(\w+)/);
-  let link = getUrl().includes('?')
-  ? (getUrl().includes('page')
-     ? getUrl().replace(matcher[1], name)
-     : getLink('&'))
+const getPageLink = (name, params = {}, dontClearParams) => {
+  const base = dontClearParams ? location.href : location.origin + location.pathname;
+  const getLink = (sign) => base + sign + `page=${name}`;
+  const matcher = base.match(/(?:page=)(\w+)/);
+  let link = base.includes('?')
+  ? (base.includes('page') ? base.replace(matcher[1], name) : getLink('&'))
   : getLink('?');
   link = link.replace(/\&settings=\w+/, '');
   for (let prop in params) { link += `&${prop}=${params[prop]}`; }
@@ -68,7 +65,9 @@ async function _setCacheConfig() {
   globals._cachedConfigFile = await raw.json();
 }
 
-async function paintPage(name, { dontPushHistory, replaceState, noAnim, params } = {}) {
+async function paintPage(name, {
+  dontPushHistory, replaceState, noAnim, params, dontClearParams
+} = {}) {
   globals.pageName = name;
   globals.isPageReady = false;
   const page = pages[name];
@@ -101,7 +100,7 @@ async function paintPage(name, { dontPushHistory, replaceState, noAnim, params }
   await showPage(globals, qs('.current'), container, noAnim);
   const args = page.noSettings ? [undefined] : ['click', () => globals.openSettings()];
   container.querySelector('.openSettings')[page.noSettings ? 'remove' : 'addEventListener'](...args);
-  const link = getPageLink(name, params);
+  const link = getPageLink(name, params, dontClearParams);
   if (dailerData.nav) {
     let historyAction = null;
     if (!dontPushHistory) historyAction = 'push';
@@ -212,7 +211,7 @@ async function openSettings(section, dontPushHistory) {
   globals.settings = true;
   const useSection = section && pages.settings.sections.includes(section);
   if (!dontPushHistory) {
-    const link = `${getUrl()}&settings=open${useSection ? `&section=${section}` : ''}`
+    const link = `${location.href}&settings=open${useSection ? `&section=${section}` : ''}`
     dailerData.nav
     ? navigation.navigate(link, {
         state: {settings: true}, history: 'push', info: {call: 'settings'}

@@ -36,7 +36,10 @@ async function disableTask(taskId) {
 
 function updateSession(item) { session = item; }
 async function updatePeriods() {
-  periods = await db.getAll('periods');
+  periods = {};
+  await globals.db.getAll('periods', (per) => {
+    periods[per.id] = per;
+  });
 }
 
 async function checkNotifications() {
@@ -75,7 +78,7 @@ async function checkReminderPromo() {
 async function createTask({
   id, isPageExist, name, period, priority, date, enableEndDate, endDate, wishlist
 }) {
-  if (!periods) periods = await db.getAll('periods');
+  if (!periods) periods = await updatePeriods();
   const td = id ? await db.getItem('tasks', id) : {};
   const per = periods[period];
   const tdPer = td.periodId ? periods[td.periodId] : {};

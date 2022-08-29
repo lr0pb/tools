@@ -123,13 +123,17 @@ async function onTaskCreator({globals, params}) {
   syncGlobals(globals);
   taskTitle = null;
   if (params.id) globals.pageInfo.taskId = params.id;
-  const isEdit = params.id || globals.pageInfo.taskAction == 'edit';
+  let isEdit = params.id || globals.pageInfo.taskAction == 'edit';
   let td;
   if (isEdit) {
-    td = await enterEditTaskMode(globals);
-    enableEditButtons(globals, td);
+    td = await globals.db.getItem('tasks', globals.pageInfo.taskId);
+    if (!td) isEdit = false;
+  }
+  if (isEdit) {
+    await enterEditTaskMode(globals, td);
     taskTitle = td.name;
   } else {
+    taskTitle = null;
     qs('#name').focus();
     await checkPeriodPromo(globals);
   }
@@ -189,8 +193,7 @@ async function onSaveTaskClick(globals, session, td, isEdit) {
   history.back();
 }
 
-async function enterEditTaskMode(globals) {
-  const td = await globals.db.getItem('tasks', globals.pageInfo.taskId);
+async function enterEditTaskMode(globals, td) {
   const periods = await globals.getPeriods();
   qs('#taskAction').innerHTML = 'Edit';
   qs('#nameTitle').innerHTML = 'You can change task name only once';
@@ -221,7 +224,7 @@ async function enterEditTaskMode(globals) {
     hide('[data-id="wishlist"]');
   }
   endDate.min = convertDate(getToday() + oneDay);
-  return td;
+  enableEditButtons(globals, td)
 }
 
 function enableEditButtons(globals, td) {

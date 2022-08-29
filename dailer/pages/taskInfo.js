@@ -17,7 +17,7 @@ export const taskInfo = {
   styleClasses: 'doubleColumns',
   get footer() { return `
     <button id="back" class="secondary">${emjs.back} Back</button>
-    <button id="edit" class="success">${emjs.pen} Edit task</button>
+    <button id="edit" class="success hidedUI">${emjs.pen} Edit task</button>
   `},
   script: renderTaskInfo,
   onPageShow: async ({globals, page}) => {
@@ -41,20 +41,30 @@ export const taskInfo = {
 };
 
 async function renderTaskInfo({globals, page, params}) {
-  qs('#back').addEventListener('click', () => history.back());
+  const { back, edit } = getElements('back', 'edit');
+  back.addEventListener('click', () => history.back());
   syncGlobals(globals);
   if (!globals.pageInfo.taskId) globals.pageInfo.taskId = params.id;
   const task = await globals.db.getItem('tasks', globals.pageInfo.taskId);
+  if (!task) {
+    taskTitle = null;
+    page.classList.add('center');
+    page.innerHTML = `
+      <h2 class="emoji">${emjs.empty}</h2>
+      <h2>No such task exists</h2>
+    `;
+    back.classList.remove('secondary');
+    back.innerHTML = `${emjs.sword} Back to the main page`;
+  }
   taskTitle = task.name;
   const periods = await globals.getPeriods();
   const priorities = await globals.getList('priorities');
-  if (task.disabled || task.deleted) {
-    hide('#edit');
-  } else {
-    qs('#edit').addEventListener('click', () => {
+  if (!(task.disabled || task.deleted)) {
+    edit.classList.remove('hidedUI');
+    edit.addEventListener('click', () => {
       if (!globals.pageInfo) syncGlobals(globals);
       globals.pageInfo.taskAction = 'edit';
-      globals.paintPage('taskCreator');
+      globals.paintPage('taskCreator', { dontClearParams: true });
     });
   }
   const iha = isHistoryAvailable(task);
