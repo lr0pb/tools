@@ -37,7 +37,7 @@ async function disableTask(taskId) {
 function updateSession(item) { session = item; }
 async function updatePeriods() {
   periods = {};
-  await globals.db.getAll('periods', (per) => {
+  await db.getAll('periods', (per) => {
     periods[per.id] = per;
   });
 }
