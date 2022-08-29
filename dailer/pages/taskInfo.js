@@ -1,6 +1,6 @@
 import { getToday, normalizeDate, oneDay, isCustomPeriod } from './highLevel/periods.js'
 import { getTextDate } from './highLevel/taskThings.js'
-import { qs, hide, intlDate, syncGlobals } from './highLevel/utils.js'
+import { qs, hide, getElements, intlDate, syncGlobals } from './highLevel/utils.js'
 
 let taskTitle = null;
 
