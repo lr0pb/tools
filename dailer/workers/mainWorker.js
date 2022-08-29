@@ -78,7 +78,7 @@ async function checkReminderPromo() {
 async function createTask({
   id, isPageExist, name, period, priority, date, enableEndDate, endDate, wishlist
 }) {
-  if (!periods) periods = await updatePeriods();
+  if (!periods) await updatePeriods();
   const td = id ? await db.getItem('tasks', id) : {};
   const per = periods[period];
   const tdPer = td.periodId ? periods[td.periodId] : {};
