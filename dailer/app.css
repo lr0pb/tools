@@ -280,7 +280,10 @@ noscript {
 .center > *:last-child {
   margin-bottom: 3rem !important;
 }
-.content.slider { flex-direction: row; }
+.content.slider {
+  flex-direction: row;
+  scroll-snap-type: x mandatory;
+}
 
 body, .content, h1, h2, h3, h4, p, button {
   margin: 0;
@@ -490,7 +493,7 @@ button:disabled, [disabled]:not(input, select) {
   backdrop-filter: blur(var(--blur));
 }
 
-#infoBackground, .itemsHolder, #history, #history > div {
+#infoBackground, .itemsHolder, #history, #history > div, .content.slider > * {
   scroll-snap-align: start;
 }
 

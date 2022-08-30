@@ -11,7 +11,8 @@ export const onboarding = {
     </div>
     <div class="content center doubleColumns" data-stage="1">
       <h2 class="emoji">${emjs.phone}</h2>
-      <h2>You can choose to run dailer in browser or install it to homescreen</h2>
+      <h2>Install dailer</h2>
+      <h3>You can choose to run dailer in browser or install it to homescreen</h3>
     </div>
     <div class="content center doubleColumns" data-stage="2">
       <h2 class="emoji">${emjs.warning}</h2>
@@ -30,7 +31,7 @@ export const onboarding = {
       qs(`div[data-stage="${stage}"]`).scrollIntoView({ behavior: 'smooth' });
     };
     if (dailerData.isSafari) setStage(0, `${emjs.forward} Start dailer`);
-    else qsa('div:not([data-stage="0"])').forEach((el) => el.remove());
+    else qsa('.slider > *:not([data-stage="0"])').forEach((el) => el.remove());
     action.addEventListener('click', async () => {
       if (dailerData.isSafari) {
         if (action.dataset.stage == '0') {
@@ -38,9 +39,9 @@ export const onboarding = {
           setStage(1, `${emjs.forward} Continue in Safari`);
           return globals.floatingMsg({
             id: 'installIOS', pageName: 'onboarding',
-            text: `${emjs.crateUp} Click 'Share' and 'Install to homescreen'. Then close Safari and open dailer`
+            text: `${emjs.crateUp} Click "Share" > "Install to the homescreen". Then close Safari and open dailer as regular app`
           });
-        } else if (action.dataset.state == '1') {
+        } else if (action.dataset.stage == '1') {
           action.classList.remove('secondary');
           return setStage(2, `${emjs.forward} Confirm to use Safari`);
         }
