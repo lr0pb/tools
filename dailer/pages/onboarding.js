@@ -1,4 +1,4 @@
-import { qs, /*emjs*/ } from './highLevel/utils.js'
+import { qs, qsa } from './highLevel/utils.js'
 
 export const onboarding = {
   get title() { return `${emjs.sparkles} Welcome to the dailer ${emjs.sign}`},
