@@ -34,7 +34,7 @@ export const settings = {
         <h3>${emjs.lockWKey} Your data is stored only on your device and have no remote access</h3>
       </div>
       <div class="doubleColumns">
-        <div class="content">
+        <div>
           <h3>
             <!--Backups are using for be safe and prevent accidental data deletion or for transfer it to other device. -->
             Upload existent backup to this device or back up your current data

@@ -14,7 +14,7 @@ async function verifyRenderPage(globals, params) {
   const session = await globals.db.getItem('settings', 'session');
   const firstPage = getFirstPage(session);
   const onbrd = session.onboarded;
-  if (!onbrd) return 'onboarding';
+  if (!onbrd) return { rndr: 'onboarding' };
   let page = (params.page && pages[params.page]) ? params.page : firstPage;
   if (onbrd && page == 'onboarding') page = firstPage;
   if (page == 'recap' && session.recaped == getToday()) page = 'main';

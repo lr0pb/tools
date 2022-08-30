@@ -47,7 +47,7 @@ async function renderDay({globals, page}) {
       <h2 class="emoji">${emjs.magicBall}</h2>
       <h2>You have no tasks today!</h2>
     `;
-    addTaskButton(page, 'one');
+    addTaskButton(globals, page, 'one');
     page.classList.add('center');
     await processChecks(globals);
     return;
@@ -61,11 +61,11 @@ async function renderDay({globals, page}) {
       renderTask({ type: 'day', globals, td, page, openTask: true });
     }
   }
-  if (!dailerData.isDoubleColumns) addTaskButton(page, 'task', 'transparent');
+  if (!dailerData.isDoubleColumns) addTaskButton(globals, page, 'task', 'transparent');
   await processChecks(globals);
 }
 
-function addTaskButton(page, lastWord, customClass) {
+function addTaskButton(globals, page, lastWord, customClass) {
   const button = document.createElement('button');
   if (customClass) {
     button.classList.add(customClass);
