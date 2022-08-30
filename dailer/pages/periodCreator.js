@@ -53,16 +53,20 @@ function toggleDays(value) {
   for (let elem of hm.children) { elem.toggleStyle(); }
 }
 
-async function onPeriodCreator({globals, page}) {
+async function onPeriodCreator({globals, page, params}) {
   qs('#back').addEventListener('click', () => history.back());
   syncGlobals(globals);
   periodTitle = null;
-  const isEdit = globals.pageInfo && globals.pageInfo.periodAction == 'edit';
+  if (params.id) globals.pageInfo.periodId = params.id;
+  let isEdit = params.id || globals.pageInfo.periodAction == 'edit';
   let per;
   if (isEdit) {
     per = await globals.db.getItem('periods', globals.pageInfo.periodId);
+    if (!per) isEdit = false;
+  }
+  if (isEdit) {
     periodTitle = per.title;
-    qs('#periodAction').innerHTML = 'Edit';
+    qs('#periodAction').innerHTML = 'View and edit';
     qs('#periodName').value = per.title;
     if (per.description) qs('#periodDesc').value = per.description;
     qs('#daysCount').value = per.days.length;

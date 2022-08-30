@@ -196,7 +196,7 @@ function floatingMsg({id, text, button, longButton, onClick, pageName, notFixed}
     div.style.cssText = `
       min-height: ${elem.getBoundingClientRect().height}px;
       min-width: 1px;
-      margin-top: 1.5rem;
+      margin-top: 2rem;
     `;
     if (!existentDiv) content.append(div);
   }

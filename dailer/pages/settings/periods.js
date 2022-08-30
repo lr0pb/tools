@@ -21,10 +21,11 @@ export async function paintPeriods(globals) {
         title: editTitle, aria: `${editTitle}: ${period.title}`,
         func: async ({globals}) => {
           if (!globals.pageInfo) globals.pageInfo = {};
-          globals.pageInfo.periodId = period.id;
+          const id = period.id;
+          globals.pageInfo.periodId = id;
           globals.pageInfo.periodAction = 'edit';
           globals.closeSettings();
-          await globals.paintPage('periodCreator');
+          await globals.paintPage('periodCreator', { params: { id } });
         }
       });
     }

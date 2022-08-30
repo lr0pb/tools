@@ -1,11 +1,13 @@
 let periods = null;
 let session = null;
 
+async function updatePeriods() {
+  periods = {};
+  await db.getAll('periods', (per) => { periods[per.id] = per; });
+}
+
 async function createDay(today = getToday()) {
-  if (!periods) {
-    periods = {};
-    await db.getAll('periods', (per) => { periods[per.id] = per; });
-  }
+  if (!periods) await updatePeriods();
   if (!session) session = await db.getItem('settings', 'session');
   if (!session.firstDayEver) session.firstDayEver = today;
   const check = await checkLastDay(today);
@@ -27,9 +29,7 @@ async function createDay(today = getToday()) {
   const cleared = day ? day.cleared : null;
   if (!day || day.lastTasksChange !== session.lastTasksChange) {
     day = getRawDay(today, !day);
-  } else {
-    return isEmpty(day) ? { day: 'error' } : { day };
-  }
+  } else return isEmpty(day) ? { day: 'error' } : { day };
   if (cleared) day.cleared = cleared;
   if (!tasks) {
     tasks = [];
@@ -42,6 +42,7 @@ async function createDay(today = getToday()) {
     day.tasksAmount++;
   };
   for (let task of tasks) {
+    if (task.wishlist) continue;
     if (task.periodStart <= today) {
       if (day.firstCreation || !task.history.length) {
         updateTask(task);

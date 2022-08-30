@@ -7,7 +7,7 @@ import {
 } from './logic/navigation.js'
 import {
   globQs as qs, checkForFeatures, isDesktop, inert, convertEmoji, getParams,
-  isWideInterface, showErrorPage
+  isWideInterface, showErrorPage, platform, isIOS, isMacOS, isSafari
 } from './pages/highLevel/utils.js'
 import { getToday, oneDay } from './pages/highLevel/periods.js'
 import { processSettings, toggleExperiments } from './pages/highLevel/settingsBackend.js'
@@ -35,9 +35,10 @@ if (!window.dailerData) window.dailerData = {
   nav: 'navigation' in window ? true : false,
   forcePeriodPromo: false,
   forceReminderPromo: false,
-  isIOS: 'standalone' in navigator,
+  platform, isIOS, isMacOS, isSafari,
   isDesktop: isDesktop(),
   isWideInterface: isWideInterface(),
+  isDoubleColumns: isDoubleColumns(),
   experiments: 0,
 };
 checkForFeatures(['inert', 'focusgroup']);
@@ -129,7 +130,8 @@ async function loadEmojiList() {
   const resp = await fetch('./emoji.json');
   window._emojiList = await resp.json();
   const loadArray = [];
-  for (let name in _emojiList) {
+  const isAppleEmoji = dailerData.isIOS || dailerData.isMacOS;
+  if (!isAppleEmoji) for (let name in _emojiList) {
     const link = getEmojiLink(name);
     loadArray.push(fetch(link));
   }
@@ -137,16 +139,13 @@ async function loadEmojiList() {
   window.emjs = new Proxy({}, {
     get(target, prop) {
       if (!(prop in _emojiList)) return '';
-      return `
-        <span class="emojiSymbol" style="background-image: url(${getEmojiLink(prop)});">&#x${
-          _emojiList[prop]
-        };</span>
-      `;
+      const html = `&#x${_emojiList[prop]};`;
+      if (isAppleEmoji) return html;
+      const style = `background-image: url(${getEmojiLink(prop)});`;
+      return `<span class="emojiSymbol" style="${style}">${html}</span>`;
     }
   });
-  window.hasEmoji = (elem) => {
-    return typeof elem == 'string' ? elem.includes('emojiSymbol') : undefined;
-  };
+  window.hasEmoji = (elem) => typeof elem == 'string' ? elem.includes('emojiSymbol') : undefined;
 }
 
 async function startApp() {

@@ -133,7 +133,6 @@ async function onTaskCreator({globals, params}) {
     await enterEditTaskMode(globals, td);
     taskTitle = td.name;
   } else {
-    taskTitle = null;
     qs('#name').focus();
     await checkPeriodPromo(globals);
   }

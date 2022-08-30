@@ -236,7 +236,10 @@ noscript {
 }
 
 .header { grid-area: header; }
-.content { grid-area: content; }
+.content {
+  grid-area: content;
+  min-width: 100%; height: 100%;
+}
 .footer { grid-area: footer; }
 
 .header, .content, .footer, .task, .floatingMsg, #infoBackground,
@@ -247,7 +250,7 @@ noscript {
   margin-right: auto;
   line-height: 1.2;
 }
-.content, #notificationsC {
+.content {
   flex-direction: column;
   align-items: start;
   overflow: hidden auto;
@@ -277,6 +280,7 @@ noscript {
 .center > *:last-child {
   margin-bottom: 3rem !important;
 }
+.content.slider { flex-direction: row; }
 
 body, .content, h1, h2, h3, h4, p, button {
   margin: 0;

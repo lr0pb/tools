@@ -16,13 +16,9 @@ export const main = {
     <button id="toPlan" class="secondary">${emjs.notes} Edit tasks</button>
   `},
   script: async ({globals, page}) => {
-    qs('#toPlan').addEventListener(
-      'click', () => globals.paintPage('planCreator')
-    );
+    qs('#toPlan').addEventListener('click', () => globals.paintPage('planCreator'));
     if (dailerData.experiments) {
-      globals.pageButton({
-        emoji: emjs.star, title: 'Open wishlist', onClick: () => {}
-      });
+      globals.pageButton({ emoji: emjs.star, title: 'Open wishlist', onClick: () => {} });
     } else {
       qs('#toHistory').style.display = 'none';
     }
@@ -51,6 +47,7 @@ async function renderDay({globals, page}) {
       <h2 class="emoji">${emjs.magicBall}</h2>
       <h2>You have no tasks today!</h2>
     `;
+    addTaskButton(page, 'one');
     page.classList.add('center');
     await processChecks(globals);
     return;
@@ -64,7 +61,19 @@ async function renderDay({globals, page}) {
       renderTask({ type: 'day', globals, td, page, openTask: true });
     }
   }
+  if (!dailerData.isDoubleColumns) addTaskButton(page, 'task', 'transparent');
   await processChecks(globals);
+}
+
+function addTaskButton(page, lastWord, customClass) {
+  const button = document.createElement('button');
+  if (customClass) {
+    button.classList.add(customClass);
+    button.style.margin = 0;
+  }
+  button.innerHTML = `${emjs.paperWPen} Add ${lastWord}`;
+  button.addEventListener('click', () => globals.paintPage('taskCreator'));
+  page.append(button);
 }
 
 async function processChecks(globals) {
@@ -95,7 +104,7 @@ async function checkDayNote(globals) {
 }
 
 export async function checkInstall(globals) {
-  if (dailerData.isIOS) return;
+  if (dailerData.isIOS || dailerData.isMacOS) return;
   if (!globals.installPrompt) return;
   const persist = await globals.checkPersist();
   const session = await globals.db.getItem('settings', 'session');

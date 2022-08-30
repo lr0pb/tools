@@ -2,7 +2,6 @@ importScripts('./defaultFunctions.js');
 importScripts('./sharedFunctions.js');
 
 db = new IDB(database.name, database.version, database.stores);
-periods = null;
 
 self.addEventListener('unhandledrejection', (e) => {
   console.error(e.reason);
@@ -35,12 +34,6 @@ async function disableTask(taskId) {
 }
 
 function updateSession(item) { session = item; }
-async function updatePeriods() {
-  periods = {};
-  await db.getAll('periods', (per) => {
-    periods[per.id] = per;
-  });
-}
 
 async function checkNotifications() {
   const notifs = await db.getItem('settings', 'notifications');

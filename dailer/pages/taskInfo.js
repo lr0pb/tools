@@ -6,9 +6,7 @@ let taskTitle = null;
 
 export const taskInfo = {
   get title() {
-    return `${emjs.oldPaper} ${
-      taskTitle ? `Task info: ${taskTitle}` : 'Task info'
-    }`;
+    return `${emjs.oldPaper} ${taskTitle ? `Task info: ${taskTitle}` : 'Task info'}`;
   },
   get titleEnding() { return taskTitle ? 'line' : 'text'; },
   dynamicTitle: true,
@@ -109,9 +107,9 @@ function renderItemsHolder({task, periods, priorities, iha}) {
   const periodText = !task.special
     ? `${perTitle} from ${startTitle}${task.endDate ? ` to ${endTitle}` : ''}`
     : (task.endDate
-      ? `${perTitle}${task.disabled ? '. Ended' : ' to'}${
-        task.special == 'untilComplete' ? ` in ${(task.endDate - task.periodStart) / oneDay} days` : ''
-      } ${endTitle}` : task.periodTitle);
+      ? `${perTitle}${task.disabled ? `. Ended${
+        task.special == 'untilComplete' ? ` in ${(task.endDate - task.periodStart) / oneDay} days on` : ''
+      }` : ' to'} ${endTitle}` : task.periodTitle);
   createInfoRect(emjs.calendar, periodText, 'blue', (!iha && !task.disabled) || (iha && showQS) ? 1 : 2);
 
   const isActive = task.period[task.periodDay];
@@ -178,6 +176,7 @@ function isStatsAvailable(task) {
   if (task.special && task.period.length == 1) return undefined;
   const { periodsInWeek, runnedPeriods } = getPeriodsData(task);
   if (runnedPeriods >= periodsInWeek * 2) return true;
+  if (task.disabled || task.deleted) return undefined;
   return false;
 }
 
