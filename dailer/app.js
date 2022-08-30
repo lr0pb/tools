@@ -7,7 +7,7 @@ import {
 } from './logic/navigation.js'
 import {
   globQs as qs, checkForFeatures, isDesktop, inert, convertEmoji, getParams,
-  isWideInterface, showErrorPage, platform, isIOS, isMacOS, isSafari
+  isWideInterface, showErrorPage, platform, isIOS, isMacOS, isSafari, isDoubleColumns
 } from './pages/highLevel/utils.js'
 import { getToday, oneDay } from './pages/highLevel/periods.js'
 import { processSettings, toggleExperiments } from './pages/highLevel/settingsBackend.js'
