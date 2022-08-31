@@ -52,7 +52,7 @@ async function renderTaskInfo({globals, page, params}) {
       <h2>No such task exists</h2>
     `;
     back.classList.remove('secondary');
-    back.innerHTML = `${emjs.sword} Back to the main page`;
+    return back.innerHTML = `${emjs.sword} Back to the main page`;
   }
   taskTitle = task.name;
   const periods = await globals.getPeriods();

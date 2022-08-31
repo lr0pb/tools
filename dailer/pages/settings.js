@@ -9,7 +9,7 @@ import { addNotifications, fillNotifTopics } from './settings/notifications.js'
 
 export const settings = {
   get title() { return `${emjs.box} Settings`},
-  sections: ['periods', 'manageData', 'notifications'],
+  sections: ['periods', 'manageData', 'notifications', 'about'],
   fillHeader: ({page}) => {
     page.innerHTML = `
       <h4>${settings.title}</h4>
@@ -26,15 +26,12 @@ export const settings = {
       <div id="periodsContainer" class="first doubleColumns" focusgroup></div>
       <h3>Create your own period for specific task performance</h3>
       <button id="toPeriodCreator">${emjs.calendar} Create custom period</button>
-      <!--<h2 data-section="storage">Protect your data</h2>
-      <h3>We store your data on your device and have no remote access to it</h3>
-      <h3>Install app to the home screen to show your browser importance of the site's data to activate site's data protection</h3>-->
       <h2 data-section="manageData">Data management</h2>
       <div class="floatingMsg notFixed">
         <h3>${emjs.lockWKey} Your data is stored only on your device and have no remote access</h3>
       </div>
       <div class="doubleColumns">
-        <div>
+        <div class="content">
           <h3>
             <!--Backups are using for be safe and prevent accidental data deletion or for transfer it to other device. -->
             Upload existent backup to this device or back up your current data
@@ -61,7 +58,10 @@ export const settings = {
       </div>
       <style class="notifStyle"></style>
       <h2 data-section="notifications" class="notif">Notifications</h2>
-      <h3 class="notif">You can turn on notifications about some things in app. They will arrive in a bundle only once a day</h3>
+      <h3 class="notif">Turn on notifications about in-app things to better manage tasks</h3>
+      <div class="floatingMsg notFixed notif">
+        <h3>${emjs.paperList} Notifications will arrive in a bundle only once a day</h3>
+      </div>
       <div class="doubleColumns first notif">
         <div id="notifications"></div>
         <button id="install" class="notifNotAllowed">${emjs.crateDown} Install dailer</button>
@@ -70,7 +70,7 @@ export const settings = {
       <div id="notifTopics" class="doubleColumns first notif" focusgroup></div>
       <div id="experiments"></div>
       <button id="toDebug" class="secondary">${emjs.construction} Open debug page</button>
-      <h2>About</h2>
+      <h2 data-section="about">About</h2>
       <h3>${emjs.label} dailer app, version 1.4.3</h3>
       <h3 id="emojiCredit">${emjs.sparkles} Emojis powered by <a href="https://github.com/googlefonts/noto-emoji/" target="_blank">Google</a></h3>
       <!--<h3>${emjs.magicBall} Codename: Sangria</h3>-->

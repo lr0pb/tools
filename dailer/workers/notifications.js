@@ -1,19 +1,18 @@
 async function proccessNotifications(notifs, tag) {
   const isAppAlreadyOpened = await cleaning(notifs, tag);
   if (isAppAlreadyOpened) return;
+  const { show: reminder } = await checkBackupReminder();
+  const backupReminder = notifs.byCategories.backupReminder && reminder;
   if (notifs.byCategories.tasksForDay) {
-    const recap = await getDayRecap();
+    const recap = await getDayRecap(backupReminder);
     if (recap) await showNotification(notifs, 'tasksForDay', recap);
   }
-  if (notifs.byCategories.backupReminder) {
-    const { show } = await checkBackupReminder();
-    if (show) await showNotification(notifs, 'backupReminder', {
-      title: `\u{1f4e5} It's time to back up your data`,
-      body: `You've set reminders to make backups, so today we made one for you \u{1f4e6}`,
-      icon: './icons/downloadBackup.png',
-      data: { popup: 'downloadBackup' }
-    });
-  }
+  if (backupReminder) await showNotification(notifs, 'backupReminder', {
+    title: `\u{1f4e5} It's time to back up your data`,
+    body: `You've set reminders to make backups, so today we made one for you \u{1f4e6}`,
+    icon: './icons/downloadBackup.png',
+    data: { popup: 'downloadBackup' }
+  });
   await db.setItem('settings', notifs);
 }
 
@@ -45,9 +44,10 @@ async function showNotification(notifs, type, options) {
   await registration.showNotification(title, options);
 }
 
-async function getDayRecap() {
+async function getDayRecap(backupReminder) {
   const { response: recap } = await getYesterdayRecap();
   if (recap.recaped) {
+    if (backupReminder) return;
     const day = await db.getItem('days', getToday().toString());
     if (day.tasksAmount === 0) return;
     let body = day.tasks[2].length === 0 ? null : '';

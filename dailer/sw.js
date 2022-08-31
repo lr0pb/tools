@@ -154,6 +154,7 @@ async function statNotification(timestamp, field) {
 }
 
 async function checkNotifications(tag) {
+  await addToCache(APP_CACHE, 'files', (data) => data);
   const notifs = await db.getItem('settings', 'notifications');
   const periodicSync = await db.getItem('settings', 'periodicSync');
   periodicSync.callsHistory.push({ timestamp: Date.now() });

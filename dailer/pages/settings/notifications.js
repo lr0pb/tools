@@ -4,9 +4,10 @@ import { installApp } from '../main.js'
 
 export async function isNotificationsAvailable(globals) {
   const periodicSync = await globals.db.getItem('settings', 'periodicSync');
-  if (dailerData.isIOS || !('Notification' in window) || !periodicSync.support) {
+  if (dailerData.isIOS || dailerData.isMacOS || !('Notification' in window) || !periodicSync.support) {
     return false;
   }
+  if (!globals.installPrompt) return false;
   return true;
 }
 
@@ -53,7 +54,6 @@ export function toggleNotifReason(session, value, globals) {
     if (value == 3) {
       qs('#install').style.display = 'block';
       qs('#install').onclick = async () => {
-        if (!globals) return;
         if (!globals.installPrompt) return;
         await installApp(globals);
         const actualSession = await globals.db.getItem('settings', 'session');
@@ -65,7 +65,7 @@ export function toggleNotifReason(session, value, globals) {
   } else {
     qs('#notifReason').innerHTML = 'Set what about notifications you will get';
     qs('#install').style.display = 'none';
-    if (globals && !qs('#notifTopics').children.length) fillNotifTopics(globals, value);
+    if (!qs('#notifTopics').children.length) fillNotifTopics(globals, value);
   }
 }
 
