@@ -1,5 +1,4 @@
 import { qs, qsa } from './highLevel/utils.js'
-import { installApp } from './main.js'
 
 export const transfer = {
   get title() { return `${htmlEmjs.flightMail} dailer moved to other address ${htmlEmjs.sign}`},
@@ -16,8 +15,8 @@ export const transfer = {
     <div class="content abs center">
       <h2 class="emoji">${emjs.sword}</h2>
       <h2>dailer is moved</h2>
-      <h3>We just remove <strong>/tools</strong> from a link</h3>
-      <h3>All your data including tasks, settings, permissions and other are <strong>saved</strong> ${emjs.sign}</h3>
+      <h3>We just remove <strong>/tools</strong> from a URL</h3>
+      <h3>All your data including tasks, settings, permissions and other are saved ${emjs.sign}</h3>
     </div>
     <div class="floatingMsg">
       <h3>${emjs.light} Just go to the new address, install app and delete the previous one</h3>
