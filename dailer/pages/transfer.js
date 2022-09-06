@@ -17,7 +17,7 @@ export const transfer = {
       <h2 class="emoji">${emjs.sword}</h2>
       <h2>dailer is moved</h2>
       <h3>We just remove <strong>/tools</strong> from a link</h3>
-      <h3>All your data including tasks, settings, permissions and other are <strong>saved</strong> ${emjs.sing}</h3>
+      <h3>All your data including tasks, settings, permissions and other are <strong>saved</strong> ${emjs.sign}</h3>
     </div>
     <div class="floatingMsg">
       <h3>${emjs.light} Just go to the new address, install app and delete the previous one</h3>
