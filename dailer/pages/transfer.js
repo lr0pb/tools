@@ -24,17 +24,26 @@ export const transfer = {
     </div>
   `},
   get footer() { return `
-    <button id="action">${emjs.flightMail} Move on the new dailer home</button>
+    <button id="action">${emjs.flightMail} Move to the new dailer home</button>
   `},
   script: async ({globals, page}) => {
     const transferDay = 1662411600000; // 06.09.2022, day in which /tools/dailer was disabled
     const session = await globals.db.getItem('settings', 'session');
+    await unregisterPreviousSW();
     if (!session || session.firstDayEver > transferDay) {
       return goAway();
     }
     qs('#action').addEventListener('click', goAway);
   }
 };
+
+async function unregisterPreviousSW() {
+  const regs = await navigator.serviceWorker.getRegistrations();
+  for (let reg of regs) {
+    if (!reg.active.scriptURL.includes('/tools')) continue;
+    await reg.unregister();
+  }
+}
 
 function goAway() {
   location.href = location.href.replace('/tools', '');
