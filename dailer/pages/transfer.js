@@ -29,10 +29,13 @@ export const transfer = {
     const transferDay = 1662411600000; // 06.09.2022, day in which /tools/dailer was disabled
     const session = await globals.db.getItem('settings', 'session');
     await unregisterPreviousSW();
+    const newHome = location.href.replace('/tools', '');
     if (!session || session.firstDayEver > transferDay) {
-      return goAway();
+      return location.href = newHome;
     }
-    qs('#action').addEventListener('click', goAway);
+    qs('#action').addEventListener('click', () => {
+      window.open(newHome);
+    });
   }
 };
 
@@ -42,8 +45,4 @@ async function unregisterPreviousSW() {
     if (!reg.active.scriptURL.includes('/tools')) continue;
     await reg.unregister();
   }
-}
-
-function goAway() {
-  location.href = location.href.replace('/tools', '');
 }
